@@ -1,0 +1,31 @@
+{
+  "name": "storage-app-backend",
+  "version": "0.0.0",
+  "description": "This is a backend for a storage app",
+  "keywords": [],
+  "license": "ISC",
+  "author": "Dhruvish Lathiya",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "node --watch index.js",
+    "format": "prettier --write \"**/*.js\""
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "cookies-parser": "^1.2.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
+    "express": "^5.1.0",
+    "google-auth-library": "^10.1.0",
+    "mongoose": "^8.16.3"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/mongoose": "^5.11.96",
+    "@types/node": "^24.0.14",
+    "prettier": "^3.6.2"
+  }
+}
