@@ -26,7 +26,7 @@ const userSchema = new Schema(
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
-      // ref: "Dir",
+      ref: "Directory",
     },
     role: {
       type: String,
