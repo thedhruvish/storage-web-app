@@ -1,7 +1,10 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { useEffect } from "react";
+import type { AxiosError } from "axios";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,24 +23,45 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import { useLoginMutation } from "@/api/auth";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const loginMutation = useLoginMutation();
+  const navagate = useNavigate();
   const formSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
   });
+  useEffect(() => {
+    if (loginMutation.isSuccess) {
+      navagate({ to: "/" });
+    }
+  }, [loginMutation.isSuccess]);
 
   type FormData = z.infer<typeof formSchema>;
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
+    defaultValues: {
+      password: "",
+      email: "",
+    },
   });
 
   const onSubmit = (data: FormData) => {
     console.log("Form submitted:", data);
+    loginMutation.mutate(data);
   };
+
+  if (loginMutation.isError) {
+    const errorMsg =
+      (loginMutation.error as AxiosError<{ message?: string }>).response?.data
+        .message || "Something went wrong";
+
+    toast.error(errorMsg);
+  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>

@@ -20,11 +20,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useRegisterMutation } from "@/api/auth";
 
 export function SigupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const registerMutation = useRegisterMutation();
   const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
     email: z.string().email("Invalid email"),
@@ -42,6 +44,7 @@ export function SigupForm({
   });
 
   function onSubmit(values: FormData) {
+    registerMutation.mutate(values);
     console.log("Form submitted:", values);
   }
   return (

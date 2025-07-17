@@ -1,0 +1,16 @@
+import { useMutation } from "@tanstack/react-query";
+import axiosClient from "./axiosClient";
+
+export const useLoginMutation = () => {
+  return useMutation({
+    mutationFn: (userEmailAndPassword: { email: string; password: string }) =>
+      axiosClient.post("/auth/login", userEmailAndPassword),
+  });
+};
+
+export const useRegisterMutation = () => {
+  return useMutation({
+    mutationFn: (userData: { name: string; email: string; password: string }) =>
+      axiosClient.post("/auth/register", userData),
+  });
+};

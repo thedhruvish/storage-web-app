@@ -26,7 +26,7 @@ const userSchema = new Schema(
     },
     rootDirId: {
       type: Schema.Types.ObjectId,
-      ref: "Dir",
+      // ref: "Dir",
     },
     role: {
       type: String,
@@ -43,9 +43,8 @@ const userSchema = new Schema(
 
 // monog hook to before the save data to covert into hash
 userSchema.pre("save", async function (next) {
-  if (this.isModified(this.password)) {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
+  if (!this.isModified("password")) return next();
+  this.password = await bcrypt.hash(this.password, 10);
   next();
 });
 
