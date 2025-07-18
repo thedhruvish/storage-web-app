@@ -1,8 +1,5 @@
-"use client";
-
-import { IconBrightness } from "@tabler/icons-react";
 import * as React from "react";
-
+import { MoonStar, SunMoon } from "lucide-react";
 import { useTheme } from "./theme-provider";
 import { Button } from "@/components/ui/button";
 
@@ -34,7 +31,7 @@ export function ModeToggle() {
       className='group/toggle size-8'
       onClick={handleThemeToggle}
     >
-      <IconBrightness />
+      {resolvedTheme === "dark" ? <SunMoon /> : <MoonStar />}
       <span className='sr-only'>Toggle theme</span>
     </Button>
   );

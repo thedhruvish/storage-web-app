@@ -1,10 +1,9 @@
 import * as React from "react";
-import { AppSidebar } from "@/components/app-sidebar";
-import { SiteHeader } from "@/components/site-header";
+import { toast } from "sonner";
 import { FileGrid } from "@/components/file-grid";
 import { FileToolbar } from "@/components/file-toolbar";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Separator } from "@/components/ui/separator";
+import { useTheme } from "@/components/theme-provider";
 
 // Mock data
 const mockFiles = [
@@ -63,39 +62,36 @@ const folderData = [
 ];
 
 export default function Home() {
+  const { theme = "system" } = useTheme();
+  React.useEffect(() => {
+    console.log(theme);
+  }, [theme]);
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
   const handleFileClick = (file: any) => {
     console.log("File clicked:", file);
+    toast("Event has been created");
     // Handle file/folder opening logic here
   };
 
   return (
-    <div className='[--header-height:calc(theme(spacing.14))]'>
-      <SidebarProvider className='flex flex-col'>
-        <SiteHeader />
-        <div className='flex flex-1'>
-          <AppSidebar />
-          <SidebarInset className='flex flex-col'>
-            <FileToolbar viewMode={viewMode} onViewModeChange={setViewMode} />
-            <div className='flex-1 p-4'>
-              <FileGrid
-                files={folderData}
-                documentType='folder'
-                viewMode={viewMode}
-                onFileClick={handleFileClick}
-              />
-              <Separator className='my-4 w-6' />
-              <FileGrid
-                files={mockFiles}
-                documentType='file'
-                viewMode={viewMode}
-                onFileClick={handleFileClick}
-              />
-            </div>
-          </SidebarInset>
-        </div>
-      </SidebarProvider>
-    </div>
+    <>
+      <FileToolbar viewMode={viewMode} onViewModeChange={setViewMode} />
+      <div className='flex-1 p-4'>
+        <FileGrid
+          files={folderData}
+          documentType='folder'
+          viewMode={viewMode}
+          onFileClick={handleFileClick}
+        />
+        <Separator className='my-4 w-6' />
+        <FileGrid
+          files={mockFiles}
+          documentType='file'
+          viewMode={viewMode}
+          onFileClick={handleFileClick}
+        />
+      </div>
+    </>
   );
 }

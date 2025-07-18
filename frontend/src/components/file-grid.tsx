@@ -4,7 +4,6 @@ import {
   Download,
   File,
   FileText,
-  FileType2,
   Folder,
   ImageIcon,
   MoreVertical,
@@ -24,6 +23,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { getFileIconName } from "@/utils/file-icon-helper";
 
 interface FileItem {
   id: string;
@@ -40,109 +40,6 @@ interface FileGridProps {
 
   viewMode: "grid" | "list";
   onFileClick?: (file: FileItem) => void;
-}
-
-function getFileIconName(filename: string) {
-  const ext = filename.split(".").pop()?.toLowerCase();
-
-  switch (ext) {
-    case "txt":
-    case "md":
-    case "rtf":
-      return "document";
-
-    case "pdf":
-      return "pdf";
-
-    case "png":
-    case "jpg":
-    case "jpeg":
-    case "gif":
-    case "bmp":
-    case "webp":
-    case "tiff":
-    case "ico":
-      return "image";
-
-    case "svg":
-      return "vector";
-
-    case "mp4":
-    case "mov":
-    case "avi":
-    case "mkv":
-    case "webm":
-    case "flv":
-      return "video";
-
-    case "mp3":
-    case "wav":
-    case "ogg":
-    case "flac":
-      return "audio";
-
-    case "zip":
-    case "rar":
-    case "7z":
-    case "tar":
-    case "gz":
-    case "bz2":
-      return "archive";
-
-    case "xls":
-    case "xlsx":
-    case "ods":
-      return "spreadsheet";
-
-    case "ppt":
-    case "pptx":
-    case "odp":
-      return "presentation";
-
-    case "doc":
-    case "docx":
-    case "odt":
-      return "word";
-
-    case "ttf":
-    case "otf":
-    case "woff":
-    case "woff2":
-      return "font";
-
-    case "exe":
-    case "msi":
-    case "apk":
-    case "bat":
-    case "sh":
-      return "executable";
-
-    case "db":
-    case "sqlite":
-    case "sql":
-      return "database";
-
-    case "js":
-    case "jsx":
-    case "ts":
-    case "tsx":
-    case "html":
-    case "css":
-    case "scss":
-    case "py":
-    case "java":
-    case "c":
-    case "cpp":
-    case "cs":
-    case "rb":
-    case "go":
-    case "rs":
-    case "php":
-      return "code";
-
-    default:
-      return "alt";
-  }
 }
 
 const getFileIcon = (document: string, file: FileItem) => {
@@ -248,12 +145,14 @@ export function FileGrid({
 
   return (
     <div className='space-y-1'>
-      <div className='text-muted-foreground grid grid-cols-12 gap-4 border-b px-4 py-2 text-sm font-medium'>
-        <div className='col-span-6'>Name</div>
-        <div className='col-span-2'>Size</div>
-        <div className='col-span-3'>Modified</div>
-        <div className='col-span-1'></div>
-      </div>
+      {documentType === "folder" && (
+        <div className='text-muted-foreground grid grid-cols-12 gap-4 border-b px-4 py-2 text-sm font-medium'>
+          <div className='col-span-6'>Name</div>
+          <div className='col-span-2'>Size</div>
+          <div className='col-span-3'>Modified</div>
+          <div className='col-span-1'></div>
+        </div>
+      )}
       {files.map((file) => (
         <div
           key={file.id}

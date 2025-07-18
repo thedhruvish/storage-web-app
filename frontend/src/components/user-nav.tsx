@@ -11,13 +11,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function UserNav() {
-  const user = {
-    name: "dhruvish",
-    email: "m@example.com",
-    avatar: "/avatars/1.png",
+export function UserNav({
+  user,
+}: {
+  user: {
+    name?: string;
+    email?: string;
+    avatar?: string;
   };
-
+}) {
   if (user) {
     return (
       <DropdownMenu>
