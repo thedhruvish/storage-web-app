@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { createContext, useContext, useEffect, useState } from "react";
 
 type Theme = "dark" | "light" | "system";
@@ -26,36 +27,44 @@ export function ThemeProvider({
   storageKey = "vite-ui-theme",
   ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+  const [theme, _setTheme] = useState<Theme>(
     () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
   );
 
   useEffect(() => {
     const root = window.document.documentElement;
+    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    root.classList.remove("light", "dark");
+    // eslint-disable-next-line no-shadow
+    const applyTheme = (theme: Theme) => {
+      root.classList.remove("light", "dark"); // Remove existing theme classes
+      const systemTheme = mediaQuery.matches ? "dark" : "light";
+      const effectiveTheme = theme === "system" ? systemTheme : theme;
+      root.classList.add(effectiveTheme); // Add the new theme class
+    };
 
-    if (theme === "system") {
-      const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-        .matches
-        ? "dark"
-        : "light";
+    const handleChange = () => {
+      if (theme === "system") {
+        applyTheme("system");
+      }
+    };
 
-      root.classList.add(systemTheme);
-      return;
-    }
+    applyTheme(theme);
 
-    root.classList.add(theme);
+    mediaQuery.addEventListener("change", handleChange);
+
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
+
+  // eslint-disable-next-line no-shadow
+  const setTheme = (theme: Theme) => {
+    localStorage.setItem(storageKey, theme);
+    _setTheme(theme);
+  };
 
   const value = {
     theme,
-    // eslint-disable-next-line no-shadow
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme);
-      setTheme(theme);
-    },
+    setTheme,
   };
 
   return (
@@ -68,7 +77,6 @@ export function ThemeProvider({
 export const useTheme = () => {
   const context = useContext(ThemeProviderContext);
 
-  // eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
   if (context === undefined)
     throw new Error("useTheme must be used within a ThemeProvider");
 
