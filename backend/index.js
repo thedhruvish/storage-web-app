@@ -27,12 +27,18 @@ app.use(cookiesParser(cookieSecret));
 app.use("/auth", authRoute);
 
 app.use((err, req, res, next) => {
-  console.log({ err });
-  console.log(err.statusCode);
-  console.log("error for end");
-  res
-    .status(err.statusCode || 500)
-    .json(err);
+  console.error("Error caught by middleware:", err);
+
+  const statusCode = err.statusCode || 500;
+  const message = err.message || "Internal Server Error";
+  console.log(process.env.NODE_ENV)
+  console.log(err)
+  res.status(statusCode).json({
+    success: false,
+    statusCode,
+    message,
+    ...(process.env.NODE_ENV === "development" && { stack: err.stack }), // Only include stack trace in dev
+  });
 });
 
 // db connect after server run
