@@ -21,3 +21,9 @@ export const useGetCurrentUser = () => {
     queryFn: () => axiosClient.get("/auth/me"),
   });
 };
+
+export const useLogout = () => {
+  return useMutation({
+    mutationFn: () => axiosClient.post("/auth/logout"),
+  });
+};

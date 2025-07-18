@@ -1,7 +1,9 @@
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
-type User = {
+export type User = {
   _id: string;
+  name: string;
   email: string;
   profile: string;
   role: string;
@@ -13,13 +15,41 @@ type UserStore = {
   clearUser: () => void;
 };
 
-export const useUserStore = create<UserStore>((set) => ({
-  user: null,
+function toBase64(obj: any) {
+  return btoa(JSON.stringify(obj));
+}
 
-  setUser: (user) => set({ user }),
+function fromBase64(str: string) {
+  return JSON.parse(atob(str));
+}
 
-  clearUser: () => set({ user: null }),
-}));
+export const useUserStore = create<UserStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      clearUser: () => set({ user: null }),
+    }),
+    {
+      name: "user-storage",
+      partialize: (state) => ({ user: state.user }),
+
+      // 🔐 Encode before saving
+      storage: {
+        getItem: (name) => {
+          const str = localStorage.getItem(name);
+          return str ? fromBase64(str) : null;
+        },
+        setItem: (name, value) => {
+          const str = toBase64(value);
+          localStorage.setItem(name, str);
+        },
+        removeItem: (name) => localStorage.removeItem(name),
+      },
+    },
+  ),
+);
+
 export const useUser = () => {
   const user = useUserStore((state) => state.user);
   const setUser = useUserStore((state) => state.setUser);

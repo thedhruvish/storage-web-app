@@ -1,4 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
+import { useNavigate } from "@tanstack/react-router";
 import { UserAvatarProfile } from "./user-avatar-profile";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,9 +18,10 @@ export function UserNav({
   user: {
     name?: string;
     email?: string;
-    avatar?: string;
+    picture?: string;
   };
 }) {
+  const navigate = useNavigate();
   if (user) {
     return (
       <DropdownMenu>
@@ -52,7 +54,7 @@ export function UserNav({
             <DropdownMenuItem>New Team</DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem>
+          <DropdownMenuItem onClick={() => navigate({ to: "/logout" })}>
             <DropdownMenuItem>Sign Out</DropdownMenuItem>
           </DropdownMenuItem>
         </DropdownMenuContent>

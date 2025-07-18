@@ -84,6 +84,20 @@ export const loginWithEmail = async (req, res) => {
   res.status(200).json(new ApiResponse(200, "User login Successfuly"), user);
 };
 
+// get user
+export const getCureentUser = async (req, res) => {
+  const { sessionId } = req.signedCookies;
+  const session = await Session.findById(sessionId);
+  const user = await User.findById(session.userId).select({
+    name: 1,
+    email: 1,
+    pictur: 1,
+    rootDirId: 1,
+    role: 1,
+  });
+  res.status(200).json(new ApiResponse(200, "User login Successfuly", user));
+};
+
 // logout user
 export const logout = async (req, res) => {
   const { sessionId } = req.signedCookies;

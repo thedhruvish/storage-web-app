@@ -3,7 +3,6 @@ import { toast } from "sonner";
 import { FileGrid } from "@/components/file-grid";
 import { FileToolbar } from "@/components/file-toolbar";
 import { Separator } from "@/components/ui/separator";
-import { useTheme } from "@/components/theme-provider";
 
 // Mock data
 const mockFiles = [
@@ -62,10 +61,6 @@ const folderData = [
 ];
 
 export default function Home() {
-  const { theme = "system" } = useTheme();
-  React.useEffect(() => {
-    console.log(theme);
-  }, [theme]);
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
 
   const handleFileClick = (file: any) => {
