@@ -14,7 +14,7 @@ const directorySchema = new Schema(
     parentDirId: {
       type: Schema.Types.ObjectId,
       ref: "Directory",
-      required: true,
+      default: null,
     },
     metaData: {
       type: Object,
