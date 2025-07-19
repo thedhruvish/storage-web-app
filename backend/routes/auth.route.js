@@ -6,6 +6,7 @@ import {
   logoutAllDevices,
   getCureentUser,
 } from "../controllers/auth.controller.js";
+import { checkAuth } from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -13,9 +14,11 @@ const router = express.Router();
 router.post("/register", registerWithEmail);
 router.post("/login", loginWithEmail);
 
+// authenticated route
+router.use(checkAuth);
 router.get("/me", getCureentUser);
 
 // logout user
-router.get("/logout", logout);
+router.post("/logout", logout);
 router.get("/logoutAll", logoutAllDevices);
 export default router;

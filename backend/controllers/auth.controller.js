@@ -15,11 +15,12 @@ export const registerWithEmail = async (req, res, next) => {
 
   //session Transtion
   const mongoSesssion = await mongoose.startSession();
+
+  mongoSesssion.startTransaction();
   try {
     if (isExstingEmail) {
       throw new ApiError(400, "Email Id Already Existing");
     }
-    mongoSesssion.startTransaction();
     const dirId = new mongoose.Types.ObjectId();
     const user = new User({
       name,
@@ -33,7 +34,7 @@ export const registerWithEmail = async (req, res, next) => {
       _id: dirId,
       name: `root-${email}`,
       userId: user._id.toString(),
-      parentDirId: dirId,
+      parentDirId: null,
     });
     await rootDir.save({ session: mongoSesssion });
 
