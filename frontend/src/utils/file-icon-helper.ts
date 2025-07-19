@@ -1,5 +1,5 @@
-export function getFileIconName(filename: string) {
-  const ext = filename.split(".").pop()?.toLowerCase();
+export function getFileIconName(extension: string) {
+  const ext = extension.replace(".", "");
 
   switch (ext) {
     case "txt":

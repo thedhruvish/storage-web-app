@@ -3,72 +3,31 @@ import { toast } from "sonner";
 import { FileGrid } from "@/components/file-grid";
 import { FileToolbar } from "@/components/file-toolbar";
 import { Separator } from "@/components/ui/separator";
-
-// Mock data
-const mockFiles = [
-  {
-    id: "1",
-    name: "Project Report.pdf",
-    size: "2.4 MB",
-    modifiedAt: new Date("2024-01-12"),
-    starred: true,
-  },
-  {
-    id: "2",
-    name: "Vacation Photo.jpg",
-    size: "1.8 MB",
-    modifiedAt: new Date("2024-01-08"),
-  },
-  {
-    id: "3",
-    name: "Presentation.pptx",
-    size: "5.2 MB",
-    modifiedAt: new Date("2024-01-14"),
-  },
-
-  {
-    id: "4",
-    name: "Demo Video.mp4",
-    size: "15.6 MB",
-    modifiedAt: new Date("2024-01-11"),
-  },
-  {
-    id: "5",
-    name: "Song.mp3",
-    size: "4.2 MB",
-    modifiedAt: new Date("2024-01-09"),
-  },
-];
-
-// folder
-const folderData = [
-  {
-    id: "1",
-    name: "Documents",
-    modifiedAt: new Date("2024-01-15"),
-    starred: true,
-  },
-  {
-    id: "2",
-    name: "Photos",
-    modifiedAt: new Date("2024-01-10"),
-  },
-  {
-    id: "3",
-    name: "Music Collection",
-    modifiedAt: new Date("2024-01-05"),
-  },
-];
+import { useGetAllDirectoryList } from "@/api/directoryApi";
+import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 
 export default function Home() {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const [folderData, setFolderData] = React.useState([]);
+  const [fileData, setFileData] = React.useState([]);
+
+  const getDirectoryDataHook = useGetAllDirectoryList();
+  React.useEffect(() => {
+    if (getDirectoryDataHook.isSuccess) {
+      console.log(getDirectoryDataHook.data);
+      setFolderData(getDirectoryDataHook.data.data.directories);
+      setFileData(getDirectoryDataHook.data.data.documents);
+    }
+  }, [getDirectoryDataHook.isSuccess]);
 
   const handleFileClick = (file: any) => {
     console.log("File clicked:", file);
     toast("Event has been created");
     // Handle file/folder opening logic here
   };
-
+  if (!getDirectoryDataHook.isSuccess) {
+    return <FileManagerSkeleton />;
+  }
   return (
     <>
       <FileToolbar viewMode={viewMode} onViewModeChange={setViewMode} />
@@ -81,7 +40,7 @@ export default function Home() {
         />
         <Separator className='my-4 w-6' />
         <FileGrid
-          files={mockFiles}
+          files={fileData}
           documentType='file'
           viewMode={viewMode}
           onFileClick={handleFileClick}

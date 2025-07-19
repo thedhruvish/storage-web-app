@@ -26,12 +26,13 @@ import {
 import { getFileIconName } from "@/utils/file-icon-helper";
 
 interface FileItem {
-  id: string;
+  _id: string;
   name: string;
   fileType?: "document" | "image" | "video" | "audio" | "other";
   size?: string;
   modifiedAt: Date;
   starred?: boolean;
+  extension: string;
 }
 
 interface FileGridProps {
@@ -47,7 +48,7 @@ const getFileIcon = (document: string, file: FileItem) => {
     return <Folder className='h-8 w-8 text-blue-500' />;
   }
 
-  const iconType = getFileIconName(file.name);
+  const iconType = getFileIconName(file.extension);
 
   switch (iconType) {
     case "document":
@@ -93,7 +94,7 @@ export function FileGrid({
       <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'>
         {files.map((file) => (
           <div
-            key={file.id}
+            key={file._id}
             className='group hover:bg-accent relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors'
             onClick={() => onFileClick?.(file)}
           >
@@ -155,7 +156,7 @@ export function FileGrid({
       )}
       {files.map((file) => (
         <div
-          key={file.id}
+          key={file._id}
           className='hover:bg-accent group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors'
           onClick={() => onFileClick?.(file)}
         >
