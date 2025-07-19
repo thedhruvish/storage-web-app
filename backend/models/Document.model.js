@@ -6,7 +6,7 @@ const documentSchema = new Schema(
       ref: "User",
       required: true,
     },
-    fileName: {
+    name: {
       type: String,
       required: true,
     },

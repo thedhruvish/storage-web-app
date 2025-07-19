@@ -17,7 +17,7 @@ export const createDocument = async (req, res) => {
   const externsion = path.extname(filename);
   const document = new Document({
     userId: req.user._id,
-    fileName: filename,
+    name: filename,
     extension: externsion,
     parentDirId,
   });
@@ -65,7 +65,7 @@ export const updateDocumentById = async (req, res) => {
     return res.status(400).json(new ApiError(400, "name is required"));
   }
 
-  const document = await Document.findByIdAndUpdate(id, { fileName: name });
+  const document = await Document.findByIdAndUpdate(id, { name });
   // check document null than does not renme
   if (!document) {
     return res.status(404).json(new ApiError(404, "Document not found"));
