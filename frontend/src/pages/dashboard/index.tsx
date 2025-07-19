@@ -1,7 +1,9 @@
 import * as React from "react";
 import { toast } from "sonner";
-import { FileGrid } from "@/components/file-grid";
-import { FileToolbar } from "@/components/file-toolbar";
+import DashboardProvider from "./context/dashboard-context";
+import { UsersDialogs } from "./components/dashboard-dialogs";
+import { FileGrid } from "@/pages/dashboard/components/file-grid";
+import { FileToolbar } from "@/pages/dashboard/components/file-toolbar";
 import { Separator } from "@/components/ui/separator";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
@@ -29,7 +31,7 @@ export default function Home() {
     return <FileManagerSkeleton />;
   }
   return (
-    <>
+    <DashboardProvider>
       <FileToolbar viewMode={viewMode} onViewModeChange={setViewMode} />
       <div className='flex-1 p-4'>
         <FileGrid
@@ -46,6 +48,7 @@ export default function Home() {
           onFileClick={handleFileClick}
         />
       </div>
-    </>
+      <UsersDialogs />
+    </DashboardProvider>
   );
 }

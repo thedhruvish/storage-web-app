@@ -1,51 +1,26 @@
 import {
   Archive,
   Code,
-  Download,
   File,
   FileText,
   Folder,
   ImageIcon,
-  MoreVertical,
   Music,
-  Share,
   Star,
-  Trash2,
   Video,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import FileDropdownMenu from "./file-dropdown-menu";
+import type { FileGridProps, FileItem } from "../types";
 import { getFileIconName } from "@/utils/file-icon-helper";
-
-interface FileItem {
-  _id: string;
-  name: string;
-  fileType?: "document" | "image" | "video" | "audio" | "other";
-  size?: string;
-  modifiedAt: Date;
-  starred?: boolean;
-  extension: string;
-}
-
-interface FileGridProps {
-  files: Array<FileItem>;
-  documentType: "folder" | "file";
-
-  viewMode: "grid" | "list";
-  onFileClick?: (file: FileItem) => void;
-}
 
 const getFileIcon = (document: string, file: FileItem) => {
   if (document === "folder") {
     return <Folder className='h-8 w-8 text-blue-500' />;
+  }
+  if (!file.extension) {
+    return <File className='h-8 w-8 text-gray-600' />;
   }
 
   const iconType = getFileIconName(file.extension);
@@ -96,7 +71,6 @@ export function FileGrid({
           <div
             key={file._id}
             className='group hover:bg-accent relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors'
-            onClick={() => onFileClick?.(file)}
           >
             <div className='relative'>
               {getFileIcon(documentType, file)}
@@ -107,37 +81,7 @@ export function FileGrid({
             <span className='mt-2 line-clamp-2 max-w-full text-center text-sm break-words'>
               {file.name}
             </span>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='absolute top-1 right-1 h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100'
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className='h-3 w-3' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuItem>
-                  <Download className='mr-2 h-4 w-4' />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share className='mr-2 h-4 w-4' />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Star className='mr-2 h-4 w-4' />
-                  {file.starred ? "Unstar" : "Star"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className='text-destructive'>
-                  <Trash2 className='mr-2 h-4 w-4' />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <FileDropdownMenu file={file} buttonViewType='grid' />
           </div>
         ))}
       </div>
@@ -158,7 +102,6 @@ export function FileGrid({
         <div
           key={file._id}
           className='hover:bg-accent group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors'
-          onClick={() => onFileClick?.(file)}
         >
           <div className='col-span-6 flex items-center gap-3'>
             <div className='relative'>
@@ -173,40 +116,10 @@ export function FileGrid({
             {file.size || "-"}
           </div>
           <div className='text-muted-foreground col-span-3 flex items-center text-sm'>
-            {formatDistanceToNow(file.modifiedAt, { addSuffix: true })}
+            {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}
           </div>
           <div className='col-span-1 flex items-center justify-end'>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='h-8 w-8 opacity-0 transition-opacity group-hover:opacity-100'
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <MoreVertical className='h-4 w-4' />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align='end'>
-                <DropdownMenuItem>
-                  <Download className='mr-2 h-4 w-4' />
-                  Download
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Share className='mr-2 h-4 w-4' />
-                  Share
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Star className='mr-2 h-4 w-4' />
-                  {file.starred ? "Unstar" : "Star"}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem className='text-destructive'>
-                  <Trash2 className='mr-2 h-4 w-4' />
-                  Delete
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <FileDropdownMenu file={file} buttonViewType='list' />
           </div>
         </div>
       ))}
