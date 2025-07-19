@@ -4,7 +4,10 @@ import express from "express";
 import cors from "cors";
 import cookiesParser from "cookie-parser";
 import { connectDB } from "./config/db.js";
+import { checkAuth } from "./middlewares/auth.js";
 import authRoute from "./routes/auth.route.js";
+import directoryRoute from "./routes/directory.route.js";
+import docuemntRoute from "./routes/document.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -25,6 +28,12 @@ app.use(cookiesParser(cookieSecret));
 
 // auth router
 app.use("/auth", authRoute);
+
+// login Required route
+app.use(checkAuth);
+
+app.use("/directory", directoryRoute);
+app.use("/document", docuemntRoute);
 
 app.use((err, req, res, next) => {
   console.error("Error caught by middleware:", err);
