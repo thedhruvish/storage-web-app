@@ -113,7 +113,7 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
 
       try {
         await axios.post(
-          `${import.meta.env.VITE_BASE_URL}d/document`,
+          `${import.meta.env.VITE_BASE_URL}/document`,
           formData,
           {
             withCredentials: true,

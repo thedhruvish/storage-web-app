@@ -47,8 +47,7 @@ export const getDocumentById = async (req, res) => {
   const filePath = `${process.cwd()}/storage/${document.id}${document.extension}`;
   // check if query are the download than file download other wise send file
   if (req.query.action === "download") {
-    res.download(filePath);
-    return;
+    return res.download(filePath, document.name);
   }
 
   res.sendFile(filePath);
