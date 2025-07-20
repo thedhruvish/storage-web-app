@@ -14,6 +14,7 @@ import { formatDistanceToNow } from "date-fns";
 import FileDropdownMenu from "./file-dropdown-menu";
 import type { FileGridProps, FileItem } from "../types";
 import { getFileIconName } from "@/utils/file-icon-helper";
+import { truncateFileName } from "@/utils/truncateFileName";
 
 const getFileIcon = (document: string, file: FileItem) => {
   if (document === "folder") {
@@ -58,12 +59,7 @@ const getFileIcon = (document: string, file: FileItem) => {
   }
 };
 
-export function FileGrid({
-  files,
-  viewMode,
-
-  documentType,
-}: FileGridProps) {
+export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
   if (viewMode === "grid") {
     return (
       <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'>
@@ -71,16 +67,27 @@ export function FileGrid({
           <div
             key={file._id}
             className='group hover:bg-accent relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors'
+            onClick={(e) => {
+              e.stopPropagation(); // ensure dropdown clicks don’t bubble
+            }}
           >
-            <div className='relative'>
-              {getFileIcon(documentType, file)}
-              {file.starred && (
-                <Star className='absolute -top-1 -right-1 h-3 w-3 fill-current text-yellow-500' />
-              )}
+            <div
+              onClick={() => {
+                window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}`;
+              }}
+              className='flex flex-col items-center'
+            >
+              <div className='relative'>
+                {getFileIcon(documentType, file)}
+                {file.starred && (
+                  <Star className='absolute -top-1 -right-1 h-3 w-3 fill-current text-yellow-500' />
+                )}
+              </div>
+              <span className='mt-2 text-center text-sm break-all'>
+                {truncateFileName(file.name)}
+              </span>
             </div>
-            <span className='mt-2 line-clamp-2 max-w-full text-center text-sm break-words'>
-              {file.name}
-            </span>
+
             <FileDropdownMenu file={file} buttonViewType='grid' />
           </div>
         ))}

@@ -29,6 +29,10 @@ export default function FileDropdownMenu({ file, buttonViewType }: Props) {
     setCurrentItem(file);
   };
 
+  const filedonw = () => {
+    window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}?action=download`;
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -46,10 +50,12 @@ export default function FileDropdownMenu({ file, buttonViewType }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
-        <DropdownMenuItem onClick={() => openDialog("download")}>
-          <Download className='mr-2 h-4 w-4' />
-          Download
-        </DropdownMenuItem>
+        {file.extension && (
+          <DropdownMenuItem onClick={filedonw}>
+            <Download className='mr-2 h-4 w-4' />
+            Download
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem onClick={() => openDialog("rename")}>
           <FolderPen className='mr-2 h-4 w-4' />
           Rename
