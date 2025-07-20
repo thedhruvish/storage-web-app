@@ -61,7 +61,7 @@ const getFileIcon = (document: string, file: FileItem) => {
 export function FileGrid({
   files,
   viewMode,
-  onFileClick,
+
   documentType,
 }: FileGridProps) {
   if (viewMode === "grid") {

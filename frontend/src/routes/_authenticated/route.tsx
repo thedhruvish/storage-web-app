@@ -25,7 +25,6 @@ function RouteComponent() {
 
   useEffect(() => {
     if (getCureentUser.isError) {
-      toast.error("Unauthorized");
       navagate({ to: "/login" });
     }
   }, [getCureentUser.isError, getCureentUser.error, navagate]);
@@ -37,7 +36,7 @@ function RouteComponent() {
   if (!user) return null;
   return (
     <div className='[--header-height:calc(theme(spacing.14))]'>
-      <SidebarProvider className='flex flex-col'>
+      <SidebarProvider className='flex flex-col' defaultOpen={false}>
         <SiteHeader />
         <div className='flex flex-1'>
           <AppSidebar />

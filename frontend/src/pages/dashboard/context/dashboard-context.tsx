@@ -9,7 +9,8 @@ type DashboardDialogType =
   | "delete"
   | "share"
   | "star"
-  | "newDirectory";
+  | "newDirectory"
+  | "uploadFile";
 
 interface DashboardContextType {
   open: DashboardDialogType | null;

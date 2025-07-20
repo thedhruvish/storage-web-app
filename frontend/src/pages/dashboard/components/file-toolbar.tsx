@@ -42,14 +42,14 @@ export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
               <FolderPlus className='mr-2 h-4 w-4' />
               New Folder
             </DropdownMenuItem>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpen("uploadFile")}>
               <Upload className='mr-2 h-4 w-4' />
               File Upload
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
 
-        <Button variant='outline'>
+        <Button variant='outline' onClick={() => setOpen("uploadFile")}>
           <Upload className='mr-2 h-4 w-4' />
           Upload
         </Button>
