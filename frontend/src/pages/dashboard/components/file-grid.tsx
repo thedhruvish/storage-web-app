@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
+import { useNavigate } from "@tanstack/react-router";
 import FileDropdownMenu from "./file-dropdown-menu";
 import type { FileGridProps, FileItem } from "../types";
 import { getFileIconName } from "@/utils/file-icon-helper";
@@ -60,6 +61,7 @@ const getFileIcon = (document: string, file: FileItem) => {
 };
 
 export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
+  const navigate = useNavigate();
   if (viewMode === "grid") {
     return (
       <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'>
@@ -73,7 +75,11 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
           >
             <div
               onClick={() => {
-                window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}`;
+                if (documentType === "folder") {
+                  navigate({ to: `/directory/${file._id}` });
+                } else {
+                  window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}`;
+                }
               }}
               className='flex flex-col items-center'
             >

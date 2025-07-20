@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { toast } from "sonner";
+import { useParams } from "@tanstack/react-router";
 import { useDashboard } from "../context/dashboard-context";
 import { Button } from "@/components/ui/button";
 import {
@@ -37,9 +38,11 @@ interface Props {
 }
 
 export function RenameDialog({ open, onOpenChange }: Props) {
+  const { directoryId = "" } = useParams({ strict: false });
+
   const { currentItem, setCurrentItem } = useDashboard();
-  const updateDirectory = useUpdateDirectory();
-  const updateDocument = useUpdateDocument();
+  const updateDirectory = useUpdateDirectory(directoryId);
+  const updateDocument = useUpdateDocument(directoryId);
 
   const form = useForm<RenameFormValues>({
     resolver: zodResolver(formSchema),

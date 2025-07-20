@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "./axiosClient";
 
-export const useGetAllDirectoryList = (directoryId?: string) => {
+export const useGetAllDirectoryList = (directoryId: string = "") => {
   return useQuery({
     queryKey: ["directorys", directoryId],
     queryFn: async ({ queryKey }) => {
@@ -13,7 +13,7 @@ export const useGetAllDirectoryList = (directoryId?: string) => {
 };
 
 // Update directory and invalidate the correct query cache
-export const useUpdateDirectory = (directoryId?: string) => {
+export const useUpdateDirectory = (directoryId: string = "") => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -28,7 +28,7 @@ export const useUpdateDirectory = (directoryId?: string) => {
 };
 
 // Delete directory and invalidate the correct query cache
-export const useDeleteDirectory = (directoryId?: string) => {
+export const useDeleteDirectory = (directoryId: string = "") => {
   const queryClient = useQueryClient();
 
   return useMutation({

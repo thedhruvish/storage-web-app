@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
+import { useParams } from "@tanstack/react-router";
 import { useDashboard } from "../context/dashboard-context";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
@@ -15,11 +16,12 @@ interface Props {
 }
 
 export function FileDeleteDialog({ open, onOpenChange }: Props) {
+  const { directoryId } = useParams({ strict: false });
   const [value, setValue] = useState("");
   const { currentItem, setCurrentItem } = useDashboard();
   const [fileName, setFileName] = useState("");
-  const deleteDirectory = useDeleteDirectory();
-  const deleteDocument = useDeleteDocument();
+  const deleteDirectory = useDeleteDirectory(directoryId);
+  const deleteDocument = useDeleteDocument(directoryId);
 
   useEffect(() => {
     if (currentItem) {

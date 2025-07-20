@@ -2,6 +2,7 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
+import { useParams } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -34,8 +35,8 @@ interface Props {
 }
 
 export function NewDirectoryDialog({ open, onOpenChange }: Props) {
-  const createDirectory = useCreateDirectory();
-
+  const { directoryId = "" } = useParams({ strict: false });
+  const createDirectory = useCreateDirectory(directoryId);
   const form = useForm<NewDirectoryFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "" },

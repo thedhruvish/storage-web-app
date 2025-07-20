@@ -1,6 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
-import Home from "@/pages/dashboard";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/")({
-  component: Home,
+  component: function () {
+    const navigate = useNavigate();
+    navigate({ to: "/directory" });
+    return <></>;
+  },
 });

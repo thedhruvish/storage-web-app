@@ -8,9 +8,10 @@ import { Separator } from "@/components/ui/separator";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 
-export default function Home() {
+export default function Home({ directoryId = "" }: { directoryId?: string }) {
   const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
-  const getDirectoryDataHook = useGetAllDirectoryList();
+
+  const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
 
   const handleFileClick = (file: any) => {
     console.log("File clicked:", file);

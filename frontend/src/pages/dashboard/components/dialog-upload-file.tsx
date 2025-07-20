@@ -12,6 +12,7 @@ import {
   Loader2,
   UploadCloud,
 } from "lucide-react";
+import { useParams } from "@tanstack/react-router";
 import {
   Dialog,
   DialogClose,
@@ -53,7 +54,9 @@ interface Props {
 }
 
 export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
-  const getDirectoryDataHook = useGetAllDirectoryList();
+  const { directoryId = "" } = useParams({ strict: false });
+
+  const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
   const form = useForm<FileUploadValues>({
     resolver: zodResolver(fileUploadSchema),
     defaultValues: { files: [] },
@@ -113,7 +116,7 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
 
       try {
         await axios.post(
-          `${import.meta.env.VITE_BASE_URL}/document`,
+          `${import.meta.env.VITE_BASE_URL}/document/${directoryId}`,
           formData,
           {
             withCredentials: true,
@@ -190,16 +193,16 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
     );
   };
 
-  const handleCancelAll = () => {
-    fileProgressList.forEach((fileObj) => {
-      if (fileObj.status === "uploading") {
-        fileObj.cancelToken?.abort();
-      }
-    });
-    setFileProgressList([]);
-    form.reset();
-    onOpenChange(false);
-  };
+  // const handleCancelAll = () => {
+  //   fileProgressList.forEach((fileObj) => {
+  //     if (fileObj.status === "uploading") {
+  //       fileObj.cancelToken?.abort();
+  //     }
+  //   });
+  //   setFileProgressList([]);
+  //   form.reset();
+  //   onOpenChange(false);
+  // };
 
   const getStatusIcon = (status: FileProgress["status"]) => {
     switch (status) {
@@ -439,8 +442,8 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
               <DialogClose asChild>
                 <Button
                   variant='outline'
-                  onClick={handleCancelAll}
-                  disabled={isUploading}
+                  // onClick={handleCancelAll}
+                  // disabled={isUploading}
                 >
                   {isUploading ? "Canceling..." : "Close"}
                 </Button>
