@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { createContext, useContext, useEffect, useState } from "react";
+import { useAppearance } from "@/store/appearanceStore";
 
 type Theme = "dark" | "light" | "system";
 
 type ThemeProviderProps = {
   children: React.ReactNode;
-  defaultTheme?: Theme;
-  storageKey?: string;
 };
 
 type ThemeProviderState = {
@@ -21,15 +20,10 @@ const initialState: ThemeProviderState = {
 
 const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 
-export function ThemeProvider({
-  children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
-  ...props
-}: ThemeProviderProps) {
-  const [theme, _setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
-  );
+export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
+  const { setAppearance, appearance } = useAppearance();
+
+  const [theme, _setTheme] = useState<Theme>(appearance.theme);
 
   useEffect(() => {
     const root = window.document.documentElement;
@@ -58,7 +52,7 @@ export function ThemeProvider({
 
   // eslint-disable-next-line no-shadow
   const setTheme = (theme: Theme) => {
-    localStorage.setItem(storageKey, theme);
+    setAppearance({ theme });
     _setTheme(theme);
   };
 

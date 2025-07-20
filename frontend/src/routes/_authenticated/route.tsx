@@ -7,6 +7,7 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useUser } from "@/store/userStore";
 import { useGetCurrentUser } from "@/api/auth";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
+import { useAppearance } from "@/store/appearanceStore";
 
 export const Route = createFileRoute("/_authenticated")({
   component: RouteComponent,
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/_authenticated")({
 
 function RouteComponent() {
   const { user, setUser } = useUser();
+  const { appearance } = useAppearance();
   const getCureentUser = useGetCurrentUser();
   const navagate = useNavigate();
 
@@ -36,7 +38,10 @@ function RouteComponent() {
   if (!user) return null;
   return (
     <div className='[--header-height:calc(theme(spacing.14))]'>
-      <SidebarProvider className='flex flex-col' defaultOpen={false}>
+      <SidebarProvider
+        className='flex flex-col'
+        defaultOpen={appearance.sidebar}
+      >
         <SiteHeader />
         <div className='flex flex-1'>
           <AppSidebar />

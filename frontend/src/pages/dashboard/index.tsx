@@ -7,9 +7,10 @@ import { FileToolbar } from "@/pages/dashboard/components/file-toolbar";
 import { Separator } from "@/components/ui/separator";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
+import { useAppearance } from "@/store/appearanceStore";
 
 export default function Home({ directoryId = "" }: { directoryId?: string }) {
-  const [viewMode, setViewMode] = React.useState<"grid" | "list">("grid");
+  const { appearance } = useAppearance();
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
 
@@ -23,19 +24,19 @@ export default function Home({ directoryId = "" }: { directoryId?: string }) {
   }
   return (
     <DashboardProvider>
-      <FileToolbar viewMode={viewMode} onViewModeChange={setViewMode} />
+      <FileToolbar viewMode={appearance.directoryLayout} />
       <div className='flex-1 p-4'>
         <FileGrid
           files={getDirectoryDataHook.data?.data.directories || []}
           documentType='folder'
-          viewMode={viewMode}
+          viewMode={appearance.directoryLayout}
           onFileClick={handleFileClick}
         />
         <Separator className='my-4 w-6' />
         <FileGrid
           files={getDirectoryDataHook.data?.data.documents || []}
           documentType='file'
-          viewMode={viewMode}
+          viewMode={appearance.directoryLayout}
           onFileClick={handleFileClick}
         />
       </div>

@@ -19,14 +19,16 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import { useAppearance } from "@/store/appearanceStore";
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";
-  onViewModeChange: (mode: "grid" | "list") => void;
 }
 
-export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
+export function FileToolbar({ viewMode }: FileToolbarProps) {
   const { setOpen } = useDashboard();
+  const { setAppearance } = useAppearance();
+
   return (
     <div className='flex items-center justify-between border-b p-4'>
       <div className='flex items-center gap-2'>
@@ -71,7 +73,7 @@ export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
             variant={viewMode === "grid" ? "default" : "ghost"}
             size='icon'
             className='rounded-r-none'
-            onClick={() => onViewModeChange("grid")}
+            onClick={() => setAppearance({ directoryLayout: "grid" })}
           >
             <Grid3X3 className='h-4 w-4' />
           </Button>
@@ -79,7 +81,7 @@ export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
             variant={viewMode === "list" ? "default" : "ghost"}
             size='icon'
             className='rounded-l-none'
-            onClick={() => onViewModeChange("list")}
+            onClick={() => setAppearance({ directoryLayout: "list" })}
           >
             <List className='h-4 w-4' />
           </Button>
