@@ -37,14 +37,9 @@ export function SiteHeader() {
         <Breadcrumb className='hidden sm:block'>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href='#'>
-                Building Your Application
-              </BreadcrumbLink>
+              <BreadcrumbLink href='#'>Storage Application</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbPage>Data Fetching</BreadcrumbPage>
-            </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
         <SearchForm className='w-full sm:ml-auto sm:w-auto' />
