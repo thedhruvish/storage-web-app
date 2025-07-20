@@ -10,6 +10,7 @@ import {
   Upload,
 } from "lucide-react";
 
+import { useDashboard } from "../context/dashboard-context";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,6 +26,7 @@ interface FileToolbarProps {
 }
 
 export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
+  const { setOpen } = useDashboard();
   return (
     <div className='flex items-center justify-between border-b p-4'>
       <div className='flex items-center gap-2'>
@@ -36,7 +38,7 @@ export function FileToolbar({ viewMode, onViewModeChange }: FileToolbarProps) {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align='start'>
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={() => setOpen("newDirectory")}>
               <FolderPlus className='mr-2 h-4 w-4' />
               New Folder
             </DropdownMenuItem>

@@ -6,7 +6,6 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import { useEffect } from "react";
 import { useDashboard } from "../context/dashboard-context";
 import type { FileItem } from "../types";
 import {
@@ -25,9 +24,11 @@ interface Props {
 
 export default function FileDropdownMenu({ file, buttonViewType }: Props) {
   const { setOpen, setCurrentItem } = useDashboard();
-  useEffect(() => {
+  const openDialog = (type: Parameters<typeof setOpen>[0]) => {
+    setOpen(type);
     setCurrentItem(file);
-  }, []);
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -45,26 +46,26 @@ export default function FileDropdownMenu({ file, buttonViewType }: Props) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align='end'>
-        <DropdownMenuItem onClick={() => setOpen("download")}>
+        <DropdownMenuItem onClick={() => openDialog("download")}>
           <Download className='mr-2 h-4 w-4' />
           Download
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setOpen("rename")}>
+        <DropdownMenuItem onClick={() => openDialog("rename")}>
           <FolderPen className='mr-2 h-4 w-4' />
           Rename
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setOpen("share")}>
+        <DropdownMenuItem onClick={() => openDialog("share")}>
           <Share className='mr-2 h-4 w-4' />
           Share
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setOpen("star")}>
+        <DropdownMenuItem onClick={() => openDialog("star")}>
           <Star className='mr-2 h-4 w-4' />
           {file.starred ? "Unstar" : "Star"}
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className='text-destructive'
-          onClick={() => setOpen("delete")}
+          onClick={() => openDialog("delete")}
         >
           <Trash2 className='mr-2 h-4 w-4' />
           Delete

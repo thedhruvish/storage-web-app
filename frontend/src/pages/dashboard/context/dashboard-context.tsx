@@ -8,7 +8,8 @@ type DashboardDialogType =
   | "download"
   | "delete"
   | "share"
-  | "star";
+  | "star"
+  | "newDirectory";
 
 interface DashboardContextType {
   open: DashboardDialogType | null;

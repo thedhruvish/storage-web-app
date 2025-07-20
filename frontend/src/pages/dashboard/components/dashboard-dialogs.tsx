@@ -1,15 +1,27 @@
 import { useDashboard } from "../context/dashboard-context";
-import { RenameDialog } from "./file-rename-dialog";
+import { FileDeleteDialog } from "./dialog-delete-file";
+import { RenameDialog } from "./dialog-file-rename";
+import { NewDirectoryDialog } from "./dialog-new-directory";
 
 export function UsersDialogs() {
   const { open, setOpen } = useDashboard();
-  console.log(open);
   return (
     <>
       <RenameDialog
         key='user-add'
         open={open === "rename"}
         onOpenChange={() => setOpen("rename")}
+      />
+
+      <FileDeleteDialog
+        key={"delete-file"}
+        open={open === "delete"}
+        onOpenChange={() => setOpen("delete")}
+      />
+      <NewDirectoryDialog
+        key={"new-directory"}
+        open={open === "newDirectory"}
+        onOpenChange={() => setOpen("newDirectory")}
       />
     </>
   );
