@@ -31,8 +31,7 @@ export const createDocument = async (req, res) => {
   });
   req.on("error", async (err) => {
     await rm(`${process.cwd()}/storage/${document.id}${externsion}`);
-    document = null;
-    throw new ApiError(400, err.message);
+    res.status(500).json(new ApiError(500, "Internal Server Error"));
   });
 };
 
