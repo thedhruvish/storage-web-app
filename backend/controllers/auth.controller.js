@@ -4,6 +4,9 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Directory from "../models/Directory.model.js";
 import Session from "../models/Session.model.js";
+import { OAuth2Client } from "google-auth-library";
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // register user
 export const registerWithEmail = async (req, res, next) => {
@@ -117,5 +120,149 @@ export const logoutAllDevices = async (req, res) => {
 };
 
 // login with google
+export const loginWithGoogle = async (req, res) => {
+  const { idToken } = req.body;
+
+  if (!idToken) {
+    throw new ApiError(400, "idToken is required");
+  }
+
+  const googleUser = await googleClient.verifyIdToken({
+    idToken,
+
+    audience: process.env.GOOGLE_CLIENT_ID,
+  });
+  const { email, picture, name } = await googleUser.getPayload();
+
+  //session Transtion
+  const mongoSesssion = await mongoose.startSession();
+  mongoSesssion.startTransaction();
+
+  // check user is exsting
+  let user = await User.findOne({ email });
+  let session;
+
+  try {
+    if (user) {
+      session = await Session.create({ userId: user._id });
+    } else {
+      const dirId = new mongoose.Types.ObjectId();
+      user = new User({
+        name,
+        email,
+        rootDirId: dirId,
+        picture,
+        loginProvider: "google",
+      });
+      await user.save({ session: mongoSesssion });
+
+      const rootDir = new Directory({
+        _id: dirId,
+        name: `root-${email}`,
+        userId: user._id,
+        parentDirId: null,
+      });
+      await rootDir.save({ session: mongoSesssion });
+      session = await Session.create({ userId: user._id });
+      // await session.save({ session: mongoSesssion });
+    }
+
+    res.cookie("sessionId", session._id, {
+      httpOnly: true,
+      secure: true,
+      maxAge: 24 * 60 * 60 * 1000,
+      signed: true,
+    });
+    await mongoSesssion.commitTransaction();
+    res.status(200).json(new ApiResponse(200, "User login Successfuly", user));
+  } catch (error) {
+    await mongoSesssion.abortTransaction();
+    return res.status(500).json(new ApiError(500, error.message));
+  } finally {
+    mongoSesssion.endSession();
+  }
+};
 
 // login with github
+export const loginWithGithub = async (req, res) => {
+  res.redirect(
+    `https://github.com/login/oauth/authorize?client_id=${process.env.GITHUB_CLIENT_ID}&redirect_uri=${process.env.GITHUB_REDIRECT_URI}&scope=user:email`,
+  );
+};
+
+export const callbackGithub = async (req, res) => {
+  const { code } = req.query;
+  const resGithub = await fetch("https://github.com/login/oauth/access_token", {
+    method: "POST",
+    body: JSON.stringify({
+      client_id: process.env.GITHUB_CLIENT_ID,
+      client_secret: process.env.GITHUB_CLIENT_SECRET,
+      redirect_uri: process.env.GITHUB_REDIRECT_URI,
+      code,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+  });
+  const data = await resGithub.json();
+  const emailRes = await fetch("https://api.github.com/user/emails", {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer  ${data.access_token}`,
+    },
+  });
+  const emailResData = await emailRes.json();
+
+  const primaryEmail = emailResData.find((e) => e.primary && e.verified)?.email;
+
+  let user = await User.findOne({ email: primaryEmail });
+  let session;
+  if (user) {
+    session = await Session.create({ userId: user._id });
+  } else {
+    const userRes = await fetch("https://api.github.com/user", {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer  ${data.access_token}`,
+      },
+    });
+    const userResData = await userRes.json();
+    const userId = new mongoose.Types.ObjectId();
+    const body = {
+      name: `root-${primaryEmail}`,
+      parentDirId: null,
+      userId,
+    };
+    const rootDir = await Directory.create([body]);
+    user = await User.create({
+      _id: userId,
+      email: primaryEmail,
+      name: userResData.login,
+      picture: userResData.avatar_url,
+      isLogInByGoogle: "github",
+      rootDirId: rootDir[0]._id,
+    });
+    session = await Session.create({ userId: user._id });
+  }
+  res.cookie("sessionId", session.id, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    signed: true,
+  });
+
+  res.redirect(process.env.FRONTEND_URL);
+  // process.env.FRONTEND_URL + "/github/session?sessionId=" + session.id,
+};
+
+export const githubCookieSet = async (req, res) => {
+  const { sessionId } = req.query;
+  res.cookie("sessionId", sessionId, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    signed: true,
+  });
+  res.redirect(process.env.FRONTEND_URL);
+};

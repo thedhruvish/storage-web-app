@@ -27,3 +27,10 @@ export const useLogout = () => {
     mutationFn: () => axiosClient.post("/auth/logout"),
   });
 };
+
+export const useLoginWithGoogle = () => {
+  return useMutation({
+    mutationFn: (data: { idToken: string }) =>
+      axiosClient.post("/auth/google", data),
+  });
+};

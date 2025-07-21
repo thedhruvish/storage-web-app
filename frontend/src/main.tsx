@@ -7,6 +7,7 @@ import {
   QueryClientProvider,
 } from "@tanstack/react-query";
 import { AxiosError } from "axios";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 // Import the generated route tree
 import { toast } from "sonner";
@@ -93,12 +94,14 @@ if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <RouterProvider router={router} />
-          <Toaster />
-        </QueryClientProvider>
-      </ThemeProvider>
+      <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <RouterProvider router={router} />
+            <Toaster />
+          </QueryClientProvider>
+        </ThemeProvider>
+      </GoogleOAuthProvider>
     </StrictMode>,
   );
 }

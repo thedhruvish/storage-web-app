@@ -5,6 +5,9 @@ import {
   logout,
   logoutAllDevices,
   getCureentUser,
+  loginWithGoogle,
+  loginWithGithub,
+  callbackGithub,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 
@@ -13,6 +16,13 @@ const router = express.Router();
 // router login with email and password
 router.post("/register", registerWithEmail);
 router.post("/login", loginWithEmail);
+
+// google auth
+router.post("/google", loginWithGoogle);
+
+// github login
+router.get("/github", loginWithGithub);
+router.get("/github/callback", callbackGithub);
 
 // authenticated route
 router.use(checkAuth);

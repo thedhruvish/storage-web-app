@@ -22,7 +22,7 @@ export const createDocument = async (req, res) => {
     parentDirId,
   });
   const fileStream = createWriteStream(
-    `${process.cwd()}/storage/${document.id}${externsion}`,
+    `${process.cwd()}/storage/${document.id.toString()}${externsion}`,
   );
   req.pipe(fileStream);
   req.on("end", async () => {

@@ -16,9 +16,8 @@ function LogoutComponent() {
     if (user) {
       clearUser();
       logouthook.mutate();
-    } else {
-      navigate({ to: "/login" });
     }
+    navigate({ to: "/login" });
   }, [user, clearUser, logouthook]);
   if (logouthook.isPending) {
     return "Logging out...";
