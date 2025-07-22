@@ -123,7 +123,6 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
             signal: controller.signal,
             headers: {
               "Content-Type": "multipart/form-data",
-              filename: file.name,
             },
             onUploadProgress: (event) => {
               if (!event.total) return;

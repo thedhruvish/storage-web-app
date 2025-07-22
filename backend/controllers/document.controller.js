@@ -1,6 +1,4 @@
 import { rm } from "node:fs/promises";
-import path from "node:path";
-import { createWriteStream } from "node:fs";
 import Document from "../models/document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -8,31 +6,21 @@ import ApiResponse from "../utils/ApiResponse.js";
 // create the file
 export const createDocument = async (req, res) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId;
+  const { id, extension } = req.customFileInfo;
 
-  const { filename } = req.headers;
-
-  if (!filename) {
-    return res.status(400).json(new ApiError(400, "filename is required"));
-  }
-  const externsion = path.extname(filename);
   const document = new Document({
+    _id: id,
     userId: req.user._id,
-    name: filename,
-    extension: externsion,
+    name: req.file.originalname,
+    extension: extension,
     parentDirId,
+    metaData: {
+      size: req.file.size,
+    },
   });
-  const fileStream = createWriteStream(
-    `${process.cwd()}/storage/${document.id.toString()}${externsion}`,
-  );
-  req.pipe(fileStream);
-  req.on("end", async () => {
-    await document.save();
-    res.status(200).json(new ApiResponse(200, "Document create Successfuly"));
-  });
-  req.on("error", async (err) => {
-    await rm(`${process.cwd()}/storage/${document.id}${externsion}`);
-    res.status(500).json(new ApiError(500, "Internal Server Error"));
-  });
+  await document.save();
+
+  res.status(200).json(new ApiResponse(200, "Document create Successfuly"));
 };
 
 // show or download file by id
