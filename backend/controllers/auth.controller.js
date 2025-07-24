@@ -5,6 +5,8 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Directory from "../models/Directory.model.js";
 import Session from "../models/Session.model.js";
 import { OAuth2Client } from "google-auth-library";
+import Otp from "../models/Otp.model.js";
+import { randomInt } from "node:crypto";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -71,13 +73,24 @@ export const loginWithEmail = async (req, res) => {
   if (!isValidPWD) {
     throw new ApiError(401, "Invalid email and password");
   }
+  // check if is_verfiy otp are the true than check the using opt
+  if (process.env.IS_VERFIY_OTP == "true") {
+    const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
+    const otpObj = await Otp.create({ userId: user._id, otp });
+
+    return res.status(200).json(
+      new ApiResponse(200, "Verify the opt", {
+        is_verfiy_otp: true,
+        userId: user._id,
+      }),
+    );
+  }
 
   // create a session
   const session = await Session.create({ userId: user._id });
 
   // delete password field in user obj
   delete user.password;
-
   res.cookie("sessionId", session._id, {
     httpOnly: true,
     secure: true,
@@ -85,7 +98,12 @@ export const loginWithEmail = async (req, res) => {
     signed: true,
   });
 
-  res.status(200).json(new ApiResponse(200, "User login Successfuly"), user);
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "User login Successfuly", { is_verfiy_otp: false }),
+      user,
+    );
 };
 
 // get user
@@ -190,6 +208,7 @@ export const loginWithGithub = async (req, res) => {
   );
 };
 
+// callback github
 export const callbackGithub = async (req, res) => {
   const { code } = req.query;
   const resGithub = await fetch("https://github.com/login/oauth/access_token", {
@@ -256,6 +275,7 @@ export const callbackGithub = async (req, res) => {
   // process.env.FRONTEND_URL + "/github/session?sessionId=" + session.id,
 };
 
+// login with github for the set cookie
 export const githubCookieSet = async (req, res) => {
   const { sessionId } = req.query;
   res.cookie("sessionId", sessionId, {
@@ -265,4 +285,29 @@ export const githubCookieSet = async (req, res) => {
     signed: true,
   });
   res.redirect(process.env.FRONTEND_URL);
+};
+
+// verify the opt
+export const verfiyOpt = async (req, res) => {
+  const { otp, userId } = req.body;
+
+  const optDoc = await Otp.findOne({ userId, otp });
+
+  if (!optDoc) {
+    return res
+      .status(400)
+      .json(new ApiResponse(400, "Invalid otp or It Expired"));
+  }
+  // delete after verfiy otp
+  await optDoc.deleteOne();
+
+  // genrate session
+  const session = await Session.create({ userId });
+  res.cookie("sessionId", session.id, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    signed: true,
+  });
+  res.status(200).json(new ApiResponse(200, "User login Successfuly"));
 };
