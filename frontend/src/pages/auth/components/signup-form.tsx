@@ -129,7 +129,13 @@ export function SigupForm({
                     )}
                   />
 
-                  <Button type='submit' className='w-full'>
+                  <Button
+                    type='submit'
+                    className='w-full'
+                    disabled={
+                      !form.formState.isValid || registerMutation.isPending
+                    }
+                  >
                     Sign up
                   </Button>
                 </div>

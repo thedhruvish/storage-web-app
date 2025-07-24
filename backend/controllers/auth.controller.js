@@ -6,7 +6,7 @@ import Directory from "../models/Directory.model.js";
 import Session from "../models/Session.model.js";
 import { OAuth2Client } from "google-auth-library";
 import Otp from "../models/Otp.model.js";
-import { randomInt } from "node:crypto";
+import { sendOtpToMail } from "../utils/mailsend.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -75,9 +75,7 @@ export const loginWithEmail = async (req, res) => {
   }
   // check if is_verfiy otp are the true than check the using opt
   if (process.env.IS_VERFIY_OTP == "true") {
-    const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
-    const otpObj = await Otp.create({ userId: user._id, otp });
-
+    await sendOtpToMail(user._id.toString());
     return res.status(200).json(
       new ApiResponse(200, "Verify the opt", {
         is_verfiy_otp: true,
@@ -316,11 +314,7 @@ export const verfiyOtp = async (req, res) => {
 export const reSendOtp = async (req, res) => {
   const { userId } = req.body;
   // delete exsting user Otp
-  await Otp.deleteMany({ userId });
-
-  // genrator otp
-  const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
-  await Otp.create({ userId, otp });
+  await sendOtpToMail(userId);
 
   res.status(200).json(
     new ApiResponse(200, "OTP resend successfully", {

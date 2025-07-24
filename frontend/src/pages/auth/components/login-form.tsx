@@ -143,7 +143,13 @@ export function LoginForm({
                     )}
                   />
 
-                  <Button type='submit' className='w-full'>
+                  <Button
+                    type='submit'
+                    className='w-full'
+                    disabled={
+                      !form.formState.isValid || loginMutation.isPending
+                    }
+                  >
                     Login
                   </Button>
                 </div>
