@@ -30,7 +30,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useVerifyOpt } from "@/api/auth";
+import { useResendOtp, useVerifyOtp } from "@/api/auth";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -46,7 +46,8 @@ export function OtpVerfiyForm({
 }: React.ComponentProps<"div">) {
   const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
 
-  const verfiyOpt = useVerifyOpt();
+  const verfiyOpt = useVerifyOtp();
+  const reSendOTP = useResendOtp();
   const navagate = useNavigate();
   const userId = localStorage.getItem("userId");
   const form = useForm<z.infer<typeof FormSchema>>({
@@ -87,8 +88,15 @@ export function OtpVerfiyForm({
     form.reset();
   };
   // reset otp
-  const handleResend = () => {
-    toast("Resending code…");
+  const handleResend = async () => {
+    if (!userId) return;
+    try {
+      await reSendOTP.mutateAsync({ userId });
+      toast.success("OTP resend successfully");
+    } catch (error) {
+      toast.error("OTP resend failed. try after some time");
+    }
+
     setCountdown(COUNTDOWN_SECONDS);
   };
   const formatTime = (secs: number) =>

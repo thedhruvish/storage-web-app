@@ -36,9 +36,17 @@ export const useLoginWithGoogle = () => {
 };
 
 // verify opt
-export const useVerifyOpt = () => {
+export const useVerifyOtp = () => {
   return useMutation({
     mutationFn: (data: { otp: string; userId: string }) =>
       axiosClient.post("/auth/otp-verify", data),
+  });
+};
+
+// re-send otp
+export const useResendOtp = () => {
+  return useMutation({
+    mutationFn: (data: { userId: string }) =>
+      axiosClient.post("/auth/resend-otp", data),
   });
 };

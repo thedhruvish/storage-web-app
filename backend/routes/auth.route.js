@@ -8,7 +8,8 @@ import {
   loginWithGoogle,
   loginWithGithub,
   callbackGithub,
-  verfiyOpt,
+  verfiyOtp,
+  reSendOtp,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 
@@ -19,7 +20,10 @@ router.post("/register", registerWithEmail);
 router.post("/login", loginWithEmail);
 
 // send otp verify
-router.post("/otp-verify", verfiyOpt);
+router.post("/otp-verify", verfiyOtp);
+
+// Re-send otp
+router.post("/resend-otp", reSendOtp);
 
 // google auth
 router.post("/google", loginWithGoogle);

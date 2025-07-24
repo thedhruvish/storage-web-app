@@ -287,8 +287,8 @@ export const githubCookieSet = async (req, res) => {
   res.redirect(process.env.FRONTEND_URL);
 };
 
-// verify the opt
-export const verfiyOpt = async (req, res) => {
+// verify the otp
+export const verfiyOtp = async (req, res) => {
   const { otp, userId } = req.body;
 
   const optDoc = await Otp.findOne({ userId, otp });
@@ -310,4 +310,22 @@ export const verfiyOpt = async (req, res) => {
     signed: true,
   });
   res.status(200).json(new ApiResponse(200, "User login Successfuly"));
+};
+
+// re-send otp
+export const reSendOtp = async (req, res) => {
+  const { userId } = req.body;
+  // delete exsting user Otp
+  await Otp.deleteMany({ userId });
+
+  // genrator otp
+  const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
+  await Otp.create({ userId, otp });
+
+  res.status(200).json(
+    new ApiResponse(200, "OTP resend successfully", {
+      is_verfiy_otp: true,
+      userId: userId,
+    }),
+  );
 };
