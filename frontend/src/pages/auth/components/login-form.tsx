@@ -38,7 +38,12 @@ export function LoginForm({
   });
   useEffect(() => {
     if (loginMutation.isSuccess) {
-      navagate({ to: "/" });
+      if (loginMutation.data.data.data.is_verfiy_otp) {
+        localStorage.setItem("userId", loginMutation.data.data.data.userId);
+        navagate({ to: "/otp-verify" });
+      } else {
+        navagate({ to: "/" });
+      }
     }
   }, [loginMutation.isSuccess]);
 
@@ -52,7 +57,6 @@ export function LoginForm({
   });
 
   const onSubmit = (data: FormData) => {
-    console.log("Form submitted:", data);
     loginMutation.mutate(data);
   };
 

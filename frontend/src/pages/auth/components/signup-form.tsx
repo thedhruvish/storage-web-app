@@ -46,7 +46,6 @@ export function SigupForm({
 
   function onSubmit(values: FormData) {
     registerMutation.mutate(values);
-    console.log("Form submitted:", values);
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
