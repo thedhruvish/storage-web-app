@@ -6,6 +6,7 @@ import { checkAuth } from "./middlewares/auth.js";
 import authRoute from "./routes/auth.route.js";
 import directoryRoute from "./routes/directory.route.js";
 import docuemntRoute from "./routes/document.route.js";
+import importDataRoute from "./routes/importData.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -32,6 +33,7 @@ app.use(checkAuth);
 
 app.use("/directory", directoryRoute);
 app.use("/document", docuemntRoute);
+app.use("/import-data", importDataRoute);
 
 app.use((err, req, res, next) => {
   console.error("Error caught by middleware:", err);
