@@ -34,6 +34,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { Progress } from "@/components/ui/progress";
 import { truncateFileName } from "@/utils/truncateFileName";
+import { useDialogStore } from "@/store/DialogsStore";
 
 export const fileUploadSchema = z.object({
   files: z.array(z.instanceof(File)).min(1, "Please upload at least one file"),
@@ -50,13 +51,14 @@ type FileProgress = {
 
 interface Props {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
 }
 
-export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
+export function MultiFileUploadDialog({ open }: Props) {
   const { directoryId = "" } = useParams({ strict: false });
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
+  const { closeDialog } = useDialogStore();
+
   const form = useForm<FileUploadValues>({
     resolver: zodResolver(fileUploadSchema),
     defaultValues: { files: [] },
@@ -151,7 +153,7 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
         return true;
       } catch (error: any) {
         if (axios.isCancel(error) || error.name === "CanceledError") {
-          console.log("Upload cancelled for", file.name);
+          toast.error(`Upload cancelled for ${file.name}`);
         } else {
           toast.error(
             `Error uploading ${file.name}: ${error.message || "Unknown error"}`,
@@ -243,7 +245,7 @@ export function MultiFileUploadDialog({ open, onOpenChange }: Props) {
           form.reset();
           setFileProgressList([]);
         }
-        onOpenChange(state);
+        closeDialog();
       }}
     >
       <DialogContent className='max-h-[90dvh] overflow-hidden sm:max-w-lg'>

@@ -7,6 +7,7 @@ import { useUser } from "@/store/userStore";
 import { useGetCurrentUser } from "@/api/auth";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 import { useAppearance } from "@/store/appearanceStore";
+import { Dialogs } from "@/components/dialogs";
 
 export const Route = createFileRoute("/_authenticated")({
   component: RouteComponent,
@@ -46,6 +47,7 @@ function RouteComponent() {
           <AppSidebar />
           <SidebarInset className='flex flex-col'>
             <Outlet />
+            <Dialogs />
           </SidebarInset>
         </div>
       </SidebarProvider>

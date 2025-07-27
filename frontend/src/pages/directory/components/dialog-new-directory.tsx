@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { useCreateDirectory } from "@/api/directoryApi";
+import { useDialogStore } from "@/store/DialogsStore";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "File name is required." }),
@@ -31,11 +32,11 @@ type NewDirectoryFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
 }
 
-export function NewDirectoryDialog({ open, onOpenChange }: Props) {
+export function NewDirectoryDialog({ open }: Props) {
   const { directoryId = "" } = useParams({ strict: false });
+  const { closeDialog } = useDialogStore();
   const createDirectory = useCreateDirectory(directoryId);
   const form = useForm<NewDirectoryFormValues>({
     resolver: zodResolver(formSchema),
@@ -55,16 +56,16 @@ export function NewDirectoryDialog({ open, onOpenChange }: Props) {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();
-      onOpenChange(false);
+      closeDialog();
     }
   };
 
   return (
     <Dialog
       open={open}
-      onOpenChange={(state) => {
+      onOpenChange={() => {
         form.reset();
-        onOpenChange(state);
+        closeDialog();
       }}
     >
       <DialogContent className='sm:max-w-md'>

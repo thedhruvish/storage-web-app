@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import { useParams } from "@tanstack/react-router";
-import { useDashboard } from "../context/dashboard-context";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -26,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useUpdateDirectory } from "@/api/directoryApi";
 import { useUpdateDocument } from "@/api/docuementApi";
+import { useDialogStore } from "@/store/DialogsStore";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "File name is required." }),
@@ -37,10 +37,10 @@ interface Props {
   onOpenChange: (open: boolean) => void;
 }
 
-export function RenameDialog({ open, onOpenChange }: Props) {
+export function RenameDialog({ open }: Props) {
   const { directoryId = "" } = useParams({ strict: false });
 
-  const { currentItem, setCurrentItem } = useDashboard();
+  const { currentItem, closeDialog } = useDialogStore();
   const updateDirectory = useUpdateDirectory(directoryId);
   const updateDocument = useUpdateDocument(directoryId);
 
@@ -52,7 +52,6 @@ export function RenameDialog({ open, onOpenChange }: Props) {
   useEffect(() => {
     if (currentItem) {
       let nameOnly = currentItem.name;
-      console.log(currentItem.extension);
       if (
         currentItem.extension &&
         nameOnly.endsWith(`${currentItem.extension}`)
@@ -64,7 +63,6 @@ export function RenameDialog({ open, onOpenChange }: Props) {
   }, [currentItem, form]);
 
   const onSubmit = async (values: RenameFormValues) => {
-    console.log("Rename to:", values.name);
     if (!currentItem) return;
     const filename = values.name;
     try {
@@ -85,8 +83,7 @@ export function RenameDialog({ open, onOpenChange }: Props) {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();
-      setCurrentItem(null);
-      onOpenChange(false);
+      closeDialog();
     }
   };
 
@@ -95,9 +92,9 @@ export function RenameDialog({ open, onOpenChange }: Props) {
   return (
     <Dialog
       open={open}
-      onOpenChange={(state) => {
+      onOpenChange={() => {
         form.reset();
-        onOpenChange(state);
+        closeDialog();
       }}
     >
       <DialogContent className='sm:max-w-md'>

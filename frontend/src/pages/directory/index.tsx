@@ -1,7 +1,4 @@
-import * as React from "react";
 import { toast } from "sonner";
-import DashboardProvider from "./context/dashboard-context";
-import { UsersDialogs } from "./components/dashboard-dialogs";
 import { FileGrid } from "@/pages/directory/components/file-grid";
 import { FileToolbar } from "@/pages/directory/components/file-toolbar";
 import { Separator } from "@/components/ui/separator";
@@ -15,7 +12,6 @@ export default function Home({ directoryId = "" }: { directoryId?: string }) {
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
 
   const handleFileClick = (file: any) => {
-    console.log("File clicked:", file);
     toast("Event has been created");
     // Handle file/folder opening logic here
   };
@@ -23,7 +19,7 @@ export default function Home({ directoryId = "" }: { directoryId?: string }) {
     return <FileManagerSkeleton />;
   }
   return (
-    <DashboardProvider>
+    <>
       <FileToolbar viewMode={appearance.directoryLayout} />
       <div className='flex-1 p-4'>
         <FileGrid
@@ -40,7 +36,6 @@ export default function Home({ directoryId = "" }: { directoryId?: string }) {
           onFileClick={handleFileClick}
         />
       </div>
-      <UsersDialogs />
-    </DashboardProvider>
+    </>
   );
 }

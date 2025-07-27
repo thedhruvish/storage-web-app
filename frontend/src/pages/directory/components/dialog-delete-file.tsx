@@ -2,13 +2,13 @@ import { useEffect, useState } from "react";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useParams } from "@tanstack/react-router";
-import { useDashboard } from "../context/dashboard-context";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { useDeleteDirectory } from "@/api/directoryApi";
 import { useDeleteDocument } from "@/api/docuementApi";
+import { useDialogStore } from "@/store/DialogsStore";
 
 interface Props {
   open: boolean;
@@ -18,7 +18,7 @@ interface Props {
 export function FileDeleteDialog({ open, onOpenChange }: Props) {
   const { directoryId } = useParams({ strict: false });
   const [value, setValue] = useState("");
-  const { currentItem, setCurrentItem } = useDashboard();
+  const { currentItem, closeDialog } = useDialogStore();
   const [fileName, setFileName] = useState("");
   const deleteDirectory = useDeleteDirectory(directoryId);
   const deleteDocument = useDeleteDocument(directoryId);
@@ -48,8 +48,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
       toast.error(`Error deleting ${fileName}`);
     } finally {
       setValue("");
-      setCurrentItem(null);
-      onOpenChange(false);
+      closeDialog();
     }
   };
   return (

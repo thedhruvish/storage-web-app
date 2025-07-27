@@ -28,6 +28,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { useDialogStore } from "@/store/DialogsStore";
 
 interface Props {
   open: boolean;
@@ -39,11 +40,13 @@ const formSchema = z.object({
 type SearchFormValues = z.infer<typeof formSchema>;
 
 export function ImportFileDialog({ open, onOpenChange }: Props) {
+  const { closeDialog } = useDialogStore();
   // get params to which directory upload the data
   const { directoryId = "" } = useParams({ strict: false });
   const [isSearchShow, setIsSearchShow] = useState(false);
   const checkGoogleDriveConnected = checkConnectedGoogle();
   const importGoogleDriveFolder = useImportFolderByDrive(directoryId);
+
   // form defuault values
   const form = useForm<SearchFormValues>({
     resolver: zodResolver(formSchema),
@@ -53,23 +56,24 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
   // check if user to alrady conneted with 0auth
   useEffect(() => {
     if (checkGoogleDriveConnected.isSuccess) {
-      console.log(checkGoogleDriveConnected.data.data.is_connected);
       setIsSearchShow(checkGoogleDriveConnected.data.data.is_connected);
     }
   }, [checkGoogleDriveConnected.isSuccess]);
 
-  // if file want download in the server than give the response
-  useEffect(() => {
-    if (importGoogleDriveFolder.isSuccess) {
-      toast.success("File want successfully imported.");
-    }
-  }, [importGoogleDriveFolder.isSuccess]);
   // sumit values to the server
   const onSubmit = (values: SearchFormValues) => {
     const folderId = values.id;
     if (!folderId) return;
     try {
-      importGoogleDriveFolder.mutate({ id: folderId });
+      importGoogleDriveFolder.mutate(
+        { id: folderId },
+        {
+          onSuccess: () => {
+            closeDialog();
+            toast.success("File want successfully imported.");
+          },
+        },
+      );
       toast.success(
         "Folder are imported it will take some time Do not close or refresh page",
       );
@@ -77,16 +81,11 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();
-      onOpenChange(false);
+      closeDialog();
     }
   };
   return (
-    <Dialog
-      open={open}
-      onOpenChange={(state) => {
-        onOpenChange(state);
-      }}
-    >
+    <Dialog open={open} onOpenChange={onOpenChange}>
       {isSearchShow ? (
         // write a id if user conneted by oath2
         <DialogContent className='sm:max-w-md'>
@@ -125,7 +124,7 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
               <Button variant='outline'>Cancel</Button>
             </DialogClose>
             <Button type='submit' form='create-item'>
-              Search
+              Import
             </Button>
           </DialogFooter>
         </DialogContent>

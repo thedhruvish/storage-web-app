@@ -1,5 +1,3 @@
-"use client";
-
 import {
   Filter,
   FolderPlus,
@@ -11,7 +9,6 @@ import {
   Upload,
 } from "lucide-react";
 
-import { useDashboard } from "../context/dashboard-context";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,48 +18,81 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
 import { useAppearance } from "@/store/appearanceStore";
+import { useDialogStore } from "@/store/DialogsStore";
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";
 }
 
 export function FileToolbar({ viewMode }: FileToolbarProps) {
-  const { setOpen } = useDashboard();
+  const { setOpen } = useDialogStore();
   const { setAppearance } = useAppearance();
 
   return (
-    <div className='flex items-center justify-between border-b p-4'>
-      <div className='flex items-center gap-2'>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className='mr-2 h-4 w-4' />
-              New
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align='start'>
-            <DropdownMenuItem onClick={() => setOpen("newDirectory")}>
-              <FolderPlus className='mr-2 h-4 w-4' />
-              New Folder
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => setOpen("uploadFile")}>
-              <Upload className='mr-2 h-4 w-4' />
-              File Upload
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4'>
+      {/* Left: New / Upload / Import */}
+      <div className='flex flex-wrap items-center gap-2'>
+        {/* Mobile: Collapse into single "New" dropdown */}
+        <div className='flex sm:hidden'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className='mr-2 h-4 w-4' />
+                New
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start'>
+              <DropdownMenuItem onClick={() => setOpen("newDirectory")}>
+                <FolderPlus className='mr-2 h-4 w-4' />
+                New Folder
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen("uploadFile")}>
+                <Upload className='mr-2 h-4 w-4' />
+                File Upload
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen("importFile")}>
+                <Import className='mr-2 h-4 w-4' />
+                Import
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
 
-        <Button variant='outline' onClick={() => setOpen("uploadFile")}>
-          <Upload className='mr-2 h-4 w-4' />
-          Upload
-        </Button>
-        <Button variant='outline' onClick={() => setOpen("importFile")}>
-          <Import className='mr-2 h-4 w-4' />
-          Import
-        </Button>
+        {/* Desktop: Full buttons */}
+        <div className='hidden items-center gap-2 sm:flex'>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className='mr-2 h-4 w-4' />
+                New
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align='start'>
+              <DropdownMenuItem onClick={() => setOpen("newDirectory")}>
+                <FolderPlus className='mr-2 h-4 w-4' />
+                New Folder
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setOpen("uploadFile")}>
+                <Upload className='mr-2 h-4 w-4' />
+                File Upload
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Button variant='outline' onClick={() => setOpen("uploadFile")}>
+            <Upload className='mr-2 h-4 w-4' />
+            <span className='hidden md:inline'>Upload</span>
+          </Button>
+
+          <Button variant='outline' onClick={() => setOpen("importFile")}>
+            <Import className='mr-2 h-4 w-4' />
+            <span className='hidden md:inline'>Import</span>
+          </Button>
+        </div>
       </div>
 
-      <div className='flex items-center gap-2'>
+      {/* Right: Sort / Filter / View Toggle */}
+      <div className='flex flex-wrap items-center gap-2'>
         <Button variant='outline' size='icon'>
           <SortAsc className='h-4 w-4' />
         </Button>
@@ -71,7 +101,7 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
           <Filter className='h-4 w-4' />
         </Button>
 
-        <Separator orientation='vertical' className='h-6' />
+        <Separator orientation='vertical' className='hidden h-6 sm:block' />
 
         <div className='flex items-center rounded-md border'>
           <Button

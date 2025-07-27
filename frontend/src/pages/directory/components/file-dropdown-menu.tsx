@@ -6,7 +6,6 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import { useDashboard } from "../context/dashboard-context";
 import type { FileItem } from "../types";
 import {
   DropdownMenu,
@@ -16,6 +15,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { useDialogStore } from "@/store/DialogsStore";
 
 interface Props {
   file: FileItem;
@@ -23,7 +23,7 @@ interface Props {
 }
 
 export default function FileDropdownMenu({ file, buttonViewType }: Props) {
-  const { setOpen, setCurrentItem } = useDashboard();
+  const { setOpen, setCurrentItem } = useDialogStore();
   const openDialog = (type: Parameters<typeof setOpen>[0]) => {
     setOpen(type);
     setCurrentItem(file);
