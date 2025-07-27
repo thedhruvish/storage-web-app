@@ -4,6 +4,7 @@ import {
   Filter,
   FolderPlus,
   Grid3X3,
+  Import,
   List,
   Plus,
   SortAsc,
@@ -54,6 +55,10 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
         <Button variant='outline' onClick={() => setOpen("uploadFile")}>
           <Upload className='mr-2 h-4 w-4' />
           Upload
+        </Button>
+        <Button variant='outline' onClick={() => setOpen("importFile")}>
+          <Import className='mr-2 h-4 w-4' />
+          Import
         </Button>
       </div>
 

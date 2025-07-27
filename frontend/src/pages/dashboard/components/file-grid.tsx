@@ -10,7 +10,6 @@ import {
   Video,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
-
 import { useNavigate } from "@tanstack/react-router";
 import FileDropdownMenu from "./file-dropdown-menu";
 import type { FileGridProps, FileItem } from "../types";
@@ -62,6 +61,7 @@ const getFileIcon = (document: string, file: FileItem) => {
 
 export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
   const navigate = useNavigate();
+
   if (viewMode === "grid") {
     return (
       <div className='grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8'>

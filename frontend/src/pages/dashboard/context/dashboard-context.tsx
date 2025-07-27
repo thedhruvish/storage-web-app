@@ -10,7 +10,8 @@ type DashboardDialogType =
   | "share"
   | "star"
   | "newDirectory"
-  | "uploadFile";
+  | "uploadFile"
+  | "importFile";
 
 interface DashboardContextType {
   open: DashboardDialogType | null;

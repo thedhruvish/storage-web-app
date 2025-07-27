@@ -1,6 +1,7 @@
 import { useDashboard } from "../context/dashboard-context";
 import { FileDeleteDialog } from "./dialog-delete-file";
 import { RenameDialog } from "./dialog-file-rename";
+import { ImportFileDialog } from "./dialog-import-file";
 import { NewDirectoryDialog } from "./dialog-new-directory";
 import { MultiFileUploadDialog } from "./dialog-upload-file";
 
@@ -28,6 +29,11 @@ export function UsersDialogs() {
         key={"upload-file"}
         open={open === "uploadFile"}
         onOpenChange={() => setOpen("uploadFile")}
+      />
+      <ImportFileDialog
+        key={"import-file"}
+        open={open === "importFile"}
+        onOpenChange={() => setOpen("importFile")}
       />
     </>
   );
