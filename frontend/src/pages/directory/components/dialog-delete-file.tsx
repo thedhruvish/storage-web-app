@@ -6,7 +6,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
-import { useDeleteDirectory } from "@/api/directoryApi";
+import { useDeleteDirectory, useGetAllDirectoryList } from "@/api/directoryApi";
 import { useDeleteDocument } from "@/api/docuementApi";
 import { useDialogStore } from "@/store/DialogsStore";
 
@@ -22,6 +22,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
   const [fileName, setFileName] = useState("");
   const deleteDirectory = useDeleteDirectory(directoryId);
   const deleteDocument = useDeleteDocument(directoryId);
+  const getallDirectorys = useGetAllDirectoryList();
 
   useEffect(() => {
     if (currentItem) {
@@ -47,6 +48,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
     } catch (error) {
       toast.error(`Error deleting ${fileName}`);
     } finally {
+      getallDirectorys.refetch();
       setValue("");
       closeDialog();
     }
