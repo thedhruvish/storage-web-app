@@ -45,8 +45,8 @@ export const useAppearanceStore = create<AppearanceStore>()(
         },
         removeItem: (name) => localStorage.removeItem(name),
       },
-    },
-  ),
+    }
+  )
 );
 
 export const useAppearance = () => {

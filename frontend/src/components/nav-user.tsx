@@ -1,3 +1,5 @@
+import { useNavigate } from "@tanstack/react-router";
+import type { User } from "@/store/userStore";
 import {
   BadgeCheck,
   Bell,
@@ -6,9 +8,6 @@ import {
   LogOut,
   Sparkles,
 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
-import { UserAvatarProfile } from "./user-avatar-profile";
-import type { User } from "@/store/userStore";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +23,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { UserAvatarProfile } from "./user-avatar-profile";
 
 type NavUserProps = {
   user: User;

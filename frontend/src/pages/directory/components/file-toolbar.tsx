@@ -1,3 +1,5 @@
+import { useDialogStore } from "@/store/DialogsStore";
+import { useAppearance } from "@/store/appearanceStore";
 import {
   Filter,
   FolderPlus,
@@ -8,7 +10,6 @@ import {
   SortAsc,
   Upload,
 } from "lucide-react";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -17,8 +18,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
-import { useAppearance } from "@/store/appearanceStore";
-import { useDialogStore } from "@/store/DialogsStore";
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";

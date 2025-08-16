@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { createContext, useContext, useEffect, useState } from "react";
 import { useAppearance } from "@/store/appearanceStore";
 
@@ -29,7 +28,6 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    // eslint-disable-next-line no-shadow
     const applyTheme = (theme: Theme) => {
       root.classList.remove("light", "dark"); // Remove existing theme classes
       const systemTheme = mediaQuery.matches ? "dark" : "light";
@@ -50,7 +48,6 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
-  // eslint-disable-next-line no-shadow
   const setTheme = (theme: Theme) => {
     setAppearance({ theme });
     _setTheme(theme);

@@ -1,13 +1,13 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
-import { toast } from "sonner";
-import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { formatDuration, intervalToDuration } from "date-fns";
+import { z } from "zod";
 import type { AxiosError } from "axios";
+import { formatDuration, intervalToDuration } from "date-fns";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useNavigate } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { useResendOtp, useVerifyOtp } from "@/api/auth";
 import { cn } from "@/lib/utils";
-
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -30,7 +30,6 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useResendOtp, useVerifyOtp } from "@/api/auth";
 
 const FormSchema = z.object({
   pin: z.string().min(6, {
@@ -110,7 +109,7 @@ export function OtpVerfiyForm({
     <div
       className={cn(
         "animate-fade-in-up flex flex-col gap-6", // <- small keyframe animation
-        className,
+        className
       )}
       {...props}
     >
@@ -148,7 +147,7 @@ export function OtpVerfiyForm({
                               index={idx}
                               className={cn(
                                 "h-14 w-12 rounded-lg border-2 border-slate-300 text-2xl font-bold transition-all",
-                                "",
+                                ""
                               )}
                             />
                           ))}
@@ -164,7 +163,7 @@ export function OtpVerfiyForm({
                         onClick={handleResend}
                         className={cn(
                           "font-semibold text-indigo-600",
-                          countdown > 0 && "cursor-not-allowed opacity-60",
+                          countdown > 0 && "cursor-not-allowed opacity-60"
                         )}
                       >
                         {countdown > 0

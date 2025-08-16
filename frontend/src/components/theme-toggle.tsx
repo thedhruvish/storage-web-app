@@ -1,7 +1,7 @@
 import * as React from "react";
 import { MoonStar, SunMoon } from "lucide-react";
-import { useTheme } from "./theme-provider";
 import { Button } from "@/components/ui/button";
+import { useTheme } from "./theme-provider";
 
 export function ModeToggle() {
   const { setTheme, theme: resolvedTheme } = useTheme();
@@ -21,7 +21,7 @@ export function ModeToggle() {
         setTheme(newMode);
       });
     },
-    [resolvedTheme, setTheme],
+    [resolvedTheme, setTheme]
   );
 
   return (

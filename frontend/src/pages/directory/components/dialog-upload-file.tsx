@@ -1,10 +1,10 @@
 import React from "react";
+import { z } from "zod";
+import axios from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDropzone } from "react-dropzone";
-import axios from "axios";
-import { z } from "zod";
-import { toast } from "sonner";
+import { useParams } from "@tanstack/react-router";
+import { useDialogStore } from "@/store/DialogsStore";
 import {
   AlertCircle,
   CheckCircle2,
@@ -12,7 +12,11 @@ import {
   Loader2,
   UploadCloud,
 } from "lucide-react";
-import { useParams } from "@tanstack/react-router";
+import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
+import { useGetAllDirectoryList } from "@/api/directoryApi";
+import { truncateFileName } from "@/utils/truncateFileName";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogClose,
@@ -29,12 +33,8 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { Progress } from "@/components/ui/progress";
-import { truncateFileName } from "@/utils/truncateFileName";
-import { useDialogStore } from "@/store/DialogsStore";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 export const fileUploadSchema = z.object({
   files: z.array(z.instanceof(File)).min(1, "Please upload at least one file"),
@@ -74,8 +74,8 @@ export function MultiFileUploadDialog({ open }: Props) {
     const newUniqueFiles = acceptedFiles.filter(
       (newFile) =>
         !existingFiles.some(
-          (f) => f.name === newFile.name && f.size === newFile.size,
-        ),
+          (f) => f.name === newFile.name && f.size === newFile.size
+        )
     );
 
     if (newUniqueFiles.length === 0) return;
@@ -109,8 +109,8 @@ export function MultiFileUploadDialog({ open }: Props) {
         prev.map((f) =>
           f.file === file
             ? { ...f, status: "uploading", cancelToken: controller }
-            : f,
-        ),
+            : f
+        )
       );
 
       const formData = new FormData();
@@ -131,11 +131,11 @@ export function MultiFileUploadDialog({ open }: Props) {
               const percent = Math.round((event.loaded * 100) / event.total);
               setFileProgressList((prev) =>
                 prev.map((f) =>
-                  f.file === file ? { ...f, progress: percent } : f,
-                ),
+                  f.file === file ? { ...f, progress: percent } : f
+                )
               );
             },
-          },
+          }
         );
 
         setFileProgressList((prev) =>
@@ -147,8 +147,8 @@ export function MultiFileUploadDialog({ open }: Props) {
                   progress: 100,
                   cancelToken: undefined,
                 }
-              : f,
-          ),
+              : f
+          )
         );
         return true;
       } catch (error: any) {
@@ -156,7 +156,7 @@ export function MultiFileUploadDialog({ open }: Props) {
           toast.error(`Upload cancelled for ${file.name}`);
         } else {
           toast.error(
-            `Error uploading ${file.name}: ${error.message || "Unknown error"}`,
+            `Error uploading ${file.name}: ${error.message || "Unknown error"}`
           );
         }
 
@@ -164,8 +164,8 @@ export function MultiFileUploadDialog({ open }: Props) {
           prev.map((f) =>
             f.file === file
               ? { ...f, status: "error", cancelToken: undefined }
-              : f,
-          ),
+              : f
+          )
         );
         return false;
       }
@@ -189,8 +189,8 @@ export function MultiFileUploadDialog({ open }: Props) {
 
     setFileProgressList((prev) =>
       prev.map((f) =>
-        f.file === file ? { ...f, status: "error", cancelToken: undefined } : f,
-      ),
+        f.file === file ? { ...f, status: "error", cancelToken: undefined } : f
+      )
     );
   };
 
@@ -233,7 +233,7 @@ export function MultiFileUploadDialog({ open }: Props) {
 
   // Calculate completed files
   const completedCount = fileProgressList.filter(
-    (f) => f.status === "success",
+    (f) => f.status === "success"
   ).length;
   const totalFiles = fileProgressList.length;
 
@@ -326,7 +326,7 @@ export function MultiFileUploadDialog({ open }: Props) {
                       const maxLength = isMobile ? 25 : 40;
                       const fileName = truncateFileName(
                         fileObj.file.name,
-                        maxLength,
+                        maxLength
                       );
 
                       return (

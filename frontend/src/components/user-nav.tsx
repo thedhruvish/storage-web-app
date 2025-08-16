@@ -1,6 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unnecessary-condition */
 import { useNavigate } from "@tanstack/react-router";
-import { UserAvatarProfile } from "./user-avatar-profile";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { UserAvatarProfile } from "./user-avatar-profile";
 
 export function UserNav({
   user,

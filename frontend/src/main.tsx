@@ -1,24 +1,22 @@
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
-import { RouterProvider, createRouter } from "@tanstack/react-router";
+import { AxiosError } from "axios";
 import {
   QueryCache,
   QueryClient,
   QueryClientProvider,
 } from "@tanstack/react-query";
-import { AxiosError } from "axios";
+import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-
 // Import the generated route tree
 import { toast } from "sonner";
-import { routeTree } from "./routeTree.gen";
-
-import "./styles.css";
-import reportWebVitals from "./reportWebVitals.ts";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
-import { handleServerError } from "./utils/handle-server-error.ts";
+import reportWebVitals from "./reportWebVitals.ts";
+import { routeTree } from "./routeTree.gen";
 import { useUserStore } from "./store/userStore.ts";
+import "./styles.css";
+import { handleServerError } from "./utils/handle-server-error.ts";
 
 // Create a new router instance
 const router = createRouter({
@@ -102,7 +100,7 @@ if (rootElement && !rootElement.innerHTML) {
           </QueryClientProvider>
         </ThemeProvider>
       </GoogleOAuthProvider>
-    </StrictMode>,
+    </StrictMode>
   );
 }
 

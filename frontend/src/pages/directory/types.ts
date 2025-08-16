@@ -1,7 +1,9 @@
 export interface FileItem {
+  id: string;
   _id: string;
   name: string;
   fileType?: "document" | "image" | "video" | "audio" | "other";
+  type: "folder" | "file";
   size?: string;
   createdAt: Date;
   starred?: boolean;

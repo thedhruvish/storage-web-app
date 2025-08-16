@@ -1,9 +1,12 @@
+import { useEffect } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useEffect } from "react";
-import { toast } from "sonner";
 import { useParams } from "@tanstack/react-router";
+import { useDialogStore } from "@/store/DialogsStore";
+import { toast } from "sonner";
+import { useUpdateDirectory } from "@/api/directoryApi";
+import { useUpdateDocument } from "@/api/docuementApi";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -23,9 +26,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useUpdateDirectory } from "@/api/directoryApi";
-import { useUpdateDocument } from "@/api/docuementApi";
-import { useDialogStore } from "@/store/DialogsStore";
 
 const formSchema = z.object({
   name: z.string().min(1, { message: "File name is required." }),

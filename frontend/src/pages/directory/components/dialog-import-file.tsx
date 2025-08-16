@@ -1,9 +1,10 @@
-import { z } from "zod";
 import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
+import { useDialogStore } from "@/store/DialogsStore";
+import { toast } from "sonner";
 import {
   checkConnectedGoogle,
   useImportFolderByDrive,
@@ -28,7 +29,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { useDialogStore } from "@/store/DialogsStore";
 
 interface Props {
   open: boolean;
@@ -72,10 +72,10 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
             closeDialog();
             toast.success("File want successfully imported.");
           },
-        },
+        }
       );
       toast.success(
-        "Folder are imported it will take some time Do not close or refresh page",
+        "Folder are imported it will take some time Do not close or refresh page"
       );
     } catch (error) {
       toast.error(`Error renaming file`);

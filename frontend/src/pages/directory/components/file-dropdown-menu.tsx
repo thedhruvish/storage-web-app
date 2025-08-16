@@ -1,3 +1,4 @@
+import { useDialogStore } from "@/store/DialogsStore";
 import {
   Download,
   FolderPen,
@@ -6,7 +7,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
-import type { FileItem } from "../types";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,8 +15,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { useDialogStore } from "@/store/DialogsStore";
+import type { FileItem } from "../types";
 
 interface Props {
   file: FileItem;
@@ -26,7 +26,7 @@ export default function FileDropdownMenu({ file, buttonViewType }: Props) {
   const { setOpen, setCurrentItem } = useDialogStore();
   const openDialog = (type: Parameters<typeof setOpen>[0]) => {
     setOpen(type);
-    setCurrentItem(file);
+    setCurrentItem({ ...file, type: file.extension ? "file" : "folder" });
   };
 
   const filedonw = () => {

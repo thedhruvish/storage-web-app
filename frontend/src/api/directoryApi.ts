@@ -56,3 +56,89 @@ export const useCreateDirectory = (directoryId?: string) => {
     },
   });
 };
+
+// get permission users list
+export const useGetDirectoryPermissionUsers = (directoryId?: string) => {
+  return useQuery({
+    queryKey: [directoryId, "permission", "directory"],
+    queryFn: async ({ queryKey }) => {
+      const [id] = queryKey;
+      const response = await axiosClient.get(`/permission/${id}/directory`);
+      return response.data;
+    },
+    enabled: !!directoryId,
+  });
+};
+
+// add permision on the directory
+export const useAddDirectoryPermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      dirId,
+      data,
+    }: {
+      dirId: string;
+      data: { email: string; role?: string };
+    }) => axiosClient.post(`/permission/${dirId}/directory`, data),
+    onSuccess(_, { dirId }) {
+      queryClient.invalidateQueries({
+        queryKey: [dirId, "permission", "directory"],
+      });
+    },
+  });
+};
+
+// change permission on User
+export const useChangeDirectoryPermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      dirId,
+      data,
+    }: {
+      dirId: string;
+      data: {
+        userId: string;
+        role: string;
+      };
+    }) => axiosClient.put(`/permission/${dirId}/directory`, data),
+    onSuccess(_, { dirId }) {
+      queryClient.invalidateQueries({
+        queryKey: [dirId, "permission", "directory"],
+      });
+    },
+  });
+};
+
+// remove user from directory permission
+export const useRemoveDirectoryPermission = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      dirId,
+      data,
+    }: {
+      dirId: string;
+      data: { userId: string };
+    }) => axiosClient.delete(`/permission/${dirId}/directory`, { data }),
+    onSuccess(_, { dirId }) {
+      queryClient.invalidateQueries({
+        queryKey: [dirId, "permission", "directory"],
+      });
+    },
+  });
+};
+
+// create a short share link
+export const useCreateDirectoryShareShortLink = () => {
+  return useMutation({
+    mutationFn: ({
+      dirId,
+      data,
+    }: {
+      dirId: string;
+      data: { shareLink: string };
+    }) => axiosClient.post(`/permission/share/${dirId}`, data),
+  });
+};

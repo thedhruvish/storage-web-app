@@ -1,4 +1,7 @@
 import * as React from "react";
+import { Link } from "@tanstack/react-router";
+import { useDialogStore } from "@/store/DialogsStore";
+import { useUser } from "@/store/userStore";
 import {
   Clock,
   Command,
@@ -9,10 +12,6 @@ import {
   Upload,
   Users,
 } from "lucide-react";
-
-import { Link } from "@tanstack/react-router";
-import { Button } from "./ui/button";
-import { NavUser } from "@/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -24,8 +23,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { useUser } from "@/store/userStore";
-import { useDialogStore } from "@/store/DialogsStore";
+import { NavUser } from "@/components/nav-user";
+import { Button } from "./ui/button";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();

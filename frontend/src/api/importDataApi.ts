@@ -6,7 +6,7 @@ export const checkConnectedGoogle = () => {
     queryKey: ["check-connected-google"],
     queryFn: async () => {
       const response = await axiosClient.get(
-        "/import-data/google/check-connected",
+        "/import-data/google/check-connected"
       );
       return response.data;
     },

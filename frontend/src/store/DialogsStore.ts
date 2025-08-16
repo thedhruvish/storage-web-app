@@ -1,5 +1,5 @@
-import { create } from "zustand";
 import type { FileItem } from "@/pages/directory/types";
+import { create } from "zustand";
 
 type DialogDialogType =
   | "rename"

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axiosClient from "./axiosClient";
 
 // update
@@ -28,5 +28,16 @@ export const useDeleteDocument = (directoryId?: string) => {
         queryKey: ["directorys", directoryId], // Invalidate the updated directory
       });
     },
+  });
+};
+
+export const getShareDocument = (shareId: string) => {
+  return useQuery({
+    queryKey: ["share", shareId],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/permission/share/${shareId}`);
+      return response.data;
+    },
+    enabled: !!shareId,
   });
 };

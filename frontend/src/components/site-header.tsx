@@ -1,7 +1,5 @@
+import { useUser } from "@/store/userStore";
 import { SidebarIcon } from "lucide-react";
-import { ModeToggle } from "./theme-toggle";
-import { UserNav } from "./user-nav";
-import { SearchForm } from "@/components/search-form";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -13,7 +11,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useSidebar } from "@/components/ui/sidebar";
-import { useUser } from "@/store/userStore";
+import { SearchForm } from "@/components/search-form";
+import { ModeToggle } from "./theme-toggle";
+import { UserNav } from "./user-nav";
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();

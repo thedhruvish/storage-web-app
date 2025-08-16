@@ -46,8 +46,8 @@ export const useUserStore = create<UserStore>()(
         },
         removeItem: (name) => localStorage.removeItem(name),
       },
-    },
-  ),
+    }
+  )
 );
 
 export const useUser = () => {

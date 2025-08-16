@@ -1,3 +1,5 @@
+import { formatDistanceToNow } from "date-fns";
+import { useNavigate } from "@tanstack/react-router";
 import {
   Archive,
   Code,
@@ -9,12 +11,10 @@ import {
   Star,
   Video,
 } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
-import { useNavigate } from "@tanstack/react-router";
-import FileDropdownMenu from "./file-dropdown-menu";
-import type { FileGridProps, FileItem } from "../types";
 import { getFileIconName } from "@/utils/file-icon-helper";
 import { truncateFileName } from "@/utils/truncateFileName";
+import type { FileGridProps, FileItem } from "../types";
+import FileDropdownMenu from "./file-dropdown-menu";
 
 const getFileIcon = (document: string, file: FileItem) => {
   if (document === "folder") {
