@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { AxiosError } from "axios";
 
 const axiosClient = axios.create({
   baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:3000",
@@ -7,5 +8,16 @@ const axiosClient = axios.create({
   },
   withCredentials: true,
 });
+
+axiosClient.interceptors.response.use(
+  (res) => res,
+  (error: AxiosError) => {
+    const apiMessage = (error.response?.data as { message?: string }).message;
+    if (apiMessage) {
+      error.message = apiMessage; // override
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosClient;
