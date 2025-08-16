@@ -10,16 +10,12 @@ export const getDirectory = async (req, res) => {
   if (!directoryId) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
-  const directory = await Directory.findOne({
-    _id: directoryId,
-    userId: req.user._id,
-  });
+  const directory = await Directory.findById(directoryId);
   if (!directory) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
   const directories = await Directory.find({
     parentDirId: directory._id,
-    userId: req.user._id,
   });
   const documents = await Document.find({ parentDirId: directory._id });
   res

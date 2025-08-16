@@ -7,6 +7,7 @@ import authRoute from "./routes/auth.route.js";
 import directoryRoute from "./routes/directory.route.js";
 import docuemntRoute from "./routes/document.route.js";
 import importDataRoute from "./routes/importData.route.js";
+import permissionRoute from "./routes/permission.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -27,6 +28,9 @@ app.use(cookiesParser(cookieSecret));
 
 // auth router
 app.use("/auth", authRoute);
+
+// permission on files
+app.use("/permission", permissionRoute);
 
 // login Required route
 app.use(checkAuth);
