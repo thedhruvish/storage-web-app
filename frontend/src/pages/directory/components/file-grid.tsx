@@ -78,7 +78,7 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
                 if (documentType === "folder") {
                   navigate({ to: `/directory/${file._id}` });
                 } else {
-                  window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}`;
+                  window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
                 }
               }}
               className='flex flex-col items-center'

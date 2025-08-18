@@ -32,7 +32,7 @@ const LoginWithOauth = () => {
         className='w-full'
         type='button'
         onClick={() =>
-          (window.location.href = `${import.meta.env.VITE_BASE_URL}/auth/github`)
+          (window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/github`)
         }
       >
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>

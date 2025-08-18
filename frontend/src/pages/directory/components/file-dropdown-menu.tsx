@@ -30,7 +30,7 @@ export default function FileDropdownMenu({ file, buttonViewType }: Props) {
   };
 
   const filedonw = () => {
-    window.location.href = `${import.meta.env.VITE_BASE_URL}/document/${file._id}?action=download`;
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}?action=download`;
   };
 
   return (

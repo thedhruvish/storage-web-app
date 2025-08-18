@@ -143,7 +143,7 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
             <Button
               variant={"outline"}
               onClick={() => {
-                window.location.href = `${import.meta.env.VITE_BASE_URL}/import-data/google/oauthurlgen`;
+                window.location.href = `${import.meta.env.VITE_BACKEND_URL}/import-data/google/oauthurlgen`;
               }}
             >
               Import to Google Drive
