@@ -8,6 +8,7 @@ import directoryRoute from "./routes/directory.route.js";
 import docuemntRoute from "./routes/document.route.js";
 import importDataRoute from "./routes/importData.route.js";
 import permissionRoute from "./routes/permission.route.js";
+import adminRoute from "./routes/admin.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -34,7 +35,7 @@ app.use("/permission", permissionRoute);
 
 // login Required route
 app.use(checkAuth);
-
+app.use("/admin", adminRoute);
 app.use("/directory", directoryRoute);
 app.use("/document", docuemntRoute);
 app.use("/import-data", importDataRoute);

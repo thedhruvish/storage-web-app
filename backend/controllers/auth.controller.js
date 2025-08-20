@@ -16,7 +16,14 @@ export const registerWithEmail = async (req, res, next) => {
   if (!name || !email || !password) {
     throw new ApiError(400, "name,email and password is required");
   }
-  const isExstingEmail = await User.exists({ email });
+  const isExstingEmail = await User.findOne({ email });
+
+  // check user delete by youself or admin
+  if (isExstingEmail?.isDeleted) {
+    return res
+      .status(409)
+      .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
+  }
 
   //session Transtion
   const mongoSesssion = await mongoose.startSession();
@@ -66,6 +73,12 @@ export const loginWithEmail = async (req, res) => {
 
   if (!user) {
     throw new ApiError(401, "Invalid email and password");
+  }
+  // check user delete by youself or admin
+  if (user?.isDeleted) {
+    return res
+      .status(409)
+      .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
   }
   // composer input password and db stora passowrd
   const isValidPWD = await user.isValidPassword(password);
@@ -156,6 +169,14 @@ export const loginWithGoogle = async (req, res) => {
 
   // check user is exsting
   let user = await User.findOne({ email });
+
+  // check user delete by youself or admin
+  if (user?.isDeleted) {
+    return res
+      .status(409)
+      .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
+  }
+
   let session;
 
   try {
@@ -234,6 +255,14 @@ export const callbackGithub = async (req, res) => {
   const primaryEmail = emailResData.find((e) => e.primary && e.verified)?.email;
 
   let user = await User.findOne({ email: primaryEmail });
+
+  // check user delete by youself or admin
+  if (user?.isDeleted) {
+    return res
+      .status(409)
+      .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
+  }
+
   let session;
   if (user) {
     session = await Session.create({ userId: user._id });
