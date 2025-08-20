@@ -45,6 +45,7 @@ const queryClient = new QueryClient({
       },
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 10 * 1000, // 10s
+      retryDelay: 5000,
     },
     mutations: {
       onError: (error) => {
@@ -53,6 +54,9 @@ const queryClient = new QueryClient({
         if (error instanceof AxiosError) {
           if (error.response?.status === 304) {
             toast.error("Content not modified!");
+          }
+          if (error.request?.status === 409) {
+            router.navigate({ to: "/account-deleted" });
           }
         }
       },
