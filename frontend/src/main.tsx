@@ -35,14 +35,22 @@ const queryClient = new QueryClient({
       retry: (failureCount, error) => {
         if (import.meta.env.DEV) console.log({ failureCount, error });
 
-        if (failureCount >= 0 && import.meta.env.DEV) return false;
-        if (failureCount > 3 && import.meta.env.PROD) return false;
-
-        return !(
+        // ❌ Don't retry on auth errors
+        if (
           error instanceof AxiosError &&
           [401, 403].includes(error.response?.status ?? 0)
-        );
+        ) {
+          return false;
+        }
+
+        // ❌ Don't retry too many times
+        if (import.meta.env.DEV && failureCount >= 0) return false;
+        if (import.meta.env.PROD && failureCount > 3) return false;
+
+        // ✅ Retry otherwise
+        return true;
       },
+
       refetchOnWindowFocus: import.meta.env.PROD,
       staleTime: 10 * 1000, // 10s
       retryDelay: 5000,
@@ -52,6 +60,10 @@ const queryClient = new QueryClient({
         handleServerError(error);
 
         if (error instanceof AxiosError) {
+          if (error.code === "ERR_NETWORK") {
+            toast.error("Cannot connect to server. Please try again later.");
+            return;
+          }
           if (error.response?.status === 304) {
             toast.error("Content not modified!");
           }
@@ -71,9 +83,14 @@ const queryClient = new QueryClient({
           const redirect = `${router.history.location.href}`;
           router.navigate({ to: "/login", search: { redirect } });
         }
+        if (error.code === "ERR_NETWORK") {
+          toast.error("Server unreachable. Check your internet or backend.");
+          router.navigate({ to: "/error/500" });
+
+          return;
+        }
         if (error.response?.status === 500) {
           toast.error("Internal Server Error!");
-          // router.navigate({ to: "/500" });
           router.navigate({ to: "/signup" });
         }
         if (error.response?.status === 403) {

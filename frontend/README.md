@@ -85,9 +85,8 @@ Here is an example layout that includes a header:
 
 ```tsx
 import { Outlet, createRootRoute } from "@tanstack/react-router";
-import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
-
 import { Link } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 
 export const Route = createRootRoute({
   component: () => (
@@ -169,7 +168,7 @@ if (!rootElement.innerHTML) {
   root.render(
     <QueryClientProvider client={queryClient}>
       <RouterProvider router={router} />
-    </QueryClientProvider>,
+    </QueryClientProvider>
   );
 }
 ```
@@ -194,7 +193,6 @@ Now you can use `useQuery` to fetch your data.
 
 ```tsx
 import { useQuery } from "@tanstack/react-query";
-
 import "./App.css";
 
 function App() {

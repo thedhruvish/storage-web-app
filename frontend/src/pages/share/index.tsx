@@ -10,8 +10,8 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 import { AppSidebar } from "@/components/app-sidebar";
 import { SiteHeader } from "@/components/site-header";
+import Error404 from "@/components/status-code/404";
 import { useTheme } from "@/components/theme-provider";
-import NotFound from "../other/not-found";
 
 export default function Index({ shareId = "" }: { shareId?: string }) {
   const getShareDocumentData = getShareDocument(shareId);
@@ -25,7 +25,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
   };
 
   if (getShareDocumentData.isError) {
-    return <NotFound message={getShareDocumentData.error.message} />;
+    return <Error404 errorTitle={getShareDocumentData?.error?.message} />;
   }
 
   return (

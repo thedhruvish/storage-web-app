@@ -1,8 +1,5 @@
-// components/ui/data-table/filters/date-range-filter.tsx
-"use client";
-
 import * as React from "react";
-import { addDays, format } from "date-fns";
+import {  format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
 import type { DateRange } from "react-day-picker";
 import { cn } from "@/lib/utils";
@@ -13,8 +10,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-
-// components/ui/data-table/filters/date-range-filter.tsx
 
 interface DateRangeFilterProps {
   column: any; // Column<any, unknown> from TanStack
