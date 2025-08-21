@@ -36,7 +36,7 @@ export function SiteHeader() {
         <Breadcrumb className='hidden sm:block'>
           <BreadcrumbList>
             <BreadcrumbItem>
-              <BreadcrumbLink href='#'>Storage Application</BreadcrumbLink>
+              <BreadcrumbLink href='/'>Storage Application</BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
           </BreadcrumbList>

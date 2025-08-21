@@ -35,7 +35,7 @@ export interface User {
   isDeleted: boolean;
 }
 
-export default function Page() {
+export default function UsersList() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [selectedUser, setSelectedUser] = useState("");
 
