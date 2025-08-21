@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDialogStore } from "@/store/DialogsStore";
 import axiosClient from "./axiosClient";
 
 export const useGetAllDirectoryList = (directoryId: string = "") => {
@@ -66,7 +67,8 @@ export const useGetDirectoryPermissionUsers = (directoryId?: string) => {
       const response = await axiosClient.get(`/permission/${id}/directory`);
       return response.data;
     },
-    enabled: !!directoryId,
+
+    enabled: !!(useDialogStore.getState().open === "share" && !!directoryId),
   });
 };
 

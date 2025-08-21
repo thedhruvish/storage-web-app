@@ -58,6 +58,7 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
     if (checkGoogleDriveConnected.isSuccess) {
       setIsSearchShow(checkGoogleDriveConnected.data.data.is_connected);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [checkGoogleDriveConnected.isSuccess]);
 
   // sumit values to the server
@@ -72,12 +73,15 @@ export function ImportFileDialog({ open, onOpenChange }: Props) {
             closeDialog();
             toast.success("File want successfully imported.");
           },
+          onError: (error) => {
+            toast.error(error.message);
+          },
         }
       );
       toast.success(
         "Folder are imported it will take some time Do not close or refresh page"
       );
-    } catch (error) {
+    } catch {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();

@@ -18,6 +18,7 @@ function LogoutComponent() {
       logouthook.mutate();
     }
     navigate({ to: "/login" });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, clearUser, logouthook]);
   if (logouthook.isPending) {
     return "Logging out...";

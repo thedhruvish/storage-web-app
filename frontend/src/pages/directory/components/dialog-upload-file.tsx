@@ -1,7 +1,6 @@
 import React from "react";
 import { z } from "zod";
 import axios, { isAxiosError } from "axios";
-import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
@@ -38,24 +37,26 @@ import {
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export const fileUploadSchema = z.object({
-  files: z.array(z.instanceof(File)).min(1, "Please upload at least one file"),
-});
-
-type FileUploadValues = z.infer<typeof fileUploadSchema>;
-
 type FileProgress = {
   file: File;
   progress: number;
   status: "idle" | "uploading" | "success" | "error";
   cancelToken?: AbortController;
 };
-
 interface Props {
   open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
 export function MultiFileUploadDialog({ open }: Props) {
+  const fileUploadSchema = z.object({
+    files: z
+      .array(z.instanceof(File))
+      .min(1, "Please upload at least one file"),
+  });
+
+  type FileUploadValues = z.infer<typeof fileUploadSchema>;
+
   const { directoryId = "" } = useParams({ strict: false });
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);

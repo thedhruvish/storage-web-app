@@ -45,7 +45,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
         });
       }
       toast.success(`${fileName} has been deleted`);
-    } catch (error) {
+    } catch {
       toast.error(`Error deleting ${fileName}`);
     } finally {
       getallDirectorys.refetch();

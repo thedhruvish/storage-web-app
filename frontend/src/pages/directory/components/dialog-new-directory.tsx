@@ -32,9 +32,10 @@ type NewDirectoryFormValues = z.infer<typeof formSchema>;
 
 interface Props {
   open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function NewDirectoryDialog({ open }: Props) {
+export function NewDirectoryDialog({ open, onOpenChange }: Props) {
   const { directoryId = "" } = useParams({ strict: false });
   const { closeDialog } = useDialogStore();
   const createDirectory = useCreateDirectory(directoryId);
@@ -52,7 +53,7 @@ export function NewDirectoryDialog({ open }: Props) {
       });
 
       toast.success("Directory has been Create");
-    } catch (error) {
+    } catch {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();
@@ -63,9 +64,11 @@ export function NewDirectoryDialog({ open }: Props) {
   return (
     <Dialog
       open={open}
-      onOpenChange={() => {
-        form.reset();
-        closeDialog();
+      onOpenChange={(state) => {
+        if (!state) {
+          form.reset();
+        }
+        onOpenChange(state); // calls parent handler
       }}
     >
       <DialogContent className='sm:max-w-md'>

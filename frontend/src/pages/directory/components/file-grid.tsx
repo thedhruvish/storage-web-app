@@ -94,7 +94,11 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
               </span>
             </div>
 
-            <FileDropdownMenu file={file} buttonViewType='grid' />
+            <FileDropdownMenu
+              file={file}
+              buttonViewType='grid'
+              fileType={documentType}
+            />
           </div>
         ))}
       </div>
@@ -132,7 +136,11 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
             {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}
           </div>
           <div className='col-span-1 flex items-center justify-end'>
-            <FileDropdownMenu file={file} buttonViewType='list' />
+            <FileDropdownMenu
+              file={file}
+              buttonViewType='list'
+              fileType={documentType}
+            />
           </div>
         </div>
       ))}

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useDialogStore } from "@/store/DialogsStore";
 import axiosClient from "./axiosClient";
 
 export const checkConnectedGoogle = () => {
@@ -10,6 +11,7 @@ export const checkConnectedGoogle = () => {
       );
       return response.data;
     },
+    enabled: !!(useDialogStore.getState().open === "importFile"),
   });
 };
 

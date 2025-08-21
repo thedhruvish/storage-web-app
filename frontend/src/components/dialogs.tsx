@@ -2,7 +2,6 @@ import { FileDeleteDialog } from "@/pages/directory/components/dialog-delete-fil
 import { RenameDialog } from "@/pages/directory/components/dialog-file-rename";
 import { ImportFileDialog } from "@/pages/directory/components/dialog-import-file";
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
-import { ShareDialog } from "@/pages/directory/components/dialog-share";
 import { MultiFileUploadDialog } from "@/pages/directory/components/dialog-upload-file";
 import { useDialogStore } from "@/store/DialogsStore";
 
@@ -22,9 +21,19 @@ export function Dialogs() {
         onOpenChange={(state) => (state ? setOpen("delete") : closeDialog())}
       />
 
-      <NewDirectoryDialog key='new-directory' open={open === "newDirectory"} />
+      <NewDirectoryDialog
+        key='new-directory'
+        open={open === "newDirectory"}
+        onOpenChange={(state) =>
+          state ? setOpen("newDirectory") : closeDialog()
+        }
+      />
 
-      <MultiFileUploadDialog key='upload-file' open={open === "uploadFile"} />
+      <MultiFileUploadDialog
+        key='upload-file'
+        open={open === "uploadFile"}
+        onOpenChange={(state) => (state ? setOpen("delete") : closeDialog())}
+      />
 
       <ImportFileDialog
         key='import-file'
@@ -32,11 +41,6 @@ export function Dialogs() {
         onOpenChange={(state) =>
           state ? setOpen("importFile") : closeDialog()
         }
-      />
-      <ShareDialog
-        key='share-file'
-        open={open === "share"}
-        onOpenChange={(state) => (state ? setOpen("share") : closeDialog())}
       />
     </>
   );

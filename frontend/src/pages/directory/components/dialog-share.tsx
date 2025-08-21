@@ -21,7 +21,7 @@ import {
   useGetDirectoryPermissionUsers,
   useRemoveDirectoryPermission,
 } from "@/api/directoryApi";
-import { truncateFileName, truncateName } from "@/utils/truncateFileName";
+import { truncateName } from "@/utils/truncateFileName";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -103,6 +103,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
       setShareLink(getDirectoryQuery.data.data?.shareLink?.link || "");
       setInvitedUsers(getDirectoryQuery.data.data.directory.permission);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [getDirectoryQuery.isSuccess]);
 
   const form = useForm<ShareFormValues>({
@@ -211,7 +212,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
           setShareLink("");
           form.reset();
         },
-        onError(error, _variables, _context) {
+        onError(error) {
           toast.error(error.message);
         },
       }

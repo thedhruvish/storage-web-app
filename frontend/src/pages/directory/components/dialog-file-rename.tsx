@@ -79,7 +79,7 @@ export function RenameDialog({ open }: Props) {
       }
 
       toast.success("File has been renamed");
-    } catch (error) {
+    } catch {
       toast.error(`Error renaming file`);
     } finally {
       form.reset();

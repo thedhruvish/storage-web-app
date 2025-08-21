@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import type { AxiosError } from "axios";
+import { AxiosError } from "axios";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,6 +63,7 @@ export function OtpVerfiyForm({
       localStorage.removeItem("userId");
       navagate({ to: "/" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verfiyOpt.isSuccess]);
 
   useEffect(() => {
@@ -72,6 +73,7 @@ export function OtpVerfiyForm({
           .message || "OTP are invalid";
       toast.error(errorMsg);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [verfiyOpt.isError]);
 
   useEffect(() => {
@@ -92,7 +94,7 @@ export function OtpVerfiyForm({
     try {
       await reSendOTP.mutateAsync({ userId });
       toast.success("OTP resend successfully");
-    } catch (error) {
+    } catch {
       toast.error("OTP resend failed. try after some time");
     }
 
@@ -107,10 +109,7 @@ export function OtpVerfiyForm({
 
   return (
     <div
-      className={cn(
-        "animate-fade-in-up flex flex-col gap-6", // <- small keyframe animation
-        className
-      )}
+      className={cn("animate-fade-in-up flex flex-col gap-6", className)}
       {...props}
     >
       <Card className='rounded-2xl shadow-xl'>

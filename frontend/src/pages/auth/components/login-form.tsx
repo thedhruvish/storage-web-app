@@ -45,6 +45,7 @@ export function LoginForm({
         navagate({ to: "/" });
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [loginMutation.isSuccess]);
 
   type FormData = z.infer<typeof formSchema>;

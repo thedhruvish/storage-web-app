@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAppearance } from "@/store/appearanceStore";
 import { GoogleLogin } from "@react-oauth/google";
+import { toast } from "sonner";
 import { useLoginWithGoogle } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 
@@ -13,6 +14,7 @@ const LoginWithOauth = () => {
     if (logoinwithGoogle.isSuccess) {
       navagate({ to: "/" });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [logoinwithGoogle.isSuccess]);
   // Login with google
   const loginWithGoogleHandler = (credentialResponse: {
@@ -48,7 +50,7 @@ const LoginWithOauth = () => {
       <div className='flex w-full justify-center'>
         <GoogleLogin
           onSuccess={loginWithGoogleHandler}
-          onError={() => console.log("Login Failed")}
+          onError={() => toast.error("Login Failed")}
           size='large'
           theme={appearance.theme === "dark" ? "filled_black" : "outline"}
           auto_select={false}

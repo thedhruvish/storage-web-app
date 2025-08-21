@@ -11,14 +11,13 @@ export default function Home({ directoryId = "" }: { directoryId?: string }) {
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
 
-  const handleFileClick = (file: any) => {
+  const handleFileClick = () => {
     toast("Event has been created");
     // Handle file/folder opening logic here
   };
   if (!getDirectoryDataHook.isSuccess) {
     return <FileManagerSkeleton />;
   }
-  // console.log(getDirectoryDataHook.data?.data)
   return (
     <>
       <FileToolbar viewMode={appearance.directoryLayout} />
