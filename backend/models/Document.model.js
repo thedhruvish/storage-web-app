@@ -16,7 +16,7 @@ const documentSchema = new Schema(
     },
     parentDirId: {
       type: Schema.Types.ObjectId,
-      ref: "Dir",
+      ref: "Directory",
       required: true,
     },
     metaData: {

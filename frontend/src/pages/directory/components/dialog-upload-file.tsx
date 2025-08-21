@@ -1,6 +1,7 @@
 import React from "react";
 import { z } from "zod";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
+import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
@@ -14,6 +15,7 @@ import {
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import axiosClient from "@/api/axiosClient";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { truncateFileName } from "@/utils/truncateFileName";
 import { Button } from "@/components/ui/button";
@@ -117,7 +119,7 @@ export function MultiFileUploadDialog({ open }: Props) {
       formData.append("file", file);
 
       try {
-        await axios.post(
+        await axiosClient.post(
           `${import.meta.env.VITE_BACKEND_URL}/document/${directoryId}`,
           formData,
           {
@@ -151,13 +153,18 @@ export function MultiFileUploadDialog({ open }: Props) {
           )
         );
         return true;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
-        if (axios.isCancel(error) || error.name === "CanceledError") {
-          toast.error(`Upload cancelled for ${file.name}`);
-        } else {
-          toast.error(
-            `Error uploading ${file.name}: ${error.message || "Unknown error"}`
-          );
+        if (isAxiosError(error)) {
+          if (axios.isCancel(error) || error.name === "CanceledError") {
+            toast.error(`Upload cancelled for ${file.name}`);
+          } else {
+            toast.error(
+              `Error uploading ${
+                file.name.slice(0, 3) + "..."
+              }: ${error.message || "Unknown error"}`
+            );
+          }
         }
 
         setFileProgressList((prev) =>
