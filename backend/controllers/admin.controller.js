@@ -11,6 +11,15 @@ export const getAllUser = async (req, res) => {
   res.status(200).json(new ApiResponse(200, "User list", { users }));
 };
 
+// logout All Devices
+export const logoutAllDevices = async (req, res) => {
+  const userId = req.params.userId;
+
+  await Session.deleteMany({ userId });
+
+  res.status(200).json(new ApiResponse(200, "All device logout Successfuly"));
+};
+
 // soft delete and recover user
 export const userDeleteChange = async (req, res) => {
   const userId = req.params.userId;

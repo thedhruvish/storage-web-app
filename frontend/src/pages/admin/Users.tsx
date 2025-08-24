@@ -6,6 +6,7 @@ import {
   useGetAllUsers,
   useHardDeleteUser,
   useUserChangeRole,
+  useUserLogoutAllDevices,
 } from "@/api/adminApi";
 import { useUserDeleteStatusChange } from "@/api/adminApi";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -34,15 +35,29 @@ export interface User {
   rootDirId: string;
   isDeleted: boolean;
 }
+type DialogState = {
+  title?: string;
+  description?: string;
+  userId: string;
+  type: string;
+  handleDialog: () => void;
+};
 
 export default function UsersList() {
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
-  const [selectedUser, setSelectedUser] = useState("");
+  const [handleConfimDialog, setHandleConfirmDialog] = useState<DialogState>({
+    title: "",
+    description: "",
+    userId: "",
+    type: "",
+    handleDialog: () => {},
+  });
 
   const userDataQuery = useGetAllUsers();
   const deleteUserStatusMutation = useUserDeleteStatusChange();
   const deleteUserHard = useHardDeleteUser();
   const userChangeRole = useUserChangeRole();
+  const userLogoutAllDevicesMutation = useUserLogoutAllDevices();
   // handle user role
   const handleChangeRole = (id: string, role: string) => {
     userChangeRole.mutate(
@@ -54,25 +69,43 @@ export default function UsersList() {
       }
     );
   };
+
+  // user logout all devices
+  const handleAllDevicesLogout = (id: string) => {
+    userLogoutAllDevicesMutation.mutate(
+      {
+        id,
+      },
+      {
+        onSuccess: () => {
+          toast.success("User logout all devices successfully");
+          setOpenDeleteDialog(false);
+          userDataQuery.refetch();
+        },
+        onError(error) {
+          toast.error(error.message || "User Logout Error");
+        },
+      }
+    );
+  };
+
   // handle soft delete
   const handleDelete = (id: string, isDeleted: boolean) => {
-    const res = confirm("Are you Sure?");
-    if (!res) return;
     deleteUserStatusMutation.mutate(
       { id, isDeleted: !isDeleted },
       {
         onSuccess: () => {
           toast.error("User soft deleted successfully");
+          setOpenDeleteDialog(false);
         },
       }
     );
   };
 
   // handle hard delete
-  const handleHardDelete = () => {
-    if (!selectedUser) return;
+  const handleHardDelete = (id: string) => {
     deleteUserHard.mutate(
-      { id: selectedUser },
+      { id },
       {
         onSuccess: () => {
           toast.error("User hard deleted successfully");
@@ -80,6 +113,37 @@ export default function UsersList() {
         },
       }
     );
+  };
+
+  const openDialog = (
+    userId: string,
+    type: "HARD_DELETE" | "SOFT_DELETE" | "LOGOUT_ALL",
+    isDeleted?: boolean
+  ) => {
+    let dialog: Partial<DialogState> = {};
+
+    if (type === "HARD_DELETE") {
+      dialog = {
+        title: "Delete User for Permanent",
+        description: "this User all the data are the deleted permanently",
+        handleDialog: () => handleHardDelete(userId),
+      };
+    } else if (type === "SOFT_DELETE") {
+      dialog = {
+        title: `${isDeleted ? "Restore" : "Soft Delete"} User `,
+        description: `this user will be ${isDeleted ? "restored" : "soft deleted"}`,
+        handleDialog: () => handleDelete(userId, isDeleted || false),
+      };
+    } else if (type === "LOGOUT_ALL") {
+      dialog = {
+        title: "Logout All Devices",
+        description: "this user will be logged out from all devices",
+        handleDialog: () => handleAllDevicesLogout(userId),
+      };
+    }
+
+    setHandleConfirmDialog({ ...(dialog as DialogState), userId, type: type });
+    setOpenDeleteDialog(true);
   };
 
   // all the columns
@@ -183,20 +247,30 @@ export default function UsersList() {
                 </DropdownMenuSubContent>
               </DropdownMenuSub>
               <DropdownMenuItem
+                onClick={() => {
+                  openDialog(row.original._id, "LOGOUT_ALL");
+                }}
+              >
+                Logout All
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
                 onClick={() =>
-                  handleDelete(row.original._id, row.original.isDeleted)
+                  openDialog(
+                    row.original._id,
+                    "SOFT_DELETE",
+                    row.original.isDeleted
+                  )
                 }
                 className={`${
                   row.original.isDeleted ? "text-green-600" : " text-red-600"
                 }`}
               >
-                {row.original.isDeleted ? "Restore" : "Delete"}
+                {row.original.isDeleted ? "Restore" : "Soft Delete"}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 onClick={() => {
-                  setSelectedUser(row.original._id);
-                  setOpenDeleteDialog(true);
+                  openDialog(row.original._id, "HARD_DELETE");
                 }}
                 className=' text-red-600'
               >
@@ -227,10 +301,10 @@ export default function UsersList() {
         />
       )}
       <ConfirmDialog
-        title={"Delete User"}
+        title={handleConfimDialog?.title}
         open={openDeleteDialog}
-        desc={"Are you Sure to delete this user"}
-        handleConfirm={handleHardDelete}
+        desc={handleConfimDialog?.description || "Are you sure?"}
+        handleConfirm={handleConfimDialog.handleDialog}
         onOpenChange={setOpenDeleteDialog}
       />
     </div>

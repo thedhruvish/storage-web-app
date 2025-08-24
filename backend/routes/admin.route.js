@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getAllUser,
+  logoutAllDevices,
   userDeleteChange,
   userHardDelete,
   userRoleChange,
@@ -11,6 +12,7 @@ route.route("/users").get(getAllUser);
 
 route
   .route("/users/:userId")
+  .post(logoutAllDevices)
   .patch(userRoleChange)
   .put(userDeleteChange)
   .delete(userHardDelete);

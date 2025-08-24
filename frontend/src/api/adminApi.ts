@@ -30,6 +30,17 @@ export const useUserChangeRole = () => {
   });
 };
 
+// logout all devices
+
+export const useUserLogoutAllDevices = () => {
+  return useMutation({
+    mutationFn: async ({ id }: { id: string }) => {
+      const response = await axiosClient.post(`/admin/users/${id}`);
+      return response.data;
+    },
+  });
+};
+
 // user delete change status
 export const useUserDeleteStatusChange = () => {
   const queryClient = useQueryClient();
