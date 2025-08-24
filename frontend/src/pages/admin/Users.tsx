@@ -1,5 +1,6 @@
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
+import { useUser } from "@/store/userStore";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -44,6 +45,7 @@ type DialogState = {
 };
 
 export default function UsersList() {
+  const { user } = useUser();
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [handleConfimDialog, setHandleConfirmDialog] = useState<DialogState>({
     title: "",
@@ -125,7 +127,8 @@ export default function UsersList() {
     if (type === "HARD_DELETE") {
       dialog = {
         title: "Delete User for Permanent",
-        description: "this User all the data are the deleted permanently",
+        description:
+          "Are you sure you want to permanently delete this user? This action cannot be undone.",
         handleDialog: () => handleHardDelete(userId),
       };
     } else if (type === "SOFT_DELETE") {
@@ -160,7 +163,7 @@ export default function UsersList() {
             alt={row.original.name || ""}
           />
           <AvatarFallback className='rounded-lg'>
-            {row.original.name.slice(0, 2).toUpperCase() || "CN"}
+            {row.original.name.slice(0, 2).toUpperCase() || "DH"}
           </AvatarFallback>
         </Avatar>
       ),
@@ -201,7 +204,7 @@ export default function UsersList() {
           rel='noopener noreferrer'
           className='text-blue-600 underline hover:text-blue-800'
         >
-          Link
+          <Button variant='link'>Open Directory</Button>
         </a>
       ),
       enableColumnFilter: false,
@@ -226,58 +229,67 @@ export default function UsersList() {
       header: "Actions",
       cell: ({ row }) => (
         <div>
-          <DropdownMenu>
-            <DropdownMenuTrigger>
-              <Button variant='ghost' size='sm'>
-                <MoreHorizontal />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
-                <DropdownMenuSubContent>
-                  {["owner", "admin", "manager", "user"].map((role) => (
-                    <DropdownMenuItem
-                      key={role}
-                      onClick={() => handleChangeRole(row.original._id, role)}
-                    >
-                      {role}
-                    </DropdownMenuItem>
-                  ))}
-                </DropdownMenuSubContent>
-              </DropdownMenuSub>
-              <DropdownMenuItem
-                onClick={() => {
-                  openDialog(row.original._id, "LOGOUT_ALL");
-                }}
-              >
-                Logout All
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() =>
-                  openDialog(
-                    row.original._id,
-                    "SOFT_DELETE",
-                    row.original.isDeleted
-                  )
-                }
-                className={`${
-                  row.original.isDeleted ? "text-green-600" : " text-red-600"
-                }`}
-              >
-                {row.original.isDeleted ? "Restore" : "Soft Delete"}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                onClick={() => {
-                  openDialog(row.original._id, "HARD_DELETE");
-                }}
-                className=' text-red-600'
-              >
-                Hard Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {(user?.role == "owner" || row.original.role !== "owner") && (
+            <DropdownMenu>
+              <DropdownMenuTrigger>
+                <Button variant='ghost' size='sm'>
+                  <MoreHorizontal />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                {user?.role === "owner" && (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger>Change Role</DropdownMenuSubTrigger>
+                    <DropdownMenuSubContent>
+                      {["owner", "admin", "user"].map((role) => (
+                        <DropdownMenuItem
+                          key={role}
+                          onClick={() =>
+                            handleChangeRole(row.original._id, role)
+                          }
+                        >
+                          {role}
+                        </DropdownMenuItem>
+                      ))}
+                    </DropdownMenuSubContent>
+                  </DropdownMenuSub>
+                )}
+                <DropdownMenuItem
+                  onClick={() => {
+                    openDialog(row.original._id, "LOGOUT_ALL");
+                  }}
+                >
+                  Logout All
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  onClick={() =>
+                    openDialog(
+                      row.original._id,
+                      "SOFT_DELETE",
+                      row.original.isDeleted
+                    )
+                  }
+                  className={`${
+                    row.original.isDeleted ? "text-green-600" : " text-red-600"
+                  }`}
+                >
+                  {row.original.isDeleted ? "Restore" : "Soft Delete"}
+                </DropdownMenuItem>
+                {user?.role === "owner" && (
+                  <DropdownMenuItem
+                    onClick={() => {
+                      openDialog(row.original._id, "HARD_DELETE");
+                    }}
+                    className=' text-red-600'
+                  >
+                    Hard Delete
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
       ),
       enableSorting: false,

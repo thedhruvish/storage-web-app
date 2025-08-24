@@ -2,6 +2,7 @@ import { FileDeleteDialog } from "@/pages/directory/components/dialog-delete-fil
 import { RenameDialog } from "@/pages/directory/components/dialog-file-rename";
 import { ImportFileDialog } from "@/pages/directory/components/dialog-import-file";
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
+import { ShareDialog } from "@/pages/directory/components/dialog-share";
 import { MultiFileUploadDialog } from "@/pages/directory/components/dialog-upload-file";
 import { useDialogStore } from "@/store/DialogsStore";
 
@@ -41,6 +42,12 @@ export function Dialogs() {
         onOpenChange={(state) =>
           state ? setOpen("importFile") : closeDialog()
         }
+      />
+
+      <ShareDialog
+        key={"share-dialog"}
+        open={open === "share"}
+        onOpenChange={(state) => (state ? setOpen("share") : closeDialog())}
       />
     </>
   );

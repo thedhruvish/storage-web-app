@@ -23,7 +23,7 @@ function RouteComponent() {
     }
   }, [user, navagate]);
 
-  if (user?.role !== "admin")
+  if (!user || !["admin", "owner"].includes(user?.role))
     return <Error403 errorTitle="You can't access this resource" />;
 
   return (
