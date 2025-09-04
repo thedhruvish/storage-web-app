@@ -3,10 +3,11 @@ import User from "../models/User.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Directory from "../models/Directory.model.js";
-import Session from "../models/Session.model.js";
 import { OAuth2Client } from "google-auth-library";
 import Otp from "../models/Otp.model.js";
 import { sendOtpToMail } from "../utils/mailsend.js";
+import { createAndCheckLimitSession } from "../utils/redisHelper.js";
+import redisClient from "../config/redis-client.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -97,12 +98,10 @@ export const loginWithEmail = async (req, res) => {
     );
   }
 
-  // create a session
-  const session = await Session.create({ userId: user._id });
-
+  const sessionId = await createAndCheckLimitSession(user.id.toString());
   // delete password field in user obj
   delete user.password;
-  res.cookie("sessionId", session._id, {
+  res.cookie("sessionId", sessionId, {
     httpOnly: true,
     secure: true,
     maxAge: 24 * 60 * 60 * 1000,
@@ -119,22 +118,15 @@ export const loginWithEmail = async (req, res) => {
 
 // get user
 export const getCureentUser = async (req, res) => {
-  const { sessionId } = req.signedCookies;
-  const session = await Session.findById(sessionId);
-  const user = await User.findById(session.userId).select({
-    name: 1,
-    email: 1,
-    pictur: 1,
-    rootDirId: 1,
-    role: 1,
-  });
-  res.status(200).json(new ApiResponse(200, "User login Successfuly", user));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "User login Successfuly", req.user));
 };
 
 // logout user
 export const logout = async (req, res) => {
   const { sessionId } = req.signedCookies;
-  await Session.findByIdAndDelete(sessionId);
+  await redisClient.del(`session:${sessionId}`);
   res.clearCookie("sessionId", { httpOnly: true, secure: true, signed: true });
   res.status(200).json(new ApiResponse(200, "User logout Successfuly"));
 };
@@ -142,7 +134,7 @@ export const logout = async (req, res) => {
 // logout all devices
 export const logoutAllDevices = async (req, res) => {
   const { _id } = req.user;
-  await Session.deleteMany({ userId: _id });
+  await createAndCheckLimitSession(_id, 0);
   res
     .status(200)
     .json(new ApiResponse(200, "User logout for all devices Successfuly"));
@@ -177,11 +169,11 @@ export const loginWithGoogle = async (req, res) => {
       .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
   }
 
-  let session;
+  let sessionId;
 
   try {
     if (user) {
-      session = await Session.create({ userId: user._id });
+      sessionId = await createAndCheckLimitSession(user.id.toString());
     } else {
       const dirId = new mongoose.Types.ObjectId();
       user = new User({
@@ -200,11 +192,12 @@ export const loginWithGoogle = async (req, res) => {
         parentDirId: null,
       });
       await rootDir.save({ session: mongoSesssion });
-      session = await Session.create({ userId: user._id });
+      sessionId = await createAndCheckLimitSession(user.id.toString());
+
       // await session.save({ session: mongoSesssion });
     }
 
-    res.cookie("sessionId", session._id, {
+    res.cookie("sessionId", sessionId, {
       httpOnly: true,
       secure: true,
       maxAge: 24 * 60 * 60 * 1000,
@@ -263,9 +256,9 @@ export const callbackGithub = async (req, res) => {
       .json(new ApiError(409, "Your Account is Deleted. Please Contact Admin"));
   }
 
-  let session;
+  let sessionId;
   if (user) {
-    session = await Session.create({ userId: user._id });
+    sessionId = await createAndCheckLimitSession(user.id.toString());
   } else {
     const userRes = await fetch("https://api.github.com/user", {
       method: "GET",
@@ -289,9 +282,9 @@ export const callbackGithub = async (req, res) => {
       isLogInByGoogle: "github",
       rootDirId: rootDir[0]._id,
     });
-    session = await Session.create({ userId: user._id });
+    sessionId = await createAndCheckLimitSession(user.id.toString());
   }
-  res.cookie("sessionId", session.id, {
+  res.cookie("sessionId", sessionId, {
     httpOnly: true,
     secure: true,
     maxAge: 24 * 60 * 60 * 1000,
@@ -329,8 +322,9 @@ export const verfiyOtp = async (req, res) => {
   await optDoc.deleteOne();
 
   // genrate session
-  const session = await Session.create({ userId });
-  res.cookie("sessionId", session.id, {
+  const sessionId = await createAndCheckLimitSession(userId);
+
+  res.cookie("sessionId", sessionId, {
     httpOnly: true,
     secure: true,
     maxAge: 24 * 60 * 60 * 1000,

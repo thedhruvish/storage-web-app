@@ -1,24 +1,42 @@
-import { isValidObjectId } from "mongoose";
-import Session from "../models/Session.model.js";
-import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
+import redisClient from "../config/redis-client.js";
+import User from "../models/User.model.js";
 
 export const checkAuth = async (req, res, next) => {
   const { sessionId } = req.signedCookies;
   // check valid id
-  if (!sessionId || !isValidObjectId(sessionId)) {
+  if (!sessionId) {
     return res.status(401).json(new ApiError(401, "Unauthorized"));
   }
-  const session = await Session.findById(sessionId).populate("userId");
-  if (!session) {
+
+  const userId = await redisClient.get(`session:${sessionId}`);
+
+  if (!userId) {
     return res.status(401).json(new ApiError(401, "Unauthorized"));
   }
-  // add user detial in requent object
+
+  let user = await redisClient.get(`user:${userId}`);
+  if (user) {
+    user = JSON.parse(user);
+    console.log("run on redis");
+  } else {
+    user = await User.findById(userId);
+    console.log("run on db");
+    await redisClient.set(
+      `user:${userId}`,
+      JSON.stringify({
+        _id: userId,
+        rootDirId: user.rootDirId,
+        email: user.email,
+        role: user.role,
+      }),
+    );
+  }
   req.user = {
-    _id: session.userId._id,
-    rootDirId: session.userId.rootDirId,
-    email: session.userId.email,
-    role: session.userId.role,
+    _id: user._id,
+    rootDirId: user.rootDirId,
+    email: user.email,
+    role: user.role,
   };
   next();
 };

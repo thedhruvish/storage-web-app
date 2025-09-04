@@ -3,7 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/User.model.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/document.model.js";
-import Session from "../models/Session.model.js";
+import { createAndCheckLimitSession } from "../utils/redisHelper.js";
 
 // get all users
 export const getAllUser = async (req, res) => {
@@ -15,7 +15,7 @@ export const getAllUser = async (req, res) => {
 export const logoutAllDevices = async (req, res) => {
   const userId = req.params.userId;
 
-  await Session.deleteMany({ userId });
+  await createAndCheckLimitSession(userId, 0);
 
   res.status(200).json(new ApiResponse(200, "All device logout Successfuly"));
 };
