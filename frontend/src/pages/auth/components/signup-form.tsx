@@ -2,8 +2,9 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useTurnstile } from "react-turnstile";
+import { toast } from "sonner";
 import { useRegisterMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function SigupForm({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileLoading, setTurnstileLoading] = useState(false);
   const turnstile = useTurnstile();
+  const navagate = useNavigate();
 
   const registerMutation = useRegisterMutation();
   const formSchema = z.object({
@@ -53,7 +55,19 @@ export function SigupForm({
 
   function onSubmit(values: FormData) {
     if (!turnstileToken) return;
-    registerMutation.mutate({ ...values, turnstileToken });
+    registerMutation.mutate(
+      { ...values, turnstileToken },
+      {
+        onSuccess: () => {
+          form.reset();
+          navagate({ to: "/login" });
+        },
+        onError: (error) => {
+          toast.error(error.message || "Something went wrong");
+          turnstile.reset();
+        },
+      }
+    );
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>

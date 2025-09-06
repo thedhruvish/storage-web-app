@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { z } from "zod";
-import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -43,17 +42,6 @@ export function LoginForm({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
   });
-  useEffect(() => {
-    if (loginMutation.isSuccess) {
-      if (loginMutation.data.data.data.is_verfiy_otp) {
-        localStorage.setItem("userId", loginMutation.data.data.data.userId);
-        navagate({ to: "/otp-verify" });
-      } else {
-        navagate({ to: "/" });
-      }
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [loginMutation.isSuccess]);
 
   type FormData = z.infer<typeof formSchema>;
   const form = useForm<FormData>({
@@ -66,16 +54,25 @@ export function LoginForm({
 
   const onSubmit = (data: FormData) => {
     if (!turnstileToken) return;
-    loginMutation.mutate({ ...data, turnstileToken }, {});
+    loginMutation.mutate(
+      { ...data, turnstileToken },
+      {
+        onSuccess(data) {
+          if (data.data.data.is_verfiy_otp) {
+            localStorage.setItem("userId", data.data.data.userId);
+            navagate({ to: "/otp-verify" });
+          } else {
+            navagate({ to: "/" });
+          }
+        },
+        onError(error) {
+          toast.error(error.message || "Something went wrong");
+          turnstile.reset();
+        },
+      }
+    );
   };
 
-  if (loginMutation.isError) {
-    const errorMsg =
-      (loginMutation.error as AxiosError<{ message?: string }>).response?.data
-        .message || "Something went wrong";
-
-    toast.error(errorMsg);
-  }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
