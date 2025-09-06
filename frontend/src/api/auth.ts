@@ -3,15 +3,22 @@ import axiosClient from "./axiosClient";
 
 export const useLoginMutation = () => {
   return useMutation({
-    mutationFn: (userEmailAndPassword: { email: string; password: string }) =>
-      axiosClient.post("/auth/login", userEmailAndPassword),
+    mutationFn: (userEmailAndPassword: {
+      email: string;
+      password: string;
+      turnstileToken: string;
+    }) => axiosClient.post("/auth/login", userEmailAndPassword),
   });
 };
 
 export const useRegisterMutation = () => {
   return useMutation({
-    mutationFn: (userData: { name: string; email: string; password: string }) =>
-      axiosClient.post("/auth/register", userData),
+    mutationFn: (userData: {
+      name: string;
+      email: string;
+      password: string;
+      turnstileToken: string;
+    }) => axiosClient.post("/auth/register", userData),
   });
 };
 

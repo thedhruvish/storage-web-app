@@ -1,9 +1,10 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import type { AxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useTurnstile } from "react-turnstile";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
@@ -24,13 +25,19 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { TurnstileWidget } from "./TurnstileWidget";
 import LoginWithOauth from "./login-with-0auth";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileLoading, setTurnstileLoading] = useState(false);
+  const turnstile = useTurnstile();
+
   const loginMutation = useLoginMutation();
+
   const navagate = useNavigate();
   const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -58,7 +65,8 @@ export function LoginForm({
   });
 
   const onSubmit = (data: FormData) => {
-    loginMutation.mutate(data);
+    if (!turnstileToken) return;
+    loginMutation.mutate({ ...data, turnstileToken }, {});
   };
 
   if (loginMutation.isError) {
@@ -124,11 +132,18 @@ export function LoginForm({
                     )}
                   />
 
+                  <TurnstileWidget
+                    setTurnstileToken={setTurnstileToken}
+                    setTurnstileLoading={setTurnstileLoading}
+                  />
+
                   <Button
                     type='submit'
                     className='w-full'
                     disabled={
-                      !form.formState.isValid || loginMutation.isPending
+                      (turnstileLoading && !turnstileToken) ||
+                      !form.formState.isValid ||
+                      loginMutation.isPending
                     }
                   >
                     Login

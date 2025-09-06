@@ -1,7 +1,9 @@
+import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link } from "@tanstack/react-router";
+import { useTurnstile } from "react-turnstile";
 import { useRegisterMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -21,12 +23,17 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { TurnstileWidget } from "./TurnstileWidget";
 import LoginWithOauth from "./login-with-0auth";
 
 export function SigupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileLoading, setTurnstileLoading] = useState(false);
+  const turnstile = useTurnstile();
+
   const registerMutation = useRegisterMutation();
   const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
@@ -45,7 +52,8 @@ export function SigupForm({
   });
 
   function onSubmit(values: FormData) {
-    registerMutation.mutate(values);
+    if (!turnstileToken) return;
+    registerMutation.mutate({ ...values, turnstileToken });
   }
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -118,11 +126,18 @@ export function SigupForm({
                     )}
                   />
 
+                  <TurnstileWidget
+                    setTurnstileToken={setTurnstileToken}
+                    setTurnstileLoading={setTurnstileLoading}
+                  />
+
                   <Button
                     type='submit'
                     className='w-full'
                     disabled={
-                      !form.formState.isValid || registerMutation.isPending
+                      (turnstileLoading && !turnstileToken) ||
+                      !form.formState.isValid ||
+                      registerMutation.isPending
                     }
                   >
                     Sign up
