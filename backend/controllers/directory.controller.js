@@ -27,9 +27,7 @@ export const getDirectory = async (req, res) => {
 export const createDirectory = async (req, res) => {
   const parentDirId = req.params.id || req.user.rootDirId;
   const name = req.body.name || "New Folder";
-  if (!name) {
-    return res.status(400).json(new ApiError(400, "name is required"));
-  }
+
   // create a directory
   const directory = new Directory({
     name,
@@ -45,10 +43,6 @@ export const createDirectory = async (req, res) => {
 export const updateDirectoryById = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
-
-  if (!name) {
-    return res.status(400).json(new ApiError(400, "name is required"));
-  }
 
   const directory = await Directory.findByIdAndUpdate(id, { $set: { name } });
   // check document null than does not renme

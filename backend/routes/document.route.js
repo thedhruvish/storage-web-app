@@ -8,6 +8,8 @@ import {
 import paramsValidation from "../middlewares/paramsValidation.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
+import { validateInput } from "../utils/validateInput.js";
+import { nameValidation } from "../validators/commanSchema.js";
 
 const router = express.Router();
 
@@ -21,7 +23,11 @@ router.param("id", paramsValidation);
 router
   .route("/:id")
   .get(permissionMiddleware("read", false), getDocumentById)
-  .put(permissionMiddleware("write", false), updateDocumentById)
+  .put(
+    validateInput(nameValidation),
+    permissionMiddleware("write", false),
+    updateDocumentById,
+  )
   .delete(permissionMiddleware("delete", false), deleteDocumentById);
 
 export default router;

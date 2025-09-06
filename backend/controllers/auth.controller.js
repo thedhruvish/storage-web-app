@@ -14,9 +14,7 @@ const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 // register user
 export const registerWithEmail = async (req, res, next) => {
   const { name, email, password } = req.body;
-  if (!name || !email || !password) {
-    throw new ApiError(400, "name,email and password is required");
-  }
+
   const isExstingEmail = await User.findOne({ email });
 
   // check user delete by youself or admin
@@ -65,10 +63,6 @@ export const registerWithEmail = async (req, res, next) => {
 // login user
 export const loginWithEmail = async (req, res) => {
   const { email, password } = req.body;
-
-  if (!email || !password) {
-    throw new ApiError(400, "email and password is required");
-  }
 
   const user = await User.findOne({ email });
 
@@ -143,10 +137,6 @@ export const logoutAllDevices = async (req, res) => {
 // login with google
 export const loginWithGoogle = async (req, res) => {
   const { idToken } = req.body;
-
-  if (!idToken) {
-    throw new ApiError(400, "idToken is required");
-  }
 
   const googleUser = await googleClient.verifyIdToken({
     idToken,

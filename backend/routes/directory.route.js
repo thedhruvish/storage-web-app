@@ -7,6 +7,8 @@ import {
 } from "../controllers/directory.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
+import { validateInput } from "../utils/validateInput.js";
+import { nameValidation } from "../validators/commanSchema.js";
 
 const router = express.Router();
 // check the id are the valid or not
@@ -16,12 +18,20 @@ router.param("id", paramsValidation);
 router
   .route("/{:id}")
   .get(permissionMiddleware("read"), getDirectory)
-  .post(permissionMiddleware("write"), createDirectory);
+  .post(
+    validateInput(nameValidation),
+    permissionMiddleware("write"),
+    createDirectory,
+  );
 
 // update dirs and delete directory
 router
   .route("/:id")
-  .put(permissionMiddleware("update"), updateDirectoryById)
+  .put(
+    validateInput(nameValidation),
+    permissionMiddleware("update"),
+    updateDirectoryById,
+  )
   .delete(permissionMiddleware("delete"), deleteDirectoryById);
 
 export default router;

@@ -47,10 +47,6 @@ export const updateDocumentById = async (req, res) => {
   const { id } = req.params;
   const { name } = req.body;
 
-  if (!name) {
-    return res.status(400).json(new ApiError(400, "name is required"));
-  }
-
   const document = await Document.findByIdAndUpdate(id, { name });
   // check document null than does not renme
   if (!document) {
