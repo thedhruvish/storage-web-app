@@ -1,19 +1,47 @@
 import express from "express";
 import cors from "cors";
 import cookiesParser from "cookie-parser";
+import helmet from "helmet";
+
 import { connectDB } from "./config/db.js";
+import "./config/redis-client.js";
+
 import { checkAuth } from "./middlewares/auth.js";
+import { rateLimiter } from "./middlewares/rateLimit.js";
+
 import authRoute from "./routes/auth.route.js";
 import directoryRoute from "./routes/directory.route.js";
 import docuemntRoute from "./routes/document.route.js";
 import importDataRoute from "./routes/importData.route.js";
 import permissionRoute from "./routes/permission.route.js";
 import adminRoute from "./routes/admin.route.js";
-import "./config/redis-client.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
+
 const app = express();
+
+// helmet
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: "same-site" },
+    contentSecurityPolicy: {
+      directives: {
+        reportUri: "/report-violation",
+      },
+    },
+  }),
+);
+
+// handle report violation:
+app.post(
+  "/report-violation",
+  express.json({ type: "applications/csp-report" }),
+  (req, res) => {
+    console.log(req.body);
+    res.status(200).json({ success: true });
+  },
+);
 
 // cors allow
 app.use(
@@ -29,13 +57,13 @@ app.use(express.json());
 app.use(cookiesParser(cookieSecret));
 
 // auth router
-app.use("/auth", authRoute);
+app.use("/auth", rateLimiter({ maxLimit: 20 }), authRoute);
 
 // permission on files
-app.use("/permission", permissionRoute);
+app.use("/permission", rateLimiter({ maxLimit: 100 }), permissionRoute);
 
 // login Required route
-app.use(checkAuth);
+app.use(rateLimiter({ maxLimit: 150 }), checkAuth);
 app.use("/admin", adminRoute);
 app.use("/directory", directoryRoute);
 app.use("/document", docuemntRoute);
