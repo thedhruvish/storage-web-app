@@ -13,6 +13,7 @@ import {
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import {
+  loginWithEmailValidation,
   loginWithGoogleValidation,
   registerWithEmailValidation,
   reSendOtpValidation,
@@ -28,11 +29,7 @@ router.post(
   validateInput(registerWithEmailValidation),
   registerWithEmail,
 );
-router.post(
-  "/login",
-  validateInput(registerWithEmailValidation),
-  loginWithEmail,
-);
+router.post("/login", validateInput(loginWithEmailValidation), loginWithEmail);
 
 // send otp verify
 router.post("/otp-verify", validateInput(verfiyOtpValidation), verfiyOtp);

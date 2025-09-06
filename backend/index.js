@@ -36,7 +36,7 @@ app.use(
 // handle report violation:
 app.post(
   "/report-violation",
-  express.json({ type: "applications/csp-report" }),
+  express.json({ type: "application/csp-report" }),
   (req, res) => {
     console.log(req.body);
     res.status(200).json({ success: true });

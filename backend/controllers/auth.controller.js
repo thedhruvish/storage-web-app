@@ -8,12 +8,19 @@ import Otp from "../models/Otp.model.js";
 import { sendOtpToMail } from "../utils/mailsend.js";
 import { createAndCheckLimitSession } from "../utils/redisHelper.js";
 import redisClient from "../config/redis-client.js";
+import { isValidTurnstileToken } from "../utils/TurnstileVerfication.js";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 // register user
 export const registerWithEmail = async (req, res, next) => {
-  const { name, email, password } = req.body;
+  const { name, email, password, turnstileToken } = req.body;
+
+  if (!(await isValidTurnstileToken(turnstileToken))) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "recaptcha is not valid try again"));
+  }
 
   const isExstingEmail = await User.findOne({ email });
 
@@ -62,7 +69,13 @@ export const registerWithEmail = async (req, res, next) => {
 
 // login user
 export const loginWithEmail = async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, turnstileToken } = req.body;
+
+  if (!(await isValidTurnstileToken(turnstileToken))) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "recaptcha is not valid try again"));
+  }
 
   const user = await User.findOne({ email });
 

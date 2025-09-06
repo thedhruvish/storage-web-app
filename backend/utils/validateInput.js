@@ -41,11 +41,9 @@ export const validateInput = (ValidateSchema) => {
 
     // Validate input
     const parsed = ValidateSchema.safeParse(cleanInput);
-
+    console.log(parsed.error);
     if (!parsed.success) {
-      return next(
-        new ApiError(400, parsed.error.errors.map((e) => e.message).join(", ")),
-      );
+      return next(new ApiError(400, "Check You Input. It invalid or missing"));
     }
 
     req.body = parsed.data;
