@@ -13,6 +13,7 @@ import {
   User,
   Users,
 } from "lucide-react";
+import { useFileUploader } from "@/hooks/use-file-uploader";
 import {
   Sidebar,
   SidebarContent,
@@ -31,6 +32,8 @@ import { Button } from "./ui/button";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
   const { setOpen } = useDialogStore();
+  const { triggerUploader, UploaderInput } = useFileUploader();
+
   if (!user) {
     return null;
   }
@@ -39,6 +42,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       className='top-(--header-height) h-[calc(100svh-var(--header-height))]!'
       {...props}
     >
+      {UploaderInput}
       <SidebarHeader className='border-b'>
         <SidebarMenu>
           <SidebarMenuItem>
@@ -71,7 +75,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             size='sm'
             variant='outline'
             className='flex-1 bg-transparent'
-            onClick={() => setOpen("uploadFile")}
+            onClick={triggerUploader}
           >
             <Upload className='mr-2 h-4 w-4' />
             Upload
