@@ -19,6 +19,10 @@ const documentSchema = new Schema(
       ref: "Directory",
       required: true,
     },
+    isStarred: {
+      type: Boolean,
+      default: false,
+    },
     metaData: {
       type: Object,
     },

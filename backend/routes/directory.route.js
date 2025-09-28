@@ -3,6 +3,7 @@ import {
   createDirectory,
   deleteDirectoryById,
   getDirectory,
+  starredToggleDirectory,
   updateDirectoryById,
 } from "../controllers/directory.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
@@ -23,6 +24,13 @@ router
     permissionMiddleware("write"),
     createDirectory,
   );
+
+// starr toggle
+router.put(
+  "/:id/starred",
+  permissionMiddleware("update"),
+  starredToggleDirectory,
+);
 
 // update dirs and delete directory
 router

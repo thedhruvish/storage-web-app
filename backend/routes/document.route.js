@@ -3,6 +3,7 @@ import {
   createDocument,
   deleteDocumentById,
   getDocumentById,
+  starredToggleDocument,
   updateDocumentById,
 } from "../controllers/document.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
@@ -20,6 +21,13 @@ router
   .post(permissionMiddleware("write"), upload.single("file"), createDocument);
 
 router.param("id", paramsValidation);
+
+router.put(
+  "/:id/starred",
+  permissionMiddleware("update"),
+  starredToggleDocument,
+);
+
 router
   .route("/:id")
   .get(permissionMiddleware("read", false), getDocumentById)

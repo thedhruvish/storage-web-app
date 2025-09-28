@@ -85,7 +85,7 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
             >
               <div className='relative'>
                 {getFileIcon(documentType, file)}
-                {file.starred && (
+                {file.isStarred && (
                   <Star className='absolute -top-1 -right-1 h-3 w-3 fill-current text-yellow-500' />
                 )}
               </div>
@@ -123,7 +123,7 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
           <div className='col-span-6 flex items-center gap-3'>
             <div className='relative'>
               {getFileIcon(documentType, file)}
-              {file.starred && (
+              {file.isStarred && (
                 <Star className='absolute -top-1 -right-1 h-3 w-3 fill-current text-yellow-500' />
               )}
             </div>

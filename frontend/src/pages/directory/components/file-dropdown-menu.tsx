@@ -7,6 +7,7 @@ import {
   Star,
   Trash2,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -15,6 +16,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { usestarredToggle } from "../../../api/directoryApi";
 import type { FileItem } from "../types";
 
 interface Props {
@@ -29,6 +31,7 @@ export default function FileDropdownMenu({
   fileType,
 }: Props) {
   const { setOpen, setCurrentItem } = useDialogStore();
+  const starredMutation = usestarredToggle();
 
   const openDialog = (type: Parameters<typeof setOpen>[0]) => {
     setOpen(type);
@@ -37,6 +40,24 @@ export default function FileDropdownMenu({
 
   const filedonw = () => {
     window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}?action=download`;
+  };
+
+  const starredToggle = () => {
+    if (!file._id) return;
+    starredMutation.mutate(
+      {
+        id: file._id,
+        type: file.extension ? "document" : "directory",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Starred successfully");
+        },
+        onError: () => {
+          toast.error("Starred failed");
+        },
+      }
+    );
   };
 
   return (
@@ -90,11 +111,11 @@ export default function FileDropdownMenu({
         )}
 
         <DropdownMenuItem
-          onClick={() => openDialog("star")}
+          onClick={() => starredToggle()}
           className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
         >
           <Star className='mr-2 h-4 w-4' />
-          {file.starred ? "Unstar" : "Star"}
+          {file.isStarred ? "Unstar" : "Star"}
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />

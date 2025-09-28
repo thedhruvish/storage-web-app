@@ -144,3 +144,22 @@ export const useCreateDirectoryShareShortLink = () => {
     }) => axiosClient.post(`/permission/share/${dirId}`, data),
   });
 };
+
+export const usestarredToggle = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      type,
+    }: {
+      id: string;
+      type: "directory" | "document";
+    }) => axiosClient.put(`/${type}/${id}/starred`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"], // Invalidate the updated directory
+      });
+    },
+  });
+};

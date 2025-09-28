@@ -32,7 +32,7 @@ export const getDocumentById = async (req, res) => {
     return res.status(404).json(new ApiError(404, "Document not found"));
   }
 
-  const filePath = `${process.cwd()}/storage/${document.id}${document.extension}`;
+  const filePath = `${import.meta.dirname}/../storage/${document.id}${document.extension}`;
   // check if query are the download than file download other wise send file
   if (req.query.action === "download") {
     return res.download(filePath, document.name);
@@ -58,6 +58,18 @@ export const updateDocumentById = async (req, res) => {
     .json(new ApiResponse(200, "Document update Successfuly", document));
 };
 
+export const starredToggleDocument = async (req, res) => {
+  const { id } = req.params;
+
+  await Document.findByIdAndUpdate(id, [
+    { $set: { isStarred: { $not: "$isStarred" } } },
+  ]);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Document started toggle Successfuly"));
+};
+
 // delete file by id
 export const deleteDocumentById = async (req, res) => {
   const { id } = req.params;
@@ -66,6 +78,8 @@ export const deleteDocumentById = async (req, res) => {
   if (!document) {
     return res.status(404).json(new ApiError(404, "Document not found"));
   }
-  await rm(`./storage/${document.id}${document.extension}`);
+  await rm(
+    `${import.meta.dirname}/../storage/${document.id}${document.extension}`,
+  );
   res.status(200).json(new ApiResponse(200, "Document delete Successfuly"));
 };

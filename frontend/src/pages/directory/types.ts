@@ -6,7 +6,7 @@ export interface FileItem {
   type: "folder" | "file";
   size?: string;
   createdAt: Date;
-  starred?: boolean;
+  isStarred?: boolean;
   extension?: string;
 }
 

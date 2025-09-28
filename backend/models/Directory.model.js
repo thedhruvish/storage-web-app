@@ -26,6 +26,10 @@ const directorySchema = new Schema(
         },
       },
     ],
+    isStarred: {
+      type: Boolean,
+      default: false,
+    },
     metaData: {
       type: Object,
     },

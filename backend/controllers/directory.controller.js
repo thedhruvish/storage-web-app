@@ -7,6 +7,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 // get Directories list or get by id
 export const getDirectory = async (req, res) => {
   const directoryId = req.params.id || req.user.rootDirId;
+  const { isStarred } = req.query;
   if (!directoryId) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
@@ -14,10 +15,19 @@ export const getDirectory = async (req, res) => {
   if (!directory) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
+  let filter = {};
+  if (isStarred) {
+    filter.isStarred = isStarred === "true";
+  }
+
   const directories = await Directory.find({
     parentDirId: directory._id,
+    ...filter,
   });
-  const documents = await Document.find({ parentDirId: directory._id });
+  const documents = await Document.find({
+    parentDirId: directory._id,
+    ...filter,
+  });
   res
     .status(200)
     .json(new ApiResponse(200, "Directories list", { directories, documents }));
@@ -50,6 +60,18 @@ export const updateDirectoryById = async (req, res) => {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
   res.status(200).json(new ApiResponse(200, "Directory update Successfuly"));
+};
+
+export const starredToggleDirectory = async (req, res) => {
+  const { id } = req.params;
+
+  await Directory.findByIdAndUpdate(id, [
+    { $set: { isStarred: { $not: "$isStarred" } } },
+  ]);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Directory started toggle Successfuly"));
 };
 
 // delete Directory by id
