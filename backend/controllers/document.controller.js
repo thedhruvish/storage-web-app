@@ -2,6 +2,8 @@ import { rm } from "node:fs/promises";
 import Document from "../models/document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import path from "node:path";
+import fs from "fs";
 
 // create the file
 export const createDocument = async (req, res) => {
@@ -29,11 +31,18 @@ export const getDocumentById = async (req, res) => {
 
   const document = await Document.findById(id);
   if (!document) {
-    return res.status(404).json(new ApiError(404, "Document not found"));
+    return res.status(404).json({ error: "Document not found" });
   }
 
-  const filePath = `${import.meta.dirname}/../storage/${document.id}${document.extension}`;
-  // check if query are the download than file download other wise send file
+  const filePath = path.resolve(
+    "./storage",
+    `${document.id}${document.extension}`,
+  );
+
+  if (!fs.existsSync(filePath)) {
+    return res.status(404).json({ error: "File not found on server" });
+  }
+
   if (req.query.action === "download") {
     return res.download(filePath, document.name);
   }

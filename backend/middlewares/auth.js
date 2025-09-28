@@ -18,7 +18,6 @@ export const checkAuth = async (req, res, next) => {
   let user = await redisClient.get(`user:${userId}`);
   if (user) {
     user = JSON.parse(user);
-    console.log("run on redis");
   } else {
     user = await User.findById(userId);
     console.log("run on db");
