@@ -1,25 +1,12 @@
-import { useDialogStore } from "@/store/DialogsStore";
-import {
-  Download,
-  FolderPen,
-  InfoIcon,
-  MoreVertical,
-  Share,
-  Star,
-  StarOff,
-  Trash2,
-} from "lucide-react";
-import { toast } from "sonner";
+import { MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { usestarredToggle } from "../../../api/directoryApi";
 import type { FileItem } from "../types";
+import FileMenuItems from "./file-menu-items";
 
 interface Props {
   file: FileItem;
@@ -32,36 +19,6 @@ export default function FileDropdownMenu({
   buttonViewType,
   fileType,
 }: Props) {
-  const { setOpen, setCurrentItem } = useDialogStore();
-  const starredMutation = usestarredToggle();
-
-  const openDialog = (type: Parameters<typeof setOpen>[0]) => {
-    setOpen(type);
-    setCurrentItem({ ...file, type: file.extension ? "file" : "folder" });
-  };
-
-  const filedonw = () => {
-    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}?action=download`;
-  };
-
-  const starredToggle = () => {
-    if (!file._id) return;
-    starredMutation.mutate(
-      {
-        id: file._id,
-        type: file.extension ? "document" : "directory",
-      },
-      {
-        onSuccess: () => {
-          toast.success("Starred successfully");
-        },
-        onError: () => {
-          toast.error("Starred failed");
-        },
-      }
-    );
-  };
-
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -83,65 +40,10 @@ export default function FileDropdownMenu({
       <DropdownMenuContent
         align='end'
         className='w-40 rounded-xl shadow-lg border bg-popover text-sm'
+        // Stop propagation to prevent the context menu from closing the parent
+        onClick={(e) => e.stopPropagation()}
       >
-        {file.extension && (
-          <>
-            <DropdownMenuItem
-              onClick={filedonw}
-              className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-            >
-              <Download className='mr-2 h-4 w-4' />
-              Download
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => openDialog("details")}
-              className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-            >
-              <InfoIcon className='mr-2 h-4 w-4' />
-              Details
-            </DropdownMenuItem>
-          </>
-        )}
-
-        <DropdownMenuItem
-          onClick={() => openDialog("rename")}
-          className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-        >
-          <FolderPen className='mr-2 h-4 w-4' />
-          Rename
-        </DropdownMenuItem>
-
-        {fileType === "folder" && (
-          <DropdownMenuItem
-            onClick={() => openDialog("share")}
-            className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-          >
-            <Share className='mr-2 h-4 w-4' />
-            Share
-          </DropdownMenuItem>
-        )}
-
-        <DropdownMenuItem
-          onClick={() => starredToggle()}
-          className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-        >
-          {file.isStarred ? (
-            <StarOff className='text-gray-400' />
-          ) : (
-            <Star className='fill-current text-yellow-500' />
-          )}
-          {file.isStarred ? "Unstar" : "Star"}
-        </DropdownMenuItem>
-
-        <DropdownMenuSeparator />
-
-        <DropdownMenuItem
-          className='cursor-pointer text-destructive hover:bg-destructive/10'
-          onClick={() => openDialog("delete")}
-        >
-          <Trash2 className='mr-2 h-4 w-4' />
-          Delete
-        </DropdownMenuItem>
+        <FileMenuItems file={file} fileType={fileType} />
       </DropdownMenuContent>
     </DropdownMenu>
   );
