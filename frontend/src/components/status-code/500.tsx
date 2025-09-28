@@ -111,7 +111,7 @@ export default function Error500({
 
           {/* Support Info */}
           <p className='text-xs text-muted-foreground text-center mt-6'>
-            Need immediate assistance? Contact us at support@storage-app.com
+            Need immediate assistance? Contact us at info@dhruvish.in
           </p>
         </CardContent>
       </Card>

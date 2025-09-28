@@ -12,7 +12,8 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "check": "prettier",
-    "format": "prettier --write . && eslint --fix"
+    "format": "prettier --write . && eslint --fix",
+    "fix": "npm run format && npm run lint:fix "
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
