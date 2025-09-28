@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 import {
   Archive,
   Code,
@@ -70,7 +71,7 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
             key={file._id}
             className='group hover:bg-accent relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors'
             onClick={(e) => {
-              e.stopPropagation(); // ensure dropdown clicks don’t bubble
+              e.stopPropagation();
             }}
           >
             <div
@@ -86,7 +87,14 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
               <div className='relative'>
                 {getFileIcon(documentType, file)}
                 {file.isStarred && (
-                  <Star className='absolute -top-1 -right-1 h-3 w-3 fill-current text-yellow-500' />
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 15 }}
+                    className='absolute -top-1 -right-1'
+                  >
+                    <Star className='h-3 w-3 fill-current text-yellow-500 drop-shadow-md' />
+                  </motion.div>
                 )}
               </div>
               <span className='mt-2 text-center text-sm break-all'>
@@ -130,7 +138,7 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
             <span className='truncate'>{file.name}</span>
           </div>
           <div className='text-muted-foreground col-span-2 flex items-center text-sm'>
-            {file.size || "-"}
+            {file.metaData?.size || "-"}
           </div>
           <div className='text-muted-foreground col-span-3 flex items-center text-sm'>
             {formatDistanceToNow(new Date(file.createdAt), { addSuffix: true })}

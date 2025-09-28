@@ -1,4 +1,5 @@
 import { FileDeleteDialog } from "@/pages/directory/components/dialog-delete-file";
+import FileDetailsDialog from "@/pages/directory/components/dialog-details";
 import { RenameDialog } from "@/pages/directory/components/dialog-file-rename";
 import { ImportFileDialog } from "@/pages/directory/components/dialog-import-file";
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
@@ -14,6 +15,12 @@ export function Dialogs() {
         key='user-add'
         open={open === "rename"}
         onOpenChange={(state) => (state ? setOpen("rename") : closeDialog())}
+      />
+
+      <FileDetailsDialog
+        key={"file-details"}
+        open={open === "details"}
+        onOpenChange={(state) => (state ? setOpen("details") : closeDialog())}
       />
 
       <FileDeleteDialog

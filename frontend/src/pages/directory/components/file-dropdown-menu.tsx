@@ -2,9 +2,11 @@ import { useDialogStore } from "@/store/DialogsStore";
 import {
   Download,
   FolderPen,
+  InfoIcon,
   MoreVertical,
   Share,
   Star,
+  StarOff,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -83,13 +85,22 @@ export default function FileDropdownMenu({
         className='w-40 rounded-xl shadow-lg border bg-popover text-sm'
       >
         {file.extension && (
-          <DropdownMenuItem
-            onClick={filedonw}
-            className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-          >
-            <Download className='mr-2 h-4 w-4' />
-            Download
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem
+              onClick={filedonw}
+              className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+            >
+              <Download className='mr-2 h-4 w-4' />
+              Download
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => openDialog("details")}
+              className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+            >
+              <InfoIcon className='mr-2 h-4 w-4' />
+              Details
+            </DropdownMenuItem>
+          </>
         )}
 
         <DropdownMenuItem
@@ -114,7 +125,11 @@ export default function FileDropdownMenu({
           onClick={() => starredToggle()}
           className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
         >
-          <Star className='mr-2 h-4 w-4' />
+          {file.isStarred ? (
+            <StarOff className='text-gray-400' />
+          ) : (
+            <Star className='fill-current text-yellow-500' />
+          )}
           {file.isStarred ? "Unstar" : "Star"}
         </DropdownMenuItem>
 

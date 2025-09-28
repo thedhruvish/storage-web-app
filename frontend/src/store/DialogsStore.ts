@@ -10,6 +10,7 @@ type DialogDialogType =
   | "star"
   | "newDirectory"
   | "uploadFile"
+  | "details"
   | "importFile";
 
 interface DialogState {
