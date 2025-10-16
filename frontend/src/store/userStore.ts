@@ -7,6 +7,8 @@ export type User = {
   email: string;
   profile: string;
   role: string;
+  totalUsedBytes: number;
+  maxStorageBytes: number;
 };
 
 type UserStore = {

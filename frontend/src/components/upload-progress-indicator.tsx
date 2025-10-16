@@ -12,6 +12,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useGetCurrentUser } from "@/api/auth";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
@@ -20,6 +21,8 @@ import { ScrollArea } from "./ui/scroll-area";
 export function UploadProgressIndicator() {
   const { directoryId = "" } = useParams({ strict: false });
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
+  const refreshUser = useGetCurrentUser();
+
   const [isMinimized, setIsMinimized] = useState(false);
 
   const { files, isUploading, cancelUpload, retryUpload, clearCompleted } =
@@ -30,12 +33,19 @@ export function UploadProgressIndicator() {
   const allDone =
     !isUploading && completedCount === totalFiles && totalFiles > 0;
 
+  const [wasUploading, setWasUploading] = useState(false);
+
   useEffect(() => {
-    if (allDone) {
+    if (isUploading) {
+      setWasUploading(true);
+    } else if (wasUploading && allDone) {
+      // Only call after a real upload session ends
+      refreshUser.refetch();
       getDirectoryDataHook.refetch();
+      setWasUploading(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allDone]);
+  }, [isUploading, allDone]);
 
   if (files.length === 0) return null;
 

@@ -5,8 +5,10 @@ import { FileToolbar } from "@/pages/directory/components/file-toolbar";
 import { useAppearance } from "@/store/appearanceStore";
 import { useBreadCrumStore } from "@/store/breadCrumStore";
 import { useUploadStore } from "@/store/uploadStore";
+import { useUser } from "@/store/userStore";
 import { UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import { toast } from "sonner";
 import { useGetAllDirectoryList } from "@/api/directoryApi";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Separator } from "@/components/ui/separator";
@@ -27,14 +29,21 @@ export default function Home({
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
   const { addFiles } = useUploadStore();
+  const { user } = useUser();
 
   const onDrop = useCallback(
     (acceptedFiles: File[]) => {
+      if (!user) return;
+      const totalSize = acceptedFiles.reduce((acc, file) => acc + file.size, 0);
+      if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+        toast.error("You have exceeded your storage limit.");
+        return;
+      }
       if (acceptedFiles.length > 0) {
         addFiles(acceptedFiles, directoryId);
       }
     },
-    [addFiles, directoryId]
+    [addFiles, directoryId, user]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

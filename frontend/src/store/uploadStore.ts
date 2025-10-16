@@ -72,7 +72,13 @@ const uploadFile = async (
           f.id === file.id ? { ...f, status: "error" } : f
         ),
       }));
-      toast.error(`Failed to upload ${file.file.name}`);
+      if (axios.isAxiosError(error)) {
+        if (error.status === 400) {
+          toast.error(error.message);
+        }
+      } else {
+        toast.error(`Failed to upload ${file.file.name}`);
+      }
     }
   } finally {
     set((state) => {

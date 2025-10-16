@@ -1,21 +1,28 @@
 import { useRef } from "react";
 import { useParams } from "@tanstack/react-router";
 import { useUploadStore } from "@/store/uploadStore";
+import { useUser } from "@/store/userStore";
+import { toast } from "sonner";
 
-/**
- * A hook to manage file uploads.
- * It provides a trigger function and the required hidden file input JSX.
- * This decouples the file selection logic from the component that triggers it.
- */
 export const useFileUploader = () => {
   const { addFiles } = useUploadStore();
   const params = useParams({ strict: false });
   const directoryId = (params as { directoryId?: string }).directoryId || "";
   const inputRef = useRef<HTMLInputElement>(null);
+  const { user } = useUser();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
+      if (!user) return;
+      const totalSize = Array.from(files).reduce(
+        (acc, file) => acc + file.size,
+        0
+      );
+      if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+        toast.error("You have exceeded your storage limit.");
+        return;
+      }
       addFiles(Array.from(files), directoryId);
     }
     // Reset input value to allow re-uploading the same file

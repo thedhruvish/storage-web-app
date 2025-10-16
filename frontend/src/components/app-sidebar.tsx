@@ -27,6 +27,7 @@ import {
   SidebarGroupLabel,
 } from "@/components/ui/sidebar";
 import { NavUser } from "@/components/nav-user";
+import { StorageProgress } from "./storage-progress";
 import { Button } from "./ui/button";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -148,6 +149,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        <StorageProgress
+          totalUsedBytes={user.totalUsedBytes}
+          maxStorageBytes={user.maxStorageBytes}
+        />
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

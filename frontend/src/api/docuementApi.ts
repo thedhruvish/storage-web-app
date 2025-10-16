@@ -27,6 +27,9 @@ export const useDeleteDocument = (directoryId?: string) => {
       queryClient.invalidateQueries({
         queryKey: ["directorys", directoryId], // Invalidate the updated directory
       });
+      queryClient.invalidateQueries({
+        queryKey: ["user"], // Invalidate the updated directory
+      });
     },
   });
 };

@@ -24,7 +24,7 @@ export const useRegisterMutation = () => {
 
 export const useGetCurrentUser = () => {
   return useQuery({
-    queryKey: ["user-current"],
+    queryKey: ["user"],
     queryFn: () => axiosClient.get("/auth/me"),
   });
 };

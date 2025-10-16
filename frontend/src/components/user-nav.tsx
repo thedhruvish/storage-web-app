@@ -9,6 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { StorageProgress } from "./storage-progress";
 import { UserAvatarProfile } from "./user-avatar-profile";
 
 export function UserNav({
@@ -18,6 +19,8 @@ export function UserNav({
     name?: string;
     email?: string;
     picture?: string;
+    totalUsedBytes: number;
+    maxStorageBytes: number;
   };
 }) {
   const navigate = useNavigate();
@@ -43,6 +46,11 @@ export function UserNav({
               </p>
             </div>
           </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <StorageProgress
+            totalUsedBytes={user.totalUsedBytes}
+            maxStorageBytes={user.maxStorageBytes}
+          />
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>Profile</DropdownMenuItem>

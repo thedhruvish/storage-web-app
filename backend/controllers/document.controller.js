@@ -9,7 +9,8 @@ import Directory from "../models/Directory.model.js";
 
 // create the file
 export const createDocument = async (req, res) => {
-  const parentDirId = req.params.parentDirId || req.user.rootDirId;
+  const user = req.user;
+  const parentDirId = req.params.parentDirId || user.rootDirId;
   const { id, extension } = req.customFileInfo;
   const fileSize = req.file.size;
   const directory = await Directory.findById(user.rootDirId, {
