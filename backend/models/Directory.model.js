@@ -16,6 +16,12 @@ const directorySchema = new Schema(
       ref: "Directory",
       default: null,
     },
+    path: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "Directory",
+      },
+    ],
     permission: [
       {
         userId: { type: Schema.Types.ObjectId, ref: "User", default: null },

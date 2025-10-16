@@ -12,7 +12,10 @@ export const getDirectory = async (req, res) => {
   if (!directoryId) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
-  const directory = await Directory.findById(directoryId);
+  const directory = await Directory.findById(directoryId).populate({
+    path: "path",
+    select: "name _id",
+  });
   if (!directory) {
     return res.status(404).json(new ApiError(404, "Directory not found"));
   }
@@ -29,22 +32,27 @@ export const getDirectory = async (req, res) => {
     parentDirId: directory._id,
     ...filter,
   });
-  res
-    .status(200)
-    .json(new ApiResponse(200, "Directories list", { directories, documents }));
+  res.status(200).json(
+    new ApiResponse(200, "Directories list", {
+      directories,
+      documents,
+      path: directory,
+    }),
+  );
 };
 
 // create the Directory
 export const createDirectory = async (req, res) => {
   const parentDirId = req.params.id || req.user.rootDirId;
   const name = req.body.name || "New Folder";
-
+  const parentDir = await Directory.findById(parentDirId, { path: 1 });
   // create a directory
   const directory = new Directory({
     name,
     userId: req.user._id,
     parentDirId,
     metaData: { size: 0 },
+    path: [...parentDir.path, parentDir._id],
   });
 
   await directory.save();
