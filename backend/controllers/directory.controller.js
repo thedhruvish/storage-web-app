@@ -3,6 +3,7 @@ import Directory from "../models/Directory.model.js";
 import Document from "../models/document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
+import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
 
 // get Directories list or get by id
 export const getDirectory = async (req, res) => {
@@ -43,6 +44,7 @@ export const createDirectory = async (req, res) => {
     name,
     userId: req.user._id,
     parentDirId,
+    metaData: { size: 0 },
   });
 
   await directory.save();
@@ -77,13 +79,24 @@ export const starredToggleDirectory = async (req, res) => {
 // delete Directory by id
 export const deleteDirectoryById = async (req, res) => {
   const { id } = req.params;
+  const deleteDirectory = await Directory.findById(id).select({
+    _id: 1,
+    metaData: 1,
+    parentDirId: 1,
+  });
 
+  await updateParentDirectorySize(
+    deleteDirectory.parentDirId,
+    -deleteDirectory.metaData.size,
+  );
   // recur
   const listDocumentAndDirectoryForDelete = async (parentDirId) => {
     let allDocuemt = await Document.find({ parentDirId }).select({
       _id: 1,
       extension: 1,
+      metaData: 1,
     });
+
     let allDirectory = await Directory.find({ parentDirId }).select({
       _id: 1,
     });
@@ -111,5 +124,6 @@ export const deleteDirectoryById = async (req, res) => {
   await Directory.deleteMany({
     _id: { $in: allDirectory.map((doc) => doc._id) },
   });
+
   res.status(200).json(new ApiResponse(200, "Directory delete Successfuly"));
 };

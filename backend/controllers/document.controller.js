@@ -4,12 +4,13 @@ import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import path from "node:path";
 import fs from "fs";
+import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
 
 // create the file
 export const createDocument = async (req, res) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId;
   const { id, extension } = req.customFileInfo;
-
+  const fileSize = req.file.size;
   const document = new Document({
     _id: id,
     userId: req.user._id,
@@ -17,10 +18,11 @@ export const createDocument = async (req, res) => {
     extension: extension,
     parentDirId,
     metaData: {
-      size: req.file.size,
+      size: fileSize,
     },
   });
   await document.save();
+  await updateParentDirectorySize(parentDirId, fileSize);
 
   res.status(200).json(new ApiResponse(200, "Document create Successfuly"));
 };
@@ -89,6 +91,10 @@ export const deleteDocumentById = async (req, res) => {
   }
   await rm(
     `${import.meta.dirname}/../storage/${document.id}${document.extension}`,
+  );
+  await updateParentDirectorySize(
+    document.parentDirId,
+    -document.metaData.size,
   );
   res.status(200).json(new ApiResponse(200, "Document delete Successfuly"));
 };

@@ -53,6 +53,7 @@ export const registerWithEmail = async (req, res, next) => {
       name: `root-${email}`,
       userId: user._id.toString(),
       parentDirId: null,
+      metaData: { size: 0 },
     });
     await rootDir.save({ session: mongoSesssion });
 
@@ -193,6 +194,7 @@ export const loginWithGoogle = async (req, res) => {
         name: `root-${email}`,
         userId: user._id,
         parentDirId: null,
+        metaData: { size: 0 },
       });
       await rootDir.save({ session: mongoSesssion });
       sessionId = await createAndCheckLimitSession(user.id.toString());
@@ -275,6 +277,7 @@ export const callbackGithub = async (req, res) => {
       name: `root-${primaryEmail}`,
       parentDirId: null,
       userId,
+      metaData: { size: 0 },
     };
     const rootDir = await Directory.create([body]);
     user = await User.create({
