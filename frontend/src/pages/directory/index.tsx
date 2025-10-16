@@ -1,8 +1,9 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
 import { FileGrid } from "@/pages/directory/components/file-grid";
 import { FileToolbar } from "@/pages/directory/components/file-toolbar";
 import { useAppearance } from "@/store/appearanceStore";
+import { useBreadCrumStore } from "@/store/breadCrumStore";
 import { useUploadStore } from "@/store/uploadStore";
 import { UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -19,6 +20,7 @@ export default function Home({
   directoryId?: string;
 }) {
   const { appearance } = useAppearance();
+  const { setStatus, setPath, setCurrentItem } = useBreadCrumStore();
   const params = useParams({ strict: false });
   const directoryId =
     (params as { directoryId?: string }).directoryId || propDirectoryId;
@@ -40,17 +42,42 @@ export default function Home({
     noClick: true,
   });
 
-  if (!getDirectoryDataHook.isSuccess) {
-    return <FileManagerSkeleton />;
-  }
+  useEffect(() => {
+    if (getDirectoryDataHook.isLoading) setStatus("loading");
+    else if (getDirectoryDataHook.isError) setStatus("error");
+    else if (getDirectoryDataHook.isSuccess) {
+      setStatus("success");
+      const { path } = getDirectoryDataHook.data.data.path;
+      setPath(path.slice(1));
+      const currentName = getDirectoryDataHook.data.data.path.name;
+      if (currentName.startsWith("root")) {
+        setCurrentItem(null);
+      } else {
+        setCurrentItem(currentName);
+      }
+    }
+  }, [
+    getDirectoryDataHook.isLoading,
+    getDirectoryDataHook.isError,
+    getDirectoryDataHook.isSuccess,
+    getDirectoryDataHook.data,
+    setPath,
+    setCurrentItem,
+    setStatus,
+  ]);
+
+  // 🔹 Render states
+  if (getDirectoryDataHook.isLoading) return <FileManagerSkeleton />;
+  if (getDirectoryDataHook.isError) return <div>Error loading directory</div>;
+
+  const { directories, documents } = getDirectoryDataHook.data?.data || {};
 
   return (
     <div {...getRootProps()} className='flex h-full flex-col outline-none'>
       <input {...getInputProps()} />
       <FileToolbar viewMode={appearance.directoryLayout} />
 
-      {getDirectoryDataHook.data?.data.directories.length === 0 &&
-      getDirectoryDataHook.data?.data.documents.length === 0 ? (
+      {!directories?.length && !documents?.length ? (
         <div className='flex h-full flex-1 items-center justify-center'>
           <div className='text-2xl text-muted-foreground'>
             This folder is empty
@@ -69,13 +96,13 @@ export default function Home({
                 </div>
               )}
               <FileGrid
-                files={getDirectoryDataHook.data?.data.directories || []}
+                files={directories || []}
                 documentType='folder'
                 viewMode={appearance.directoryLayout}
               />
               <Separator className='my-4' />
               <FileGrid
-                files={getDirectoryDataHook.data?.data.documents || []}
+                files={documents || []}
                 documentType='file'
                 viewMode={appearance.directoryLayout}
               />

@@ -1,5 +1,7 @@
 import * as React from "react";
+// or your router import
 import { Slot } from "@radix-ui/react-slot";
+import { Link as RouterLink } from "@tanstack/react-router";
 import { ChevronRight, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,19 +32,42 @@ function BreadcrumbItem({ className, ...props }: React.ComponentProps<"li">) {
   );
 }
 
+// function BreadcrumbLink({
+//   asChild,
+//   className,
+//   ...props
+// }: React.ComponentProps<"a"> & {
+//   asChild?: boolean;
+// }) {
+//   const Comp = asChild ? Slot : "a";
+
+//   return (
+//     <Comp
+//       data-slot='breadcrumb-link'
+//       className={cn("hover:text-foreground transition-colors", className)}
+//       {...props}
+//     />
+//   );
+// }
+
+interface BreadcrumbLinkProps extends React.ComponentProps<"a"> {
+  asChild?: boolean;
+  to?: string; // add a `to` prop for router
+}
+
 function BreadcrumbLink({
   asChild,
+  to,
   className,
   ...props
-}: React.ComponentProps<"a"> & {
-  asChild?: boolean;
-}) {
-  const Comp = asChild ? Slot : "a";
+}: BreadcrumbLinkProps) {
+  const Comp = asChild ? Slot : to ? RouterLink : "a";
 
   return (
     <Comp
       data-slot='breadcrumb-link'
       className={cn("hover:text-foreground transition-colors", className)}
+      {...(to ? { to } : {})}
       {...props}
     />
   );
