@@ -57,24 +57,21 @@ export default function FileMenuItems({ file, fileType }: Props) {
   return (
     <>
       {file.extension && (
-        <>
-          <DropdownMenuItem
-            onClick={filedownload}
-            className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-          >
-            <Download className='mr-2 h-4 w-4' />
-            Download
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            onClick={() => openDialog("details")}
-            className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
-          >
-            <InfoIcon className='mr-2 h-4 w-4' />
-            Details
-          </DropdownMenuItem>
-        </>
+        <DropdownMenuItem
+          onClick={filedownload}
+          className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+        >
+          <Download className='mr-2 h-4 w-4' />
+          Download
+        </DropdownMenuItem>
       )}
-
+      <DropdownMenuItem
+        onClick={() => openDialog("details")}
+        className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+      >
+        <InfoIcon className='mr-2 h-4 w-4' />
+        Details
+      </DropdownMenuItem>
       <DropdownMenuItem
         onClick={() => openDialog("rename")}
         className='cursor-pointer hover:bg-accent hover:text-accent-foreground'

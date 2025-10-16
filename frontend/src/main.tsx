@@ -118,7 +118,7 @@ if (rootElement && !rootElement.innerHTML) {
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
-            <Toaster />
+            <Toaster position='top-center' />
           </QueryClientProvider>
         </ThemeProvider>
       </GoogleOAuthProvider>

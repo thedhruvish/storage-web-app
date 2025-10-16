@@ -77,10 +77,12 @@ export default function FileDetailsDialog({ open }: Props) {
                 {formatFileSize(currentItem.metaData?.size)}
               </TableCell>
             </TableRow>
-            <TableRow>
-              <TableCell className='font-medium'>Extension</TableCell>
-              <TableCell>{currentItem.extension}</TableCell>
-            </TableRow>
+            {currentItem.extension && (
+              <TableRow>
+                <TableCell className='font-medium'>Extension</TableCell>
+                <TableCell>{currentItem.extension}</TableCell>
+              </TableRow>
+            )}
             <TableRow>
               <TableCell className='font-medium'>Created At</TableCell>
               <TableCell>{formatDate(currentItem.createdAt)}</TableCell>

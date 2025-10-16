@@ -5,9 +5,6 @@ import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
 import { useDeleteDirectory, useGetAllDirectoryList } from "@/api/directoryApi";
 import { useDeleteDocument } from "@/api/docuementApi";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface Props {
@@ -17,7 +14,6 @@ interface Props {
 
 export function FileDeleteDialog({ open, onOpenChange }: Props) {
   const { directoryId } = useParams({ strict: false });
-  const [value, setValue] = useState("");
   const { currentItem, closeDialog } = useDialogStore();
   const [fileName, setFileName] = useState("");
   const deleteDirectory = useDeleteDirectory(directoryId);
@@ -33,7 +29,6 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
   const fileType = currentItem.extension ? "File" : "Directory";
 
   const handleDelete = async () => {
-    if (value.trim() !== fileName) return;
     try {
       if (currentItem.extension) {
         await deleteDocument.mutateAsync({
@@ -49,7 +44,6 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
       toast.error(`Error deleting ${fileName}`);
     } finally {
       getallDirectorys.refetch();
-      setValue("");
       closeDialog();
     }
   };
@@ -58,7 +52,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={value.trim() !== fileName}
+      disabled={deleteDocument.isPending || deleteDirectory.isPending}
       title={
         <span className='text-destructive'>
           <TriangleAlert
@@ -68,34 +62,7 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
           Delete {fileType}
         </span>
       }
-      desc={
-        <div className='space-y-4'>
-          <p className='mb-2'>
-            Are you sure you want to delete{" "}
-            <span className='font-bold'>{fileName}</span>?
-            <br />
-            This action will permanently remove the {fileType} with the name of{" "}
-            <span className='font-bold'>{fileName}</span> from the system. This
-            cannot be undone.
-          </p>
-
-          <Label className='my-2'>
-            {fileType} Name:
-            <Input
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              placeholder={`Enter ${fileType} name to confirm deletion.`}
-            />
-          </Label>
-
-          <Alert variant='destructive'>
-            <AlertTitle>Warning!</AlertTitle>
-            <AlertDescription>
-              Please be carefull, this operation can not be rolled back.
-            </AlertDescription>
-          </Alert>
-        </div>
-      }
+      desc={"Are you sure you want to delete this " + fileType + "?"}
       confirmText='Delete'
       destructive
     />

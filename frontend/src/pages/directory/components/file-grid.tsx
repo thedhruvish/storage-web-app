@@ -114,21 +114,19 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
   const renderContextMenuItems = (file: FileItem) => (
     <>
       {file.extension && (
-        <>
-          <ContextMenuItem
-            onClick={() => handleFileDownload(file)}
-            className='cursor-pointer'
-          >
-            <Download className='mr-2 h-4 w-4' /> Download
-          </ContextMenuItem>
-          <ContextMenuItem
-            onClick={() => handleOpenDialog("details", file)}
-            className='cursor-pointer'
-          >
-            <InfoIcon className='mr-2 h-4 w-4' /> Details
-          </ContextMenuItem>
-        </>
+        <ContextMenuItem
+          onClick={() => handleFileDownload(file)}
+          className='cursor-pointer'
+        >
+          <Download className='mr-2 h-4 w-4' /> Download
+        </ContextMenuItem>
       )}
+      <ContextMenuItem
+        onClick={() => handleOpenDialog("details", file)}
+        className='cursor-pointer'
+      >
+        <InfoIcon className='mr-2 h-4 w-4' /> Details
+      </ContextMenuItem>
       <ContextMenuItem
         onClick={() => handleOpenDialog("rename", file)}
         className='cursor-pointer'
