@@ -3,7 +3,10 @@ import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/User.model.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/document.model.js";
-import { createAndCheckLimitSession } from "../utils/redisHelper.js";
+import {
+  createAndCheckLimitSession,
+  deleteAllUserSessions,
+} from "../utils/redisHelper.js";
 
 // get all users
 export const getAllUser = async (req, res) => {
@@ -33,8 +36,7 @@ export const userDeleteChange = async (req, res) => {
 // hard delete
 export const userHardDelete = async (req, res) => {
   const userId = req.params.userId;
-
-  await Session.deleteMany({ userId });
+  await deleteAllUserSessions(userId);
   const allDocument = await Document.find({ userId }).select({
     _id: 1,
     extension: 1,

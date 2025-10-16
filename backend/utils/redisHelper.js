@@ -38,3 +38,22 @@ export const createAndCheckLimitSession = async (userId, limitDevices = 3) => {
 
   return sessionUUID;
 };
+
+export const deleteAllUserSessions = async (userId) => {
+  let cursor = "0";
+
+  do {
+    const { cursor: nextCursor, keys } = await redisClient.scan(cursor, {
+      MATCH: "session:*",
+      COUNT: 100,
+    });
+    cursor = nextCursor;
+
+    for (const key of keys) {
+      const value = await redisClient.get(key);
+      if (value === userId) {
+        await redisClient.del(key);
+      }
+    }
+  } while (cursor !== "0");
+};
