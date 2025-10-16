@@ -126,9 +126,15 @@ export const loginWithEmail = async (req, res) => {
 
 // get user
 export const getCureentUser = async (req, res) => {
-  res
-    .status(200)
-    .json(new ApiResponse(200, "User login Successfuly", req.user));
+  const metaData = await Directory.findById(req.user.rootDirId, {
+    metaData: 1,
+  });
+  res.status(200).json(
+    new ApiResponse(200, "User login Successfuly", {
+      ...req.user,
+      totalUsedBytes: metaData.metaData.size,
+    }),
+  );
 };
 
 // logout user

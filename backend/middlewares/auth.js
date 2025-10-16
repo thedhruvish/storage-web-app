@@ -28,6 +28,7 @@ export const checkAuth = async (req, res, next) => {
         rootDirId: user.rootDirId,
         email: user.email,
         role: user.role,
+        maxStorageBytes: user.maxStorageBytes,
       }),
     );
   }
@@ -36,6 +37,8 @@ export const checkAuth = async (req, res, next) => {
     rootDirId: user.rootDirId,
     email: user.email,
     role: user.role,
+    maxStorageBytes: user.maxStorageBytes,
   };
+  console.log(req.user);
   next();
 };

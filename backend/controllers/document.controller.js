@@ -5,12 +5,26 @@ import ApiResponse from "../utils/ApiResponse.js";
 import path from "node:path";
 import fs from "fs";
 import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
+import Directory from "../models/Directory.model.js";
 
 // create the file
 export const createDocument = async (req, res) => {
   const parentDirId = req.params.parentDirId || req.user.rootDirId;
   const { id, extension } = req.customFileInfo;
   const fileSize = req.file.size;
+  const directory = await Directory.findById(user.rootDirId, {
+    metaData: 1,
+  }).lean();
+  const newUsedSize = directory.metaData.size + fileSize;
+
+  if (newUsedSize > user.maxStorageBytes) {
+    // Delete uploaded file immediately to avoid overflow
+    await rm(`${import.meta.dirname}/../storage/${id}${extension}`);
+    fs.unlinkSync(req.file.path);
+    return res.status(400).json({
+      message: "Storage limit exceeded — file removed.",
+    });
+  }
   const document = new Document({
     _id: id,
     userId: req.user._id,

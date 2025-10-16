@@ -24,7 +24,6 @@ export const updateParentDirectorySize = async (dirId, size) => {
         { _id: { $in: directories } },
         { $inc: { "metaData.size": size } },
       );
-      console.log("✅ Updated parent directories:", directories);
     } else {
       console.log("⚠️ No parent directories found");
     }
