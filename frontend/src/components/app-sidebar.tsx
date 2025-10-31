@@ -157,6 +157,32 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 </SidebarMenu>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to='/admin/coupon'
+                        className='flex items-center gap-3'
+                      >
+                        <Plane className='h-4 w-4' />
+                        <span>coupon</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to='/admin/promo-code/'
+                        className='flex items-center gap-3'
+                      >
+                        <Plane className='h-4 w-4' />
+                        <span>Promo Code</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
               </>
             )}
           </SidebarGroupContent>
