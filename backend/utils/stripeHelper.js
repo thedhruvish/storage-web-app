@@ -9,13 +9,30 @@ export const listStripeProduct = async () => {
   return products;
 };
 
-export const createStripeProduct = async (data) => {
-  const product = await stripe.products.create(data);
-  return product;
-};
+export const createStripeProduct = async ({
+  title,
+  isActive,
+  description,
+  interval,
+  priceUSD,
+  metadata,
+}) => {
+  const product = await stripe.products.create({
+    name: title,
+    active: isActive,
+    description,
+    default_price_data: {
+      currency: "USD",
+      unit_amount: priceUSD * 100,
+      recurring: {
+        interval,
+        interval_count: 1,
+      },
+    },
+    shippable: false,
+    metadata,
+  });
 
-export const updateStripeProduct = async (id, data) => {
-  const product = await stripe.products.update(id, data);
   return product;
 };
 
@@ -38,13 +55,14 @@ export const listStripeCoupons = async () => {
   return coupons;
 };
 
-export const createStripeCoupons = async (data) => {
-  const coupon = await stripe.coupons.create(data);
-  return coupon;
-};
-
-export const updateStripeCoupons = async (id, data) => {
-  const coupon = await stripe.coupons.update(id, data);
+export const createStripeCoupons = async ({ amount_off, percent_off, id }) => {
+  const coupon = await stripe.coupons.create({
+    amount_off,
+    percent_off,
+    currency: "USD",
+    duration: "forever",
+    id,
+  });
   return coupon;
 };
 
@@ -60,13 +78,27 @@ export const listStripePromotionCodes = async () => {
   return promotionCodes;
 };
 
-export const createStripePromotionCodes = async (data) => {
-  const promotionCode = await stripe.promotionCodes.create(data);
-  return promotionCode;
-};
-
-export const updateStripePromotionCodes = async (id, data) => {
-  const promotionCode = await stripe.promotionCodes.update(id, data);
+export const createStripePromotionCode = async ({
+  couponCode,
+  code,
+  expires_at,
+  customer,
+  metadata,
+  isActive,
+  max_redemptions,
+}) => {
+  const promotionCode = await stripe.promotionCodes.create({
+    promotion: {
+      type: "coupon",
+      coupon: couponCode,
+    },
+    active: isActive,
+    code,
+    expires_at,
+    customer,
+    metadata,
+    max_redemptions,
+  });
   return promotionCode;
 };
 

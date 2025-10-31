@@ -34,7 +34,7 @@ router.param("id", paramsValidation);
 
 router.put(
   "/:id/starred",
-  permissionMiddleware("update"),
+  permissionMiddleware("update", false),
   starredToggleDocument,
 );
 

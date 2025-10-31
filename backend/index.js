@@ -16,6 +16,7 @@ import importDataRoute from "./routes/importData.route.js";
 import permissionRoute from "./routes/permission.route.js";
 import adminRoute from "./routes/admin.route.js";
 import paymentRoute from "./routes/payment.route.js";
+import planRoute from "./routes/plan.route.js";
 import paymentStripeRoute from "./routes/paymentStripe.route.js";
 
 const port = process.env.PORT || 4000;
@@ -60,6 +61,9 @@ app.use(cookiesParser(cookieSecret));
 
 // auth router
 app.use("/auth", rateLimiter({ maxLimit: 20 }), authRoute);
+
+// plan route
+app.use("/plan", rateLimiter({ maxLimit: 100 }), planRoute);
 
 // permission on files
 app.use("/permission", rateLimiter({ maxLimit: 100 }), permissionRoute);

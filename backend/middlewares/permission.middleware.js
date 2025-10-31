@@ -117,3 +117,13 @@ export const adminPermissionMiddleware = (action) => {
     return res.status(403).json(new ApiError(403, "Unauthorized"));
   };
 };
+
+export const checkOwnerAndAdmin = () => {
+  return async (req, res, next) => {
+    if (req.user.role === "owner" || req.user.role === "admin") {
+      return next();
+    }
+    console.log("run");
+    return res.status(403).json(new ApiError(403, "You can't do this action"));
+  };
+};
