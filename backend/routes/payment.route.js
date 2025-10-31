@@ -1,15 +1,15 @@
 import express from "express";
 import {
-  createCoupens,
+  createCoupons,
   createPromoCode,
-  deleteCoupens,
-  getAllCoupens,
+  deleteCoupons,
+  getAllCoupons,
   getAllPromoCode,
   togglePromoCode,
 } from "../controllers/payment.controller.js";
 import { validateInput } from "../utils/validateInput.js";
 import {
-  createCoupensValidation,
+  createCouponsValidation,
   createPromoCodeValidation,
   togglePromoCodeValidation,
 } from "../validators/paymentSchema.js";
@@ -19,22 +19,22 @@ const router = express.Router();
 
 router.use(checkOwnerAndAdmin());
 
-// coupen
+// coupon
 router
-  .route("/coupen")
-  .get(getAllCoupens)
-  .post(validateInput(createCoupensValidation), createCoupens);
+  .route("/coupon")
+  .get(getAllCoupons)
+  .post(validateInput(createCouponsValidation), createCoupons);
 
-router.route("/coupen/:id").delete(deleteCoupens);
+router.route("/coupon/:id").delete(deleteCoupons);
 
-// promocode
+// promo-code
 router
-  .route("/promocode")
+  .route("/promo-code")
   .get(getAllPromoCode)
   .post(validateInput(createPromoCodeValidation), createPromoCode);
 router
-  .route("/promocode/:id")
+  .route("/promo-code/:id")
   .put(validateInput(togglePromoCodeValidation), togglePromoCode)
-  .delete(deleteCoupens);
+  .delete(deleteCoupons);
 
 export default router;

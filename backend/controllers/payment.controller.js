@@ -9,19 +9,19 @@ import {
   toggleStripePromotionCodes,
 } from "../utils/stripeHelper.js";
 
-// handle the coupens
-export const getAllCoupens = async (req, res) => {
-  const coupens = await listStripeCoupons();
-  res.status(200).json(new ApiResponse(200, "Coupens list", { coupens }));
+// handle the coupons
+export const getAllCoupons = async (req, res) => {
+  const coupons = await listStripeCoupons();
+  res.status(200).json(new ApiResponse(200, "Coupons list", { coupons }));
 };
 
-export const createCoupens = async (req, res) => {
+export const createCoupons = async (req, res) => {
   const { code, amount_off = undefined, percent_off = undefined } = req.body;
   await createStripeCoupons({ id: code, amount_off, percent_off });
-  res.status(200).json(new ApiResponse(200, "Coupens create Successfuly"));
+  res.status(200).json(new ApiResponse(200, "Coupons create Successfuly"));
 };
 
-export const deleteCoupens = async (req, res) => {
+export const deleteCoupons = async (req, res) => {
   const { id } = req.params;
   await deleteStripeCoupons(id);
 };

@@ -1,7 +1,7 @@
 import z from "zod";
 
-export const createCoupensValidation = z.object({
-  code: z.string("Coupen Code is required"),
+export const createCouponsValidation = z.object({
+  code: z.string("Coupon Code is required"),
   amount_off: z.number("Amount off is required").optional(),
   percent_off: z
     .number("Percent off is required")
