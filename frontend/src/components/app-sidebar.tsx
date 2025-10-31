@@ -6,6 +6,7 @@ import {
   Clock,
   Command,
   HardDrive,
+  Plane,
   Plus,
   Star,
   Trash2,
@@ -139,6 +140,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       <Link to='/admin' className='flex items-center gap-3'>
                         <User className='h-4 w-4' />
                         <span>All Users</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </SidebarMenu>
+                <SidebarMenu>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild>
+                      <Link
+                        to='/admin/plan'
+                        className='flex items-center gap-3'
+                      >
+                        <Plane className='h-4 w-4' />
+                        <span>All Plan</span>
                       </Link>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

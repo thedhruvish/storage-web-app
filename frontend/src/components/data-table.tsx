@@ -15,6 +15,7 @@ import {
   type RowSelectionState,
 } from "@tanstack/react-table";
 import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -26,13 +27,15 @@ import {
 import { DataTablePagination } from "./data-table/pagination";
 import { DataTableViewOptions } from "./data-table/view-options";
 
+// <-- 1. IMPORT SKELETON
+
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   searchKey?: string; // which column to search in
   showRowSelection?: boolean; // add checkbox column
   pageCount?: number;
-  isLoading?: boolean;
+  isLoading?: boolean; // We will use this prop
   manualFiltering?: boolean;
   manualPagination?: boolean;
   manualSorting?: boolean;
@@ -43,6 +46,7 @@ export function DataTable<TData, TValue>({
   data,
   searchKey = "email",
   showRowSelection = false,
+  isLoading,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -67,6 +71,18 @@ export function DataTable<TData, TValue>({
     getPaginationRowModel: getPaginationRowModel(),
   });
 
+  // Helper to create skeleton rows
+  const SkeletonRow = () => (
+    <TableRow>
+      {/* Use table.getAllColumns() to include selection/action columns */}
+      {table.getAllColumns().map((column) => (
+        <TableCell key={column.id}>
+          <Skeleton className='h-4 w-full' />
+        </TableCell>
+      ))}
+    </TableRow>
+  );
+
   return (
     <div>
       {/* Search + Column visibility toggles */}
@@ -78,6 +94,7 @@ export function DataTable<TData, TValue>({
             table.getColumn(searchKey)?.setFilterValue(event.target.value)
           }
           className='max-w-sm'
+          disabled={isLoading}
         />
         <DataTableViewOptions table={table} />
       </div>
@@ -101,8 +118,14 @@ export function DataTable<TData, TValue>({
               </TableRow>
             ))}
           </TableHeader>
+
+          {/* --- 2. UPDATED TABLE BODY --- */}
           <TableBody>
-            {table.getRowModel().rows?.length ? (
+            {isLoading ? (
+              // If loading, show 5 skeleton rows
+              [...Array(5)].map((_, i) => <SkeletonRow key={i} />)
+            ) : table.getRowModel().rows?.length ? (
+              // If not loading and data exists, show data
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
@@ -121,7 +144,8 @@ export function DataTable<TData, TValue>({
             ) : (
               <TableRow>
                 <TableCell
-                  colSpan={columns.length}
+                  // Use table.getAllColumns() for correct colSpan
+                  colSpan={table.getAllColumns().length}
                   className='h-24 text-center'
                 >
                   No results.
