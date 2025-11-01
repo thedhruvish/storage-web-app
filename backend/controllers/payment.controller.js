@@ -5,18 +5,33 @@ import {
   createStripeCoupons,
   createStripePromotionCode,
   deleteStripeCoupons,
-  deleteStripePromotionCodes,
   listStripeCoupons,
   listStripePromotionCodes,
   toggleStripePromotionCodes,
 } from "../utils/stripeHelper.js";
 import redisClient from "../config/redis-client.js";
+import { countCheckoutUrls } from "../utils/redisHelper.js";
+import ApiError from "../utils/ApiError.js";
 
 // checkout
 
 export const genratorStripeCheckoutUrl = async (req, res) => {
   const { id } = req.body;
   const userId = req.user._id.toString();
+
+  // check only allowed 5 checkout url allowed
+  const count = await countCheckoutUrls(`checkoutUrl:${userId}:*`);
+
+  if (count >= 0) {
+    return res
+      .status(400)
+      .json(
+        new ApiError(
+          400,
+          "Please wait for some time after You can allowd to create checkout url",
+        ),
+      );
+  }
   const checkoutUrl = await redisClient.get(`checkoutUrl:${userId}:${id}`);
   console.log(checkoutUrl);
   if (checkoutUrl) {
@@ -77,6 +92,7 @@ export const createCoupons = async (req, res) => {
 export const deleteCoupons = async (req, res) => {
   const { id } = req.params;
   await deleteStripeCoupons(id);
+  res.status(200).json(new ApiResponse(200), "Coupons delete Successfuly");
 };
 
 // handle promo code
@@ -118,9 +134,4 @@ export const togglePromoCode = async (req, res) => {
   const { isActive = false } = req.body;
   await toggleStripePromotionCodes(id, isActive);
   res.status(201).json(new ApiResponse(201, "promoCode toggle Successfuly"));
-};
-export const deletePromoCode = async (req, res) => {
-  const { id } = req.params;
-  await deleteStripePromotionCodes(id);
-  res.status(201).json(new ApiResponse(201, "promoCode delete Successfuly"));
 };

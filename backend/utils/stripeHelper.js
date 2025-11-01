@@ -113,11 +113,6 @@ export const toggleStripePromotionCodes = async (id, active) => {
   return promotionCode;
 };
 
-export const deleteStripePromotionCodes = async (id) => {
-  const promotionCode = await stripe.promotionCodes.del(id);
-  return promotionCode;
-};
-
 //  Checkout session  subscription create
 export const createStripeCheckoutSession = async ({
   priceId,

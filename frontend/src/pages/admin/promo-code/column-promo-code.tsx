@@ -13,7 +13,6 @@ import {
 import type { PromoCode } from "./promocode-schema";
 
 export const getColumnsPromoCode = (
-  handleDelete: (planId: string) => void,
   handleToggleActive: (planId: string, isActive: boolean) => void
 ): ColumnDef<PromoCode>[] => [
   {
@@ -68,12 +67,6 @@ export const getColumnsPromoCode = (
               onClick={() => handleToggleActive(plan.id, plan.active)}
             >
               {plan.active ? "Deactivate" : "Activate"}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              className='text-red-600'
-              onClick={() => handleDelete(plan.id)}
-            >
-              Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

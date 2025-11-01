@@ -57,3 +57,19 @@ export const deleteAllUserSessions = async (userId) => {
     }
   } while (cursor !== "0");
 };
+
+export const countCheckoutUrls = async (MATCH) => {
+  let cursor = "0";
+  let total = 0;
+  do {
+    const { cursor: nextCursor, keys } = await redisClient.scan(cursor, {
+      MATCH,
+      COUNT: 100,
+    });
+
+    total += keys.length;
+    cursor = nextCursor;
+  } while (cursor !== "0");
+
+  return total;
+};

@@ -57,20 +57,3 @@ export const useTogglePromoCode = () => {
     },
   });
 };
-
-/**
- * Deleting a Stripe promotion code.
- */
-export const useDeletePromoCode = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: async (id: string) => {
-      const response = await axiosClient.delete(`/promo-code/${id}`);
-      return response.data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["promo-codes"] });
-    },
-  });
-};

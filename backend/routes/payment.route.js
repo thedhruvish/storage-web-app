@@ -39,7 +39,6 @@ router
   .post(validateInput(createPromoCodeValidation), createPromoCode);
 router
   .route("/promo-code/:id")
-  .patch(validateInput(togglePromoCodeValidation), togglePromoCode)
-  .delete(deleteCoupons);
+  .patch(validateInput(togglePromoCodeValidation), togglePromoCode);
 
 export default router;
