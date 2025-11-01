@@ -81,8 +81,3 @@ export const getAllPlansForPublic = async (req, res) => {
   const plans = await Plan.find({ isActive: true });
   res.status(200).json(new ApiResponse(200, "Plans list", { plans }));
 };
-
-export const genratorStripeCheckoutUrl = async (req, res) => {
-  const { id } = req.body;
-  const plan = await Plan.findById(id);
-};

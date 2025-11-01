@@ -14,3 +14,13 @@ export const useGetAllPlansPublic = () => {
   });
 };
 
+export const useCheckoutStripe = () => {
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const response = await axiosClient.post("/payment/stripe-checkout", {
+        id,
+      });
+      return response.data.data.url;
+    },
+  });
+};

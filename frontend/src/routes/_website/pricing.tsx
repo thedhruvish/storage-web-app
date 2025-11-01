@@ -1,7 +1,15 @@
-import { useState } from "react";
+import { useEffect } from "react";
+import { z } from "zod";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
-import { PricingCard, type BillingCycle, type Currency } from "@/pages/other/PricingCard";
+import {
+  PricingCard,
+  type BillingCycle,
+  type Currency,
+} from "@/pages/other/PricingCard";
+import { toast } from "sonner";
 import { useGetAllPlansPublic } from "@/api/checkoutApi";
+import { useCheckoutStripe } from "@/api/checkoutApi";
 import {
   Card,
   CardContent,
@@ -18,17 +26,62 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
+const pricingSearchSchema = z.object({
+  billing: z.enum(["month", "year"]).optional().default("month"),
+  currency: z.enum(["inr", "usd"]).optional().default("inr"),
+});
+
 export const Route = createFileRoute("/_website/pricing")({
+  validateSearch: (search) => pricingSearchSchema.parse(search),
   component: PricingPage,
 });
 
 export default function PricingPage() {
   const { data, isLoading } = useGetAllPlansPublic();
-  const [billingCycle, setBillingCycle] = useState<BillingCycle>("month");
-  const [currency, setCurrency] = useState<Currency>("inr");
+  const { billing, currency } = Route.useSearch();
 
-  const filteredPlans =
-    data?.filter((plan) => plan.interval === billingCycle) ?? [];
+  const navigate = Route.useNavigate();
+
+  const { mutate: checkoutStripeMutate, isPending } = useCheckoutStripe();
+
+  const queryClient = useQueryClient();
+  const filteredPlans = data?.filter((plan) => plan.interval === billing) ?? [];
+
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      // Check if the message is the one we expect
+      if (event.key === "payment_status" && event.newValue === "SUCCESS") {
+        // Payment was successful!
+        toast.success("Payment successful! Refreshing data.");
+
+        // 1. Refetch any data that needs updating
+        // (e.g., the user's new plan)
+        // queryClient.invalidateQueries({ queryKey: ["user-status"] });
+
+        // 2. Clean up the message
+        localStorage.removeItem("payment_status");
+      }
+    };
+
+    // Add the listener
+    window.addEventListener("storage", handleStorageChange);
+
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [queryClient]);
+
+  const checkoutStripeHandler = (id: string) => {
+    if (currency === "usd") {
+      checkoutStripeMutate(id, {
+        onSuccess(data) {
+          localStorage.setItem("payment_status", "INIT");
+          window.open(data, "_blank");
+        },
+      });
+    }
+  };
 
   return (
     <div className='container mx-auto max-w-7xl px-4 py-12'>
@@ -46,7 +99,12 @@ export default function PricingPage() {
       <div className='flex flex-col sm:flex-row justify-center items-center gap-4 mb-10'>
         <Select
           value={currency}
-          onValueChange={(value) => setCurrency(value as Currency)}
+          onValueChange={(value) =>
+            navigate({
+              search: (prev) => ({ ...prev, currency: value as Currency }),
+              replace: true,
+            })
+          }
         >
           <SelectTrigger className='w-[180px]'>
             <SelectValue placeholder='Select Currency' />
@@ -58,8 +116,13 @@ export default function PricingPage() {
         </Select>
 
         <Tabs
-          value={billingCycle}
-          onValueChange={(value) => setBillingCycle(value as BillingCycle)}
+          value={billing}
+          onValueChange={(value) =>
+            navigate({
+              search: (prev) => ({ ...prev, billing: value as BillingCycle }),
+              replace: true,
+            })
+          }
           className='w-auto'
         >
           <TabsList>
@@ -102,6 +165,8 @@ export default function PricingPage() {
               key={plan._id} // Use the database ID as the key
               plan={plan}
               currency={currency}
+              isPending={isPending}
+              checkoutHandler={checkoutStripeHandler}
             />
           ))}
       </div>

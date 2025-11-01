@@ -3,6 +3,7 @@ import {
   createCoupons,
   createPromoCode,
   deleteCoupons,
+  genratorStripeCheckoutUrl,
   getAllCoupons,
   getAllPromoCode,
   togglePromoCode,
@@ -17,6 +18,10 @@ import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
 
 const router = express.Router();
 
+//  only auth access
+router.post("/stripe-checkout", genratorStripeCheckoutUrl);
+
+// admin access those routes
 router.use(checkOwnerAndAdmin());
 
 // coupon

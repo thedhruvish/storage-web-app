@@ -40,21 +40,19 @@ const formatCurrency = (amount: number, currency: Currency) => {
 
 interface PricingCardProps {
   plan: BackendPlan;
+  isPending: boolean;
   currency: Currency;
+  checkoutHandler: (plan: string) => void;
 }
 
-export function PricingCard({ plan, currency }: PricingCardProps) {
+export function PricingCard({
+  plan,
+  currency,
+  isPending,
+  checkoutHandler,
+}: PricingCardProps) {
   const price = currency === "inr" ? plan.priceINR : plan.priceUSD;
   const isFree = price === 0;
-
-  const getStartPlan = () => {
-    if (currency === "inr") {
-      alert("comming soon");
-    }
-    if (currency === "usd") {
-      console.log("stripe");
-    }
-  };
 
   return (
     <Card
@@ -99,7 +97,8 @@ export function PricingCard({ plan, currency }: PricingCardProps) {
         <Button
           className='w-full'
           variant={plan.isFeatured ? "default" : "outline"}
-          onClick={getStartPlan}
+          onClick={() => checkoutHandler(plan._id)}
+          disabled={isPending}
         >
           {price === -1 ? "Contact Sales" : "Get Started"}
         </Button>

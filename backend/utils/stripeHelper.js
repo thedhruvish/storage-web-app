@@ -119,7 +119,23 @@ export const deleteStripePromotionCodes = async (id) => {
 };
 
 //  Checkout session  subscription create
-export const createStripeCheckoutSession = async (data) => {
-  const checkoutSession = await stripe.checkout.sessions.create(data);
+export const createStripeCheckoutSession = async ({
+  priceId,
+  metadata,
+  customer_email,
+}) => {
+  const checkoutSession = await stripe.checkout.sessions.create({
+    mode: "subscription",
+    line_items: [
+      {
+        price: priceId,
+        quantity: 1,
+      },
+    ],
+    allow_promotion_codes: true,
+    success_url: process.env.STRIPE_PAYMENT_SUCCESS_URL,
+    metadata,
+    customer_email,
+  });
   return checkoutSession;
 };
