@@ -2,6 +2,7 @@ import Stripe from "stripe";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 //  product helper
 
 export const listStripeProduct = async () => {
@@ -133,4 +134,16 @@ export const createStripeCheckoutSession = async ({
     customer_email,
   });
   return checkoutSession;
+};
+
+// verify webhook stripe
+export const verifyStripeWebhook = async (req) => {
+  const signature = req.headers["stripe-signature"];
+
+  const event = stripe.webhooks.constructEvent(
+    req.body,
+    signature,
+    endpointSecret,
+  );
+  return event;
 };

@@ -18,6 +18,7 @@ import adminRoute from "./routes/admin.route.js";
 import paymentRoute from "./routes/payment.route.js";
 import planRoute from "./routes/plan.route.js";
 import paymentStripeRoute from "./routes/paymentStripe.route.js";
+import webhookRoute from "./routes/webhook.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -53,6 +54,10 @@ app.use(
     credentials: true,
   }),
 );
+
+// webhook
+app.use("/wh", webhookRoute);
+
 // parser data into json and add req.body
 app.use(express.json());
 
