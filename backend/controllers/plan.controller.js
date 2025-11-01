@@ -76,3 +76,13 @@ export const deletePlan = async (req, res) => {
   await deleteStripeProduct(plan.productId, plan.default_price_id);
   res.status(200).json(new ApiResponse(200, "Plan delete Successfuly"));
 };
+
+export const getAllPlansForPublic = async (req, res) => {
+  const plans = await Plan.find({ isActive: true });
+  res.status(200).json(new ApiResponse(200, "Plans list", { plans }));
+};
+
+export const genratorStripeCheckoutUrl = async (req, res) => {
+  const { id } = req.body;
+  const plan = await Plan.findById(id);
+};

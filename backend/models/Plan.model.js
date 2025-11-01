@@ -15,7 +15,7 @@ const planSchema = new mongoose.Schema(
       required: true,
     },
     productId: {
-      type: String, // this id is the same as the created product on the stripe
+      type: String,
     },
     default_price_id: {
       type: String,
