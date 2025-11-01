@@ -10,7 +10,7 @@ export const useGetAllPromoCodes = () => {
     queryKey: ["promo-codes"],
     queryFn: async () => {
       const response = await axiosClient.get("/payment/promo-code");
-      return response.data.promoCode;
+      return response.data.data.promoCode;
     },
   });
 };

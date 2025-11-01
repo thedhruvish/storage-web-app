@@ -15,3 +15,12 @@ export const createCouponSchema = z.object({
 });
 
 export type CouponFormValues = z.infer<typeof createCouponSchema>;
+
+export type Coupon = {
+  id: string;
+  amount_off: number;
+  created: number;
+  duration: string;
+  max_redemptions: number;
+  percent_off: number;
+};

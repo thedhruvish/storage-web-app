@@ -14,3 +14,23 @@ export const createPromoCodeSchema = z.object({
 });
 
 export type PromoCodeFormValues = z.infer<typeof createPromoCodeSchema>;
+
+export type PromoCode = {
+  id: string;
+  code: string;
+  created: number;
+  expires_at: number;
+  max_redemptions: number;
+  customer: string;
+  promotion: {
+    coupon: string;
+    type: string;
+  };
+  restrictions: {
+    first_time_transaction: boolean;
+    minimum_amount: number;
+    minimum_amount_currency: string;
+  };
+  times_redeemed: number;
+  active: boolean;
+};

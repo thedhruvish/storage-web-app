@@ -12,7 +12,20 @@ import {
 // handle the coupons
 export const getAllCoupons = async (req, res) => {
   const coupons = await listStripeCoupons();
-  res.status(200).json(new ApiResponse(200, "Coupons list", { coupons }));
+  const response = coupons.data.map(
+    ({ id, amount_off, created, duration, max_redemptions, percent_off }) => ({
+      id,
+      amount_off,
+      created,
+      duration,
+      max_redemptions,
+      percent_off,
+    }),
+  );
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Coupons list", { coupons: response }));
 };
 
 export const createCoupons = async (req, res) => {
@@ -29,7 +42,11 @@ export const deleteCoupons = async (req, res) => {
 // handle promo code
 export const getAllPromoCode = async (req, res) => {
   const promoCode = await listStripePromotionCodes();
-  res.status(200).json(new ApiResponse(200, "promoCode list", { promoCode }));
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "promoCode list", { promoCode: promoCode.data }),
+    );
 };
 
 export const createPromoCode = async (req, res) => {

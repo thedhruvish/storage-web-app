@@ -10,7 +10,7 @@ export const useGetAllCoupon = () => {
     queryKey: ["coupons"],
     queryFn: async () => {
       const response = await axiosClient.get("/payment/coupon");
-      return response.data.coupens;
+      return response.data.data.coupons;
     },
   });
 };
