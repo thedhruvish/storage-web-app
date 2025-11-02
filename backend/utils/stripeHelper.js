@@ -136,6 +136,26 @@ export const createStripeCheckoutSession = async ({
   return checkoutSession;
 };
 
+// pause subscription
+
+export const pauseStripeSubscription = async (id) => {
+  const subscription = await stripe.subscriptions.update(id, {
+    pause_collection: {
+      behavior: "mark_uncollectible",
+    },
+  });
+  return subscription;
+};
+
+// resume subscription
+
+export const resumeStripeSubscription = async (id) => {
+  const subscription = await stripe.subscriptions.update(id, {
+    pause_collection: null,
+  });
+  return subscription;
+};
+
 // verify webhook stripe
 export const verifyStripeWebhook = async (req) => {
   const signature = req.headers["stripe-signature"];

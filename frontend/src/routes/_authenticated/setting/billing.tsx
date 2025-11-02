@@ -1,6 +1,13 @@
+import { useEffect } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import { AlertCircle, CalendarDays, Database, Loader2 } from "lucide-react";
-import { useGetAllSubscriptions, type ApiSubscription } from "@/api/settingApi";
+import { toast } from "sonner";
+import {
+  useGetAllSubscriptions,
+  useToggleSubscriptionPaused,
+  type ApiSubscription,
+} from "@/api/settingApi";
 import { formatCurrency, formatDate, formatFileSize } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -45,7 +52,34 @@ const getStatusVariant = (
 export function BillingSettingsPage() {
   // Use the hook to fetch data
   const { data: subscriptions, isLoading, isError } = useGetAllSubscriptions();
+  const { mutate: toggleSubscriptionMutation, isPending: isTogglingPaused } =
+    useToggleSubscriptionPaused();
+  const queryClient = useQueryClient();
 
+  useEffect(() => {
+    const handleStorageChange = (event: StorageEvent) => {
+      // Check if the message is the one we expect
+      if (event.key === "payment_status" && event.newValue === "SUCCESS") {
+        // Payment was successful!
+        toast.success("Payment successful! Refreshing data.");
+
+        // 1. Refetch any data that needs updating
+        // (e.g., the user's new plan)
+        // queryClient.invalidateQueries({ queryKey: ["user-status"] });
+
+        // 2. Clean up the message
+        localStorage.removeItem("payment_status");
+      }
+    };
+
+    // Add the listener
+    window.addEventListener("storage", handleStorageChange);
+
+    // Clean up the listener when the component unmounts
+    return () => {
+      window.removeEventListener("storage", handleStorageChange);
+    };
+  }, [queryClient]);
   // Find the current active subscription
   // We use optional chaining (?) in case 'subscriptions' is not yet loaded
   const currentSubscription = subscriptions?.find(
@@ -165,6 +199,25 @@ export function BillingSettingsPage() {
           <CardFooter className='flex flex-col items-start gap-4 border-t pt-6 md:flex-row md:justify-between'>
             <Button variant='outline' onClick={() => console.log("ok")}>
               Manage Subscription
+            </Button>
+            <Button
+              variant={
+                currentSubscription.isPauseCollection
+                  ? "outline"
+                  : "destructive"
+              }
+              onClick={() =>
+                toggleSubscriptionMutation(currentSubscription._id, {
+                  onSuccess: () => {
+                    toast.success("Subscription toggled successfully");
+                  },
+                })
+              }
+              disabled={isTogglingPaused}
+            >
+              {currentSubscription.isPauseCollection
+                ? "Active Payment"
+                : "Paused Payment"}
             </Button>
             {currentSubscription.status === "active" && (
               <Button variant='destructive'>Cancel Subscription</Button>

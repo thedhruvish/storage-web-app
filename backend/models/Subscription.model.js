@@ -28,6 +28,10 @@ const subscriptionSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  isPauseCollection: {
+    type: Boolean,
+    default: false,
+  },
   cancelDate: {
     type: Date,
   },

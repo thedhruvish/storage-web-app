@@ -1,13 +1,10 @@
-import { useEffect } from "react";
 import { z } from "zod";
-import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 import {
   PricingCard,
   type BillingCycle,
   type Currency,
 } from "@/pages/other/PricingCard";
-import { toast } from "sonner";
 import { useGetAllPlansPublic } from "@/api/checkoutApi";
 import { useCheckoutStripe } from "@/api/checkoutApi";
 import {
@@ -44,34 +41,7 @@ export default function PricingPage() {
 
   const { mutate: checkoutStripeMutate, isPending } = useCheckoutStripe();
 
-  const queryClient = useQueryClient();
   const filteredPlans = data?.filter((plan) => plan.interval === billing) ?? [];
-
-  useEffect(() => {
-    const handleStorageChange = (event: StorageEvent) => {
-      // Check if the message is the one we expect
-      if (event.key === "payment_status" && event.newValue === "SUCCESS") {
-        // Payment was successful!
-        toast.success("Payment successful! Refreshing data.");
-
-        // 1. Refetch any data that needs updating
-        // (e.g., the user's new plan)
-        // queryClient.invalidateQueries({ queryKey: ["user-status"] });
-
-        // 2. Clean up the message
-        localStorage.removeItem("payment_status");
-      }
-    };
-
-    // Add the listener
-    window.addEventListener("storage", handleStorageChange);
-
-    // Clean up the listener when the component unmounts
-    return () => {
-      window.removeEventListener("storage", handleStorageChange);
-    };
-  }, [queryClient]);
-
   const checkoutStripeHandler = (id: string) => {
     if (currency === "usd") {
       checkoutStripeMutate(id, {

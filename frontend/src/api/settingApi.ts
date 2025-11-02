@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Plan } from "@/pages/admin/plan/schema";
 import axiosClient from "./axiosClient";
 
@@ -15,7 +15,7 @@ export type ApiSubscription = {
   endDate: string; // API sends strings, not Date objects
   subscriptionId: string;
   paymentType: "stripe" | "razorpay";
-  __v: 0;
+  isPauseCollection: boolean;
   cancelDate?: string;
   customerId?: string;
 };
@@ -42,6 +42,19 @@ export const useGetAllSubscriptions = () => {
 
       // The subscriptions array is in response.data.data
       return response.data.data;
+    },
+  });
+};
+
+// toggle subsciption paused
+export const useToggleSubscriptionPaused = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axiosClient.put(`/user/subscriptions/${id}/toggle`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "subscription"] });
     },
   });
 };
