@@ -1,5 +1,5 @@
 import { Check } from "lucide-react";
-import { formatFileSize } from "@/utils/functions";
+import { formatCurrency, formatFileSize } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,17 +25,6 @@ export type BackendPlan = {
   totalBytes: number;
   isFeatured?: boolean;
   features?: string[];
-};
-
-const formatCurrency = (amount: number, currency: Currency) => {
-  if (amount === -1) return "Custom";
-
-  return new Intl.NumberFormat(currency === "inr" ? "en-IN" : "en-US", {
-    style: "currency",
-    currency: currency.toUpperCase(),
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
 };
 
 interface PricingCardProps {
@@ -70,7 +59,11 @@ export function PricingCard({
       <CardContent className='flex-grow'>
         <div className='mb-6'>
           <span className='text-4xl font-bold'>
-            {isFree ? "Free" : formatCurrency(price, currency)}
+            {isFree
+              ? "Free"
+              : formatCurrency(price, currency, {
+                  amountInSmallestUnit: false,
+                })}
           </span>
           <span className='text-muted-foreground'>
             {isFree || price === -1 ? "" : `/${plan.interval}`}

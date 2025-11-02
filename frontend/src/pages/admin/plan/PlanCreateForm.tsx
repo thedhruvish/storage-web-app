@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"; // 1. Import hooks
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
@@ -25,7 +25,6 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { planCreateValidation, type PlanFormValues } from "./schema";
-import { formatFileSize } from "@/utils/functions";
 
 // --- 2. Define Storage Units and Conversion Logic ---
 const STORAGE_UNITS = ["MB", "GB", "TB"] as const;
@@ -40,9 +39,10 @@ const BYTES_IN_UNIT: Record<StorageUnit, number> = {
 /**
  * Finds the best human-readable unit and value from a number of bytes.
  */
-function getHumanReadableStorage(
-  bytes: number,
-): { value: number; unit: StorageUnit } {
+function getHumanReadableStorage(bytes: number): {
+  value: number;
+  unit: StorageUnit;
+} {
   if (bytes >= BYTES_IN_UNIT.TB) {
     return { value: Number((bytes / BYTES_IN_UNIT.TB).toFixed(2)), unit: "TB" };
   }
@@ -64,9 +64,11 @@ export function PlanCreateForm() {
   const defaultBytes = 1 * BYTES_IN_UNIT.GB; // Default to 1 GB
   const initialStorage = getHumanReadableStorage(defaultBytes);
 
-  const [storageValue, setStorageValue] = useState<number>(initialStorage.value);
+  const [storageValue, setStorageValue] = useState<number>(
+    initialStorage.value
+  );
   const [storageUnit, setStorageUnit] = useState<StorageUnit>(
-    initialStorage.unit,
+    initialStorage.unit
   );
 
   const form = useForm<PlanFormValues>({
@@ -84,7 +86,9 @@ export function PlanCreateForm() {
 
   // 5. Sync local UI state (value + unit) to the RHF state (totalBytes)
   useEffect(() => {
-    const totalBytes = Math.round((storageValue || 0) * BYTES_IN_UNIT[storageUnit]);
+    const totalBytes = Math.round(
+      (storageValue || 0) * BYTES_IN_UNIT[storageUnit]
+    );
     form.setValue("totalBytes", totalBytes, { shouldValidate: true });
   }, [storageValue, storageUnit, form]);
 
