@@ -22,7 +22,7 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
   // check only allowed 5 checkout url allowed
   const count = await countCheckoutUrls(`checkoutUrl:${userId}:*`);
 
-  if (count >= 0) {
+  if (count >= 5) {
     return res
       .status(400)
       .json(

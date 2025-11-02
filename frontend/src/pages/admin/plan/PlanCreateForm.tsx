@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"; // 1. Import hooks
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
@@ -24,11 +25,50 @@ import { Spinner } from "@/components/ui/spinner";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { planCreateValidation, type PlanFormValues } from "./schema";
+import { formatFileSize } from "@/utils/functions";
+
+// --- 2. Define Storage Units and Conversion Logic ---
+const STORAGE_UNITS = ["MB", "GB", "TB"] as const;
+type StorageUnit = (typeof STORAGE_UNITS)[number];
+
+const BYTES_IN_UNIT: Record<StorageUnit, number> = {
+  MB: 1024 * 1024,
+  GB: 1024 * 1024 * 1024,
+  TB: 1024 * 1024 * 1024 * 1024,
+};
+
+/**
+ * Finds the best human-readable unit and value from a number of bytes.
+ */
+function getHumanReadableStorage(
+  bytes: number,
+): { value: number; unit: StorageUnit } {
+  if (bytes >= BYTES_IN_UNIT.TB) {
+    return { value: Number((bytes / BYTES_IN_UNIT.TB).toFixed(2)), unit: "TB" };
+  }
+  if (bytes >= BYTES_IN_UNIT.GB) {
+    return { value: Number((bytes / BYTES_IN_UNIT.GB).toFixed(2)), unit: "GB" };
+  }
+  // Default to MB
+  const mbValue = Number((bytes / BYTES_IN_UNIT.MB).toFixed(2));
+  return { value: Math.max(mbValue, 1), unit: "MB" };
+}
+// --- End of Storage Logic ---
 
 export function PlanCreateForm() {
   const { mutate: createNewPlan, isPending: isCreatingPlan } =
     useCreateNewPlan();
   const navigation = useNavigate();
+
+  // 3. Set up default value and local state for the UI
+  const defaultBytes = 1 * BYTES_IN_UNIT.GB; // Default to 1 GB
+  const initialStorage = getHumanReadableStorage(defaultBytes);
+
+  const [storageValue, setStorageValue] = useState<number>(initialStorage.value);
+  const [storageUnit, setStorageUnit] = useState<StorageUnit>(
+    initialStorage.unit,
+  );
+
   const form = useForm<PlanFormValues>({
     resolver: zodResolver(planCreateValidation),
     defaultValues: {
@@ -37,13 +77,22 @@ export function PlanCreateForm() {
       priceINR: 1,
       priceUSD: 1,
       interval: "month",
-      totalBytes: 1000000, // Example default
+      totalBytes: defaultBytes, // 4. Set RHF default in bytes
       isActive: true,
     },
   });
 
-  // 4. Create the submit handler
+  // 5. Sync local UI state (value + unit) to the RHF state (totalBytes)
+  useEffect(() => {
+    const totalBytes = Math.round((storageValue || 0) * BYTES_IN_UNIT[storageUnit]);
+    form.setValue("totalBytes", totalBytes, { shouldValidate: true });
+  }, [storageValue, storageUnit, form]);
+
+  // 6. Watch the RHF value to display the formatted size
+  const totalBytesWatched = form.watch("totalBytes");
+
   function onSubmit(values: PlanFormValues) {
+    // `values.totalBytes` will be the calculated number in bytes
     createNewPlan(values, {
       onSuccess: () => {
         navigation({ to: "/admin/plan" });
@@ -159,25 +208,51 @@ export function PlanCreateForm() {
               </FormItem>
             )}
           />
+
+          {/* --- 7. UPDATED Storage Quota Field --- */}
           <FormField
             control={form.control}
-            name='totalBytes'
-            render={({ field }) => (
+            name='totalBytes' // This field now controls validation
+            render={() => (
               <FormItem>
-                <FormLabel>Total Bytes</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    placeholder='1000000'
-                    min='1000'
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
+                <FormLabel>Storage Quota</FormLabel>
+                <div className='flex gap-2'>
+                  <FormControl>
+                    <Input
+                      type='number'
+                      placeholder='10'
+                      min='1'
+                      value={storageValue}
+                      onChange={(e) =>
+                        setStorageValue(parseFloat(e.target.value) || 0)
+                      }
+                      className='w-2/3' // Adjust width as needed
+                    />
+                  </FormControl>
+                  <Select
+                    value={storageUnit}
+                    onValueChange={(value: string) =>
+                      setStorageUnit(value as StorageUnit)
                     }
-                  />
-                </FormControl>
-                <FormDescription>Total storage quota in bytes.</FormDescription>
-                <FormMessage />
+                  >
+                    <FormControl>
+                      <SelectTrigger className='w-1/3'>
+                        <SelectValue placeholder='Select unit' />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {STORAGE_UNITS.map((unit) => (
+                        <SelectItem key={unit} value={unit}>
+                          {unit}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <FormDescription>
+                  Total storage Bytes: {totalBytesWatched}
+                </FormDescription>
+                <FormMessage /> {/* This will show errors for totalBytes */}
               </FormItem>
             )}
           />

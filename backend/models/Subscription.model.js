@@ -24,12 +24,15 @@ export const subscriptionSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  paymentId: {
+  subscriptionId: {
     type: String,
     required: true,
   },
   cancelDate: {
     type: Date,
+  },
+  customerId: {
+    type: String,
   },
   paymentType: {
     type: String,

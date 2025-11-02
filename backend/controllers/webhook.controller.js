@@ -1,3 +1,4 @@
+import Subscription from "../models/Subscription.model.js";
 import { verifyStripeWebhook } from "../utils/stripeHelper.js";
 
 export const stripeWebhookHandler = async (req, res) => {
@@ -10,14 +11,26 @@ export const stripeWebhookHandler = async (req, res) => {
   }
 
   // Handle the event
+  console.log(event.data);
   switch (event.type) {
-    case "payment_intent.processing":
-      const paymentIntent = event.data.object;
-      console.log(paymentIntent);
+    case "checkout.session.completed":
+      const checkoutSessionObj = event.data.object;
+      //  when first time payment 
+      if (checkoutSessionObj.status === "complete") {
+        await Subscription.create({
+          planId: checkoutSessionObj.metadata.planId,
+          userId: checkoutSessionObj.metadata.userId,
+          customerId: checkoutSessionObj.customerId,
+          startDate: new Date(checkoutSessionObj.created * 1000),
+          endDate: new Date(checkoutSessionObj.expires_at * 1000),
+
+          subscriptionId: checkoutSessionObj.subscription,
+          status: "active",
+          paymentType: "stripe",
+        });
+      }
       break;
-    case "payment_method.attached":
-      const paymentMethod = event.data.object;
-      break;
+   
     default:
       console.log(`Unhandled event type ${event.type}`);
   }
