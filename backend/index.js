@@ -19,6 +19,7 @@ import paymentRoute from "./routes/payment.route.js";
 import planRoute from "./routes/plan.route.js";
 import paymentStripeRoute from "./routes/paymentStripe.route.js";
 import webhookRoute from "./routes/webhook.route.js";
+import userRoute from "./routes/user.route.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -79,6 +80,7 @@ app.use("/admin", adminRoute);
 app.use("/directory", directoryRoute);
 app.use("/document", docuemntRoute);
 app.use("/import-data", importDataRoute);
+app.use("/user", userRoute);
 app.use("/payment/", paymentRoute);
 app.use("/payment/stripe", paymentStripeRoute);
 

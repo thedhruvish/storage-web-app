@@ -15,7 +15,7 @@ export const stripeWebhookHandler = async (req, res) => {
   switch (event.type) {
     case "checkout.session.completed":
       const checkoutSessionObj = event.data.object;
-      //  when first time payment 
+      //  when first time payment
       if (checkoutSessionObj.status === "complete") {
         await Subscription.create({
           planId: checkoutSessionObj.metadata.planId,
@@ -30,7 +30,7 @@ export const stripeWebhookHandler = async (req, res) => {
         });
       }
       break;
-   
+
     default:
       console.log(`Unhandled event type ${event.type}`);
   }

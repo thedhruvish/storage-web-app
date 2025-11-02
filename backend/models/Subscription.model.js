@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-export const subscriptionSchema = new mongoose.Schema({
+const subscriptionSchema = new mongoose.Schema({
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
