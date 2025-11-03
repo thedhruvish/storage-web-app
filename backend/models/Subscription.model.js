@@ -13,8 +13,11 @@ const subscriptionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["active", "cancelled", "paused", "expired"],
+    enum: ["active", "cancelled", "paused", "expired", "failed", "past_due"],
     default: "active",
+  },
+  stripeSubscriptionCycle: {
+    type: [Object],
   },
   startDate: {
     type: Date,
@@ -24,7 +27,7 @@ const subscriptionSchema = new mongoose.Schema({
     type: Date,
     required: true,
   },
-  subscriptionId: {
+  stripeSubscriptionId: {
     type: String,
     required: true,
   },

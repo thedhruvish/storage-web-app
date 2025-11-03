@@ -12,13 +12,13 @@ import {
 import redisClient from "../config/redis-client.js";
 import { countCheckoutUrls } from "../utils/redisHelper.js";
 import ApiError from "../utils/ApiError.js";
+import User from "../models/User.model.js";
 
 // checkout
 
 export const genratorStripeCheckoutUrl = async (req, res) => {
   const { id } = req.body;
   const userId = req.user._id.toString();
-
   // check only allowed 5 checkout url allowed
   const count = await countCheckoutUrls(`checkoutUrl:${userId}:*`);
 
@@ -53,7 +53,8 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
   await redisClient.set(`checkoutUrl:${userId}:${id}`, checkoutStripe.url, {
     expiration: {
       type: "EX",
-      value: 3600,
+      // value: 3600,
+      value: 6,
     },
   });
 

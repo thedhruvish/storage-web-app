@@ -156,6 +156,15 @@ export const resumeStripeSubscription = async (id) => {
   return subscription;
 };
 
+export const createCustomerPortalSession = async (id) => {
+  const session = await stripe.billingPortal.sessions.create({
+    customer: id,
+    return_url: process.env.STRIPE_PORTAL_RETURN_URL,
+  });
+
+  return session;
+};
+
 // verify webhook stripe
 export const verifyStripeWebhook = async (req) => {
   const signature = req.headers["stripe-signature"];

@@ -39,6 +39,5 @@ export const checkAuth = async (req, res, next) => {
     role: user.role,
     maxStorageBytes: user.maxStorageBytes,
   };
-  console.log(req.user);
   next();
 };
