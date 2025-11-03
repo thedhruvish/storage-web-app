@@ -2,6 +2,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Plan } from "@/pages/admin/plan/schema";
 import axiosClient from "./axiosClient";
 
+export type StripeSubscriptionCycle = {
+  invoice_pdf: string;
+  period_start: string;
+  status: string;
+  total: number;
+};
 /**
  * This type matches the Subscription object
  * from your API response.
@@ -10,10 +16,11 @@ export type ApiSubscription = {
   _id: string;
   userId: string;
   planId: Plan;
-  status: "active" | "cancelled" | "paused" | "expired";
+  status: "active" | "cancelled" | "paused" | "expired" | "failed" | "past_due";
   startDate: string; // API sends strings, not Date objects
   endDate: string; // API sends strings, not Date objects
-  subscriptionId: string;
+  stripeSubscriptionId: string;
+  stripeSubscriptionCycle: StripeSubscriptionCycle[];
   paymentType: "stripe" | "razorpay";
   isPauseCollection: boolean;
   cancelDate?: string;
@@ -52,6 +59,21 @@ export const useToggleSubscriptionPaused = () => {
   return useMutation({
     mutationFn: async (id: string) => {
       await axiosClient.put(`/user/subscriptions/${id}/toggle`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "subscription"] });
+    },
+  });
+};
+
+// update payment details
+export const useUpdatePaymentDetails = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const response = await axiosClient.get(`/user/update-payment-details`);
+      console.log(response.data);
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings", "subscription"] });

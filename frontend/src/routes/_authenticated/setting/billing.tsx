@@ -1,14 +1,24 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { createFileRoute } from "@tanstack/react-router";
-import { AlertCircle, CalendarDays, Database, Loader2 } from "lucide-react";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { SubscriptionCycleDialog } from "@/pages/website/SubscriptionCycleDialog";
+import {
+  AlertCircle,
+  CalendarDays,
+  Database,
+  Loader2,
+  Package,
+  AlertTriangle,
+} from "lucide-react";
 import { toast } from "sonner";
 import {
   useGetAllSubscriptions,
   useToggleSubscriptionPaused,
+  useUpdatePaymentDetails,
   type ApiSubscription,
 } from "@/api/settingApi";
 import { formatCurrency, formatDate, formatFileSize } from "@/utils/functions";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,8 +50,12 @@ const getStatusVariant = (
       return "default"; // Green (if customized) or primary
     case "cancelled":
       return "destructive"; // Red
+    case "failed":
+      return "destructive"; // Red
     case "paused":
       return "secondary"; // Gray
+    case "past_due":
+      return "secondary";
     case "expired":
       return "outline"; // Lighter gray
     default:
@@ -50,10 +64,15 @@ const getStatusVariant = (
 };
 
 export function BillingSettingsPage() {
+  const [selectedSub, setSelectedSub] = useState<ApiSubscription | null>(null);
   // Use the hook to fetch data
   const { data: subscriptions, isLoading, isError } = useGetAllSubscriptions();
   const { mutate: toggleSubscriptionMutation, isPending: isTogglingPaused } =
     useToggleSubscriptionPaused();
+  const {
+    mutate: updatePaymentDetailsMutation,
+    isPending: isPendingUpdatePaymentDetails,
+  } = useUpdatePaymentDetails();
   const queryClient = useQueryClient();
 
   useEffect(() => {
@@ -82,10 +101,46 @@ export function BillingSettingsPage() {
   }, [queryClient]);
   // Find the current active subscription
   // We use optional chaining (?) in case 'subscriptions' is not yet loaded
-  const currentSubscription = subscriptions?.find(
-    (sub) => sub.status === "active"
-  );
+  // const currentSubscription = subscriptions?.find(
+  //   (sub) => sub.status === "active"
+  // );
+  const updatePaymentDetails = () => {
+    updatePaymentDetailsMutation(undefined, {
+      onSuccess: (data) => {
+        console.log(data);
+        window.open(data.url, "_blank");
+      },
+    });
+  };
+  const today = new Date();
 
+  // Find the current active subscription
+
+  // 1. Try to find the "happy path" subscription: active and in date range
+  let currentSubscription = subscriptions?.find((sub) => {
+    const start = new Date(sub.startDate);
+    const end = new Date(sub.endDate);
+    const isWithinDateRange = today >= start && today <= end;
+    // Note: We also check for 'past_due', a common Stripe status for failed renewals
+    const isActiveStatus = sub.status === "active" || sub.status === "past_due";
+    return isActiveStatus && isWithinDateRange;
+  });
+
+  // 2. If no "happy path" sub, find the most relevant "problem" or "past" sub.
+
+  if (!currentSubscription && subscriptions && subscriptions.length > 0) {
+    const sortedSubs = [...subscriptions].sort(
+      (a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime()
+    );
+
+    currentSubscription = sortedSubs.find((sub) =>
+      ["failed", "past_due", "paused", "cancelled"].includes(sub.status)
+    );
+
+    if (!currentSubscription) {
+      currentSubscription = sortedSubs[0];
+    }
+  }
   // 1. Loading State
   if (isLoading) {
     return (
@@ -118,7 +173,6 @@ export function BillingSettingsPage() {
     <div className='space-y-8 p-4 md:p-8'>
       <h1 className='text-2xl font-bold'>Billing & Subscriptions</h1>
 
-      {/* --- Section 1: Current Plan --- */}
       <Card>
         <CardHeader>
           <CardTitle>Current Plan</CardTitle>
@@ -128,8 +182,7 @@ export function BillingSettingsPage() {
         </CardHeader>
         <CardContent>
           {currentSubscription ? (
-            // We define the price/currency variables right after
-            // confirming we have a 'currentSubscription'.
+            // We have a subscription to show (active, failed, paused, etc.)
             (() => {
               const isStripe = currentSubscription.paymentType === "stripe";
               const price = isStripe
@@ -137,67 +190,131 @@ export function BillingSettingsPage() {
                 : currentSubscription.planId.priceINR;
               const currency = isStripe ? "USD" : "INR";
 
+              // Check for failure states
+              const isFailed =
+                currentSubscription.status === "failed" ||
+                currentSubscription.status === "past_due";
+
+              // Check if plan is in a "renewable" state
+              const isActive = currentSubscription.status === "active";
+
               return (
-                <div className='flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0'>
-                  {/* --- Left Side: Plan Details --- */}
-                  <div className='flex-1'>
-                    <h3 className='text-lg font-semibold'>
-                      {currentSubscription.planId.title}{" "}
-                      <span className='text-base font-normal capitalize text-muted-foreground'>
-                        ({currentSubscription.planId.interval})
-                      </span>
-                    </h3>
-
-                    {/* --- Cleaner Price Display --- */}
-                    <p className='text-muted-foreground'>
-                      {formatCurrency(price, currency, {
-                        amountInSmallestUnit: false,
-                      })}{" "}
-                      / {currentSubscription.planId.interval}
-                    </p>
-
-                    {/* --- Plan Features List --- */}
-                    <div className='mt-4 space-y-2'>
-                      <div className='flex items-center text-sm'>
-                        <Database className='mr-2 h-4 w-4 text-muted-foreground' />
-                        <span className='text-muted-foreground'>Storage:</span>
-                        <strong className='ml-1.5'>
-                          {formatFileSize(
-                            currentSubscription.planId.totalBytes
-                          )}
-                        </strong>
+                <>
+                  {isFailed && (
+                    <Alert
+                      variant='destructive'
+                      className='mb-6 flex items-center justify-between'
+                    >
+                      {/* --- Grouping for left side (icon + text) --- */}
+                      <div className='flex items-start'>
+                        <AlertTriangle className='h-4 w-4 flex-shrink-0' />
+                        <div className='ml-3'>
+                          <AlertTitle>Payment Failed</AlertTitle>
+                          <AlertDescription>
+                            Your last payment for this plan failed. Please
+                            update your payment method to restore access.
+                          </AlertDescription>
+                        </div>
                       </div>
-                      <div className='flex items-center text-sm'>
-                        <CalendarDays className='mr-2 h-4 w-4 text-muted-foreground' />
-                        <span className='text-muted-foreground'>
-                          Renews on:
-                        </span>
-                        <strong className='ml-1.5'>
-                          {formatDate(currentSubscription.endDate)}
-                        </strong>
+
+                      <Button
+                        variant={"destructive"}
+                        className='ml-6 flex-shrink-0' // Added ml-6 for spacing
+                        onClick={() => {
+                          const len =
+                            currentSubscription.stripeSubscriptionCycle.length;
+                          if (len > 0) {
+                            const latestCycle =
+                              currentSubscription.stripeSubscriptionCycle[
+                                len - 1
+                              ];
+                            window.open(latestCycle.invoice_pdf);
+                          } else {
+                            toast.error("Could not find payment link.");
+                          }
+                        }}
+                      >
+                        Retry Payment
+                      </Button>
+                    </Alert>
+                  )}
+
+                  <div className='flex flex-col space-y-4 md:flex-row md:items-start md:justify-between md:space-y-0'>
+                    <div className='flex-1 space-y-1.5'>
+                      <div className='flex items-center gap-3'>
+                        <h3 className='text-lg font-semibold'>
+                          {currentSubscription.planId.title}
+                        </h3>
+                        <Badge
+                          variant={getStatusVariant(currentSubscription.status)}
+                          className='capitalize'
+                        >
+                          {currentSubscription.status}
+                        </Badge>
+                      </div>
+
+                      <p className='text-lg text-muted-foreground'>
+                        {formatCurrency(price, currency, {
+                          amountInSmallestUnit: false,
+                        })}{" "}
+                        / {currentSubscription.planId.interval}
+                      </p>
+
+                      <div className='space-y-2 pt-4'>
+                        <div className='flex items-center text-sm'>
+                          <Database className='mr-2 h-4 w-4 text-muted-foreground' />
+                          <span className='text-muted-foreground'>
+                            Storage:
+                          </span>
+                          <strong className='ml-1.5'>
+                            {formatFileSize(
+                              currentSubscription.planId.totalBytes
+                            )}
+                          </strong>
+                        </div>
+                        <div className='flex items-center text-sm'>
+                          <CalendarDays className='mr-2 h-4 w-4 text-muted-foreground' />
+                          <span className='text-muted-foreground'>
+                            {isActive ? "Renews on:" : "Period End:"}
+                          </span>
+                          <strong className='ml-1.5'>
+                            {formatDate(currentSubscription.endDate)}
+                          </strong>
+                        </div>
                       </div>
                     </div>
                   </div>
-
-                  {/* --- Right Side: Status Badge --- */}
-                  <div className='flex-shrink-0'>
-                    <Badge
-                      variant={getStatusVariant(currentSubscription.status)}
-                      className='capitalize'
-                    >
-                      {currentSubscription.status}
-                    </Badge>
-                  </div>
-                </div>
+                </>
               );
             })()
           ) : (
-            <p>You do not have an active subscription.</p>
+            <div className='flex min-h-[150px] flex-col items-center justify-center rounded-md border border-dashed p-8 text-center'>
+              <Package className='h-10 w-10 text-muted-foreground' />
+              <p className='mt-4 font-medium'>No Subscription Found</p>
+              <p className='text-sm text-muted-foreground'>
+                You do not have an active or previous subscription.
+              </p>
+              <Button asChild className='mt-4'>
+                <Link
+                  to='/pricing'
+                  search={{
+                    billing: "month",
+                    currency: "usd",
+                  }}
+                >
+                  View Plans
+                </Link>
+              </Button>
+            </div>
           )}
         </CardContent>
         {currentSubscription && (
           <CardFooter className='flex flex-col items-start gap-4 border-t pt-6 md:flex-row md:justify-between'>
-            <Button variant='outline' onClick={() => console.log("ok")}>
+            <Button
+              variant='outline'
+              onClick={updatePaymentDetails}
+              disabled={isPendingUpdatePaymentDetails}
+            >
               Manage Subscription
             </Button>
             <Button
@@ -226,7 +343,6 @@ export function BillingSettingsPage() {
         )}
       </Card>
 
-      {/* --- Section 2: Billing History --- */}
       <Card>
         <CardHeader>
           <CardTitle>Billing History</CardTitle>
@@ -248,40 +364,59 @@ export function BillingSettingsPage() {
             </TableHeader>
             <TableBody>
               {subscriptions && subscriptions.length > 0 ? (
-                subscriptions.map((sub) => (
-                  <TableRow key={sub._id}>
-                    <TableCell className='font-medium'>
-                      {sub.planId.title}{" "}
-                      <span className='capitalize text-muted-foreground'>
-                        ({sub.planId.interval})
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={getStatusVariant(sub.status)}
-                        className='capitalize'
-                      >
-                        {sub.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {formatDate(sub.startDate)} - {formatDate(sub.endDate)}
-                    </TableCell>
-                    <TableCell className='capitalize'>
-                      {sub.paymentType}
-                    </TableCell>
-                    <TableCell className='font-mono text-xs'>
-                      ${sub.planId.priceUSD}
-                    </TableCell>
-                    <TableCell className='font-mono text-xs'>
-                      {sub.subscriptionId}
-                    </TableCell>
-                  </TableRow>
-                ))
+                subscriptions.map((sub) => {
+                  // --- Check if row should be clickable ---
+                  const hasCycleData =
+                    sub.paymentType === "stripe" &&
+                    sub.stripeSubscriptionCycle?.length > 0;
+
+                  return (
+                    <TableRow
+                      key={sub._id}
+                      onClick={() => hasCycleData && setSelectedSub(sub)}
+                      className={hasCycleData ? "cursor-pointer" : ""}
+                    >
+                      <TableCell className='font-medium'>
+                        {sub.planId.title}{" "}
+                        <span className='capitalize text-muted-foreground'>
+                          ({sub.planId.interval})
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={getStatusVariant(sub.status)}
+                          className='capitalize'
+                        >
+                          {sub.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {formatDate(sub.startDate)} - {formatDate(sub.endDate)}
+                      </TableCell>
+                      <TableCell className='capitalize'>
+                        {sub.paymentType}
+                      </TableCell>
+                      <TableCell>
+                        {formatCurrency(
+                          sub.paymentType === "stripe"
+                            ? sub.planId.priceUSD
+                            : sub.planId.priceINR,
+                          sub.paymentType === "stripe" ? "USD" : "INR",
+                          { amountInSmallestUnit: false }
+                        )}
+                      </TableCell>
+                      <TableCell className='font-mono text-xs'>
+                        {sub.paymentType === "stripe"
+                          ? sub.stripeSubscriptionId
+                          : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={5}
+                    colSpan={6} // Changed to 6 to match columns
                     className='text-center text-muted-foreground'
                   >
                     No billing history found.
@@ -292,6 +427,14 @@ export function BillingSettingsPage() {
           </Table>
         </CardContent>
       </Card>
+      <SubscriptionCycleDialog
+        subscription={selectedSub}
+        onOpenChange={(isOpen) => {
+          if (!isOpen) {
+            setSelectedSub(null);
+          }
+        }}
+      />
     </div>
   );
 }
