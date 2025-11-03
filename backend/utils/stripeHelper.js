@@ -146,7 +146,10 @@ export const pauseStripeSubscription = async (id) => {
   });
   return subscription;
 };
-
+export const retrieveStripeSubscription = async (id) => {
+  const subscription = await stripe.subscriptions.retrieve(id);
+  return subscription;
+};
 // resume subscription
 
 export const resumeStripeSubscription = async (id) => {

@@ -72,7 +72,9 @@ export function NavUser({ user }: NavUserProps) {
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate({ to: "/setting/billing" })}
+              >
                 <CreditCard />
                 Billing
               </DropdownMenuItem>

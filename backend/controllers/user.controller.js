@@ -40,9 +40,9 @@ export const toggleSubscriptionStatus = async (req, res) => {
     { new: true },
   );
   if (subscription.isPauseCollection) {
-    await pauseStripeSubscription(subscription.subscriptionId);
+    await pauseStripeSubscription(subscription.stripeSubscriptionId);
   } else {
-    await resumeStripeSubscription(subscription.subscriptionId);
+    await resumeStripeSubscription(subscription.stripeSubscriptionId);
   }
   res.status(200).json(new ApiResponse(200, "Subscription status toggled"));
 };

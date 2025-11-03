@@ -5,6 +5,7 @@ import {
   type BillingCycle,
   type Currency,
 } from "@/pages/other/PricingCard";
+import { useUser } from "@/store/userStore";
 import { useGetAllPlansPublic } from "@/api/checkoutApi";
 import { useCheckoutStripe } from "@/api/checkoutApi";
 import {
@@ -36,6 +37,7 @@ export const Route = createFileRoute("/_website/pricing")({
 export default function PricingPage() {
   const { data, isLoading } = useGetAllPlansPublic();
   const { billing, currency } = Route.useSearch();
+  const { user } = useUser();
 
   const navigate = Route.useNavigate();
 
@@ -43,6 +45,10 @@ export default function PricingPage() {
 
   const filteredPlans = data?.filter((plan) => plan.interval === billing) ?? [];
   const checkoutStripeHandler = (id: string) => {
+    if (!user) {
+      navigate({ to: "/login" });
+      return;
+    }
     if (currency === "usd") {
       checkoutStripeMutate(id, {
         onSuccess(data) {
