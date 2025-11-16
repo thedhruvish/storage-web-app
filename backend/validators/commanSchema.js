@@ -7,5 +7,7 @@ export const nameValidation = z.object({
 
 //  -> req.body = {folderId: string}
 export const importDriveDataValidation = z.object({
-  folderId: z.string("Folder Id is required"),
+  id: z.string("Folder Id is required"),
+  mimeType: z.string("Folder Id is required"),
+  name: z.string("Folder Id is required"),
 });

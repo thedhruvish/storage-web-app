@@ -99,34 +99,22 @@ export function BillingSettingsPage() {
       window.removeEventListener("storage", handleStorageChange);
     };
   }, [queryClient]);
-  // Find the current active subscription
-  // We use optional chaining (?) in case 'subscriptions' is not yet loaded
-  // const currentSubscription = subscriptions?.find(
-  //   (sub) => sub.status === "active"
-  // );
   const updatePaymentDetails = () => {
     updatePaymentDetailsMutation(undefined, {
       onSuccess: (data) => {
-        console.log(data);
         window.open(data.url, "_blank");
       },
     });
   };
   const today = new Date();
 
-  // Find the current active subscription
-
-  // 1. Try to find the "happy path" subscription: active and in date range
   let currentSubscription = subscriptions?.find((sub) => {
     const start = new Date(sub.startDate);
     const end = new Date(sub.endDate);
     const isWithinDateRange = today >= start && today <= end;
-    // Note: We also check for 'past_due', a common Stripe status for failed renewals
     const isActiveStatus = sub.status === "active" || sub.status === "past_due";
     return isActiveStatus && isWithinDateRange;
   });
-
-  // 2. If no "happy path" sub, find the most relevant "problem" or "past" sub.
 
   if (!currentSubscription && subscriptions && subscriptions.length > 0) {
     const sortedSubs = [...subscriptions].sort(
@@ -141,7 +129,6 @@ export function BillingSettingsPage() {
       currentSubscription = sortedSubs[0];
     }
   }
-  // 1. Loading State
   if (isLoading) {
     return (
       <div className='flex min-h-[400px] w-full items-center justify-center p-8'>
@@ -150,7 +137,6 @@ export function BillingSettingsPage() {
     );
   }
 
-  // 2. Error State
   if (isError) {
     return (
       <Card className='border-destructive'>
@@ -168,7 +154,6 @@ export function BillingSettingsPage() {
     );
   }
 
-  // 3. Success/Data State
   return (
     <div className='space-y-8 p-4 md:p-8'>
       <h1 className='text-2xl font-bold'>Billing & Subscriptions</h1>
@@ -182,7 +167,6 @@ export function BillingSettingsPage() {
         </CardHeader>
         <CardContent>
           {currentSubscription ? (
-            // We have a subscription to show (active, failed, paused, etc.)
             (() => {
               const isStripe = currentSubscription.paymentType === "stripe";
               const price = isStripe
@@ -190,12 +174,10 @@ export function BillingSettingsPage() {
                 : currentSubscription.planId.priceINR;
               const currency = isStripe ? "USD" : "INR";
 
-              // Check for failure states
               const isFailed =
                 currentSubscription.status === "failed" ||
                 currentSubscription.status === "past_due";
 
-              // Check if plan is in a "renewable" state
               const isActive = currentSubscription.status === "active";
 
               return (
@@ -205,7 +187,6 @@ export function BillingSettingsPage() {
                       variant='destructive'
                       className='mb-6 flex items-center justify-between'
                     >
-                      {/* --- Grouping for left side (icon + text) --- */}
                       <div className='flex items-start'>
                         <AlertTriangle className='h-4 w-4 flex-shrink-0' />
                         <div className='ml-3'>
@@ -219,7 +200,7 @@ export function BillingSettingsPage() {
 
                       <Button
                         variant={"destructive"}
-                        className='ml-6 flex-shrink-0' // Added ml-6 for spacing
+                        className='ml-6 flex-shrink-0'
                         onClick={() => {
                           const len =
                             currentSubscription.stripeSubscriptionCycle.length;
@@ -365,7 +346,6 @@ export function BillingSettingsPage() {
             <TableBody>
               {subscriptions && subscriptions.length > 0 ? (
                 subscriptions.map((sub) => {
-                  // --- Check if row should be clickable ---
                   const hasCycleData =
                     sub.paymentType === "stripe" &&
                     sub.stripeSubscriptionCycle?.length > 0;
@@ -416,7 +396,7 @@ export function BillingSettingsPage() {
               ) : (
                 <TableRow>
                   <TableCell
-                    colSpan={6} // Changed to 6 to match columns
+                    colSpan={6}
                     className='text-center text-muted-foreground'
                   >
                     No billing history found.

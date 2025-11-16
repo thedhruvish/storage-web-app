@@ -12,6 +12,7 @@ import { validateInput } from "../utils/validateInput.js";
 import {
   createCouponsValidation,
   createPromoCodeValidation,
+  idValidation,
   togglePromoCodeValidation,
 } from "../validators/paymentSchema.js";
 import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
@@ -19,7 +20,11 @@ import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
 const router = express.Router();
 
 //  only auth access
-router.post("/stripe-checkout", genratorStripeCheckoutUrl);
+router.post(
+  "/stripe-checkout",
+  validateInput(idValidation),
+  genratorStripeCheckoutUrl,
+);
 
 // admin access those routes
 router.use(checkOwnerAndAdmin());

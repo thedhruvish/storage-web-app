@@ -33,7 +33,7 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
       );
   }
   const checkoutUrl = await redisClient.get(`checkoutUrl:${userId}:${id}`);
-  console.log(checkoutUrl);
+
   if (checkoutUrl) {
     return res
       .status(200)
@@ -87,13 +87,13 @@ export const getAllCoupons = async (req, res) => {
 export const createCoupons = async (req, res) => {
   const { code, amount_off = undefined, percent_off = undefined } = req.body;
   await createStripeCoupons({ id: code, amount_off, percent_off });
-  res.status(200).json(new ApiResponse(200, "Coupons create Successfuly"));
+  res.status(200).json(new ApiResponse(200, "Coupons create Successfully"));
 };
 
 export const deleteCoupons = async (req, res) => {
   const { id } = req.params;
   await deleteStripeCoupons(id);
-  res.status(200).json(new ApiResponse(200), "Coupons delete Successfuly");
+  res.status(200).json(new ApiResponse(200), "Coupons delete Successfully");
 };
 
 // handle promo code
@@ -128,11 +128,11 @@ export const createPromoCode = async (req, res) => {
     },
   });
 
-  res.status(200).json(new ApiResponse(200, "promoCode create Successfuly"));
+  res.status(200).json(new ApiResponse(200, "promoCode create Successfully"));
 };
 export const togglePromoCode = async (req, res) => {
   const { id } = req.params;
   const { isActive = false } = req.body;
   await toggleStripePromotionCodes(id, isActive);
-  res.status(201).json(new ApiResponse(201, "promoCode toggle Successfuly"));
+  res.status(201).json(new ApiResponse(201, "promoCode toggle Successfully"));
 };

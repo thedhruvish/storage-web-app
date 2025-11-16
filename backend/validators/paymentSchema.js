@@ -22,3 +22,7 @@ export const createPromoCodeValidation = z.object({
 export const togglePromoCodeValidation = z.object({
   isActive: z.boolean(),
 });
+
+export const idValidation = z.object({
+  id: z.string("ID is required"),
+});
