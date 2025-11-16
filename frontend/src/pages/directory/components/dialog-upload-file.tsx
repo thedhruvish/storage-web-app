@@ -163,7 +163,6 @@ export function MultiFileUploadDialog({ open }: Props) {
           )
         );
         return true;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } catch (error: any) {
         if (isAxiosError(error)) {
           if (axios.isCancel(error) || error.name === "CanceledError") {

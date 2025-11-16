@@ -10,6 +10,8 @@ import {
   SortAsc,
   Upload,
 } from "lucide-react";
+import { checkConnectedGoogle } from "@/api/importDataApi";
+import { useDrivePicker } from "@/hooks/drive-picker";
 import { useFileUploader } from "@/hooks/use-file-uploader";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,14 +27,29 @@ interface FileToolbarProps {
 }
 
 export function FileToolbar({ viewMode }: FileToolbarProps) {
+  const { openPicker } = useDrivePicker();
   const { setOpen } = useDialogStore();
   const { setAppearance } = useAppearance();
 
   const { triggerUploader, UploaderInput } = useFileUploader();
 
+  const { refetch: refetchGoogleConnection, isFetching } = checkConnectedGoogle(
+    { enabled: false }
+  );
+
+  const importFromGoogleDrive = async () => {
+    const { data } = await refetchGoogleConnection();
+    if (data?.data?.is_connected) {
+      openPicker();
+    } else {
+      setOpen("importFile");
+    }
+  };
+
   return (
     <>
       {UploaderInput}
+
       <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4'>
         <div className='flex flex-wrap items-center gap-2'>
           <div className='flex sm:hidden'>
@@ -52,9 +69,12 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
                   <Upload className='mr-2 h-4 w-4' />
                   File Upload
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setOpen("importFile")}>
+                <DropdownMenuItem
+                  disabled={isFetching}
+                  onClick={importFromGoogleDrive}
+                >
                   <Import className='mr-2 h-4 w-4' />
-                  Import
+                  {isFetching ? "Checking..." : "Import"}
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -85,9 +105,15 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
               <span className='hidden md:inline'>Upload</span>
             </Button>
 
-            <Button variant='outline' onClick={() => setOpen("importFile")}>
+            <Button
+              variant='outline'
+              disabled={isFetching}
+              onClick={importFromGoogleDrive}
+            >
               <Import className='mr-2 h-4 w-4' />
-              <span className='hidden md:inline'>Import</span>
+              <span className='hidden md:inline'>
+                {isFetching ? "Checking..." : "Import"}
+              </span>
             </Button>
           </div>
         </div>

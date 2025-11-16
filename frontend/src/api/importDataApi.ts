@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDialogStore } from "@/store/DialogsStore";
 import axiosClient from "./axiosClient";
 
-export const checkConnectedGoogle = () => {
+export const checkConnectedGoogle = ({ enabled }: { enabled: boolean }) => {
   return useQuery({
     queryKey: ["check-connected-google"],
     queryFn: async () => {
@@ -11,21 +10,46 @@ export const checkConnectedGoogle = () => {
       );
       return response.data;
     },
-    enabled: !!(useDialogStore.getState().open === "importFile"),
+    enabled: enabled,
   });
 };
 
 export const useImportFolderByDrive = (directoryId: string = "") => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id }: { id: string }) =>
+    mutationFn: ({
+      id,
+      mimeType,
+      name,
+    }: {
+      id: string;
+      mimeType: string;
+      name: string;
+    }) =>
       axiosClient.post(`/import-data/google/file-data/${directoryId}`, {
-        folderId: id,
+        id,
+        mimeType,
+        name,
       }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["directorys", directoryId], // Invalidate the updated directory
+        queryKey: ["directorys", directoryId],
       });
     },
+  });
+};
+
+export const useGoogleAccessToken = (options: { enabled: boolean }) => {
+  return useQuery<{ data: { accessToken: string } }>({
+    queryKey: ["google-access-token"],
+    queryFn: async () => {
+      const response = await axiosClient.get(
+        "/import-data/google/get-access-token"
+      );
+      return response.data;
+    },
+    enabled: options.enabled,
+    staleTime: 1000 * 60 * 50,
+    refetchOnWindowFocus: false,
   });
 };
