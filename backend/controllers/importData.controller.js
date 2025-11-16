@@ -5,6 +5,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Document from "../models/document.model.js";
 import { downloadFiles, downloadSingleFile } from "../utils/DriveFile.js";
 import Directory from "../models/Directory.model.js";
+import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -170,11 +171,16 @@ export const importDriveData = async (req, res) => {
       path: [...parentDir.path, parentDir._id],
       metaData: {
         source: "google-drive",
+        size: 0,
       },
     });
 
     const fileData = await downloadFiles(drive, id, newFolder._id, user._id);
-
+    const totalSize = fileData.reduce(
+      (acc, file) => acc + file.metaData.size,
+      0,
+    );
+    await updateParentDirectorySize(newFolder._id, totalSize);
     await Document.insertMany(fileData);
 
     return res
@@ -192,7 +198,9 @@ export const importDriveData = async (req, res) => {
       user._id,
     );
     console.log(fileData);
+
     await Document.create(fileData);
+    await updateParentDirectorySize(uploadDirId, fileData.metaData.size);
 
     return res
       .status(201)

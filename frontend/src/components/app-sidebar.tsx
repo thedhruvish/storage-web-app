@@ -174,8 +174,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <SidebarMenuItem>
                     <SidebarMenuButton asChild>
                       <Link
-                        to='/admin/promo-code/'
+                        to='/admin/promo-code'
                         className='flex items-center gap-3'
+                        translate='yes'
                       >
                         <Plane className='h-4 w-4' />
                         <span>Promo Code</span>
