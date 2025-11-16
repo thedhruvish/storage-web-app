@@ -105,7 +105,6 @@ export function MultiFileUploadDialog({ open }: Props) {
     uploadFiles(newUniqueFiles);
   };
 
-  // FIX: Ensure multiple file uploads are enabled
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     multiple: true, // This enables multiple file selection

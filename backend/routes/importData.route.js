@@ -2,6 +2,7 @@ import express from "express";
 import {
   checkOauthConnected,
   genrateGoogleDriveImportAuthUrl,
+  getGoogleAccessToken,
   googleDriveCallback,
   importDriveData,
 } from "../controllers/importData.controller.js";
@@ -20,7 +21,7 @@ router.get("/google/callback", googleDriveCallback);
 
 // check the user is connected or not
 router.get("/google/check-connected", checkOauthConnected);
-
+router.get("/google/get-access-token", getGoogleAccessToken);
 // validate params:
 router.param("id", paramsValidation);
 

@@ -3,7 +3,8 @@ import ImportToken from "../models/ImportToken.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Document from "../models/document.model.js";
-import { downloadFile, getFileList } from "../utils/DriveFile.js";
+import { downloadFiles, downloadSingleFile } from "../utils/DriveFile.js";
+import Directory from "../models/Directory.model.js";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -81,39 +82,120 @@ export const checkOauthConnected = async (req, res) => {
     }),
   );
 };
+export const getGoogleAccessToken = async (req, res) => {
+  const userId = req.user._id;
+
+  // Find the stored refresh token
+  const tokenDoc = await ImportToken.findOne({
+    userId: userId,
+    services: "google",
+  });
+
+  if (!tokenDoc) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "User not connected to Google Drive."));
+  }
+
+  try {
+    // Set the refresh token on the OAuth client
+    googleApiOauth2Client.setCredentials({
+      refresh_token: tokenDoc.refreshToken,
+    });
+
+    // Get a new access token
+    const { token } = await googleApiOauth2Client.getAccessToken();
+
+    if (!token) {
+      return res
+        .status(500)
+        .json(new ApiError(500, "Failed to generate access token."));
+    }
+
+    // Send the access token to the frontend
+    return res.status(200).json(
+      new ApiResponse(200, "Access token generated", {
+        accessToken: token,
+      }),
+    );
+  } catch (error) {
+    console.error("Error getting access token:", error);
+    return res
+      .status(500)
+      .json(new ApiError(500, "Error getting access token"));
+  }
+};
+
 // Give google drive folder id to download.
 export const importDriveData = async (req, res) => {
-  // get paranet dir
   const uploadDirId = req.params.id || req.user.rootDirId;
-  const { folderId } = req.body;
+  const { id, mimeType, name } = req.body;
   const user = req.user;
-  // find the accesstoken
+
+  console.log("📥 Import request:", { uploadDirId, id, mimeType, name });
+
   const tokenDoc = await ImportToken.findOne({
     userId: user._id,
     services: "google",
   });
 
   if (!tokenDoc) {
-    return res.status(401).json(new ApiError(401, "Login again"));
+    return res
+      .status(401)
+      .json(new ApiError(401, "Google login expired. Please reconnect."));
   }
-  // google oath setup
-  googleApiOauth2Client.setCredentials({
-    refresh_token: tokenDoc.refreshToken,
-  });
-  const newAccessToken = await googleApiOauth2Client.getAccessToken();
 
+  // 🔑 Setup OAuth2 client
   googleApiOauth2Client.setCredentials({
-    access_token: newAccessToken,
     refresh_token: tokenDoc.refreshToken,
   });
+
+  const { token: accessToken } = await googleApiOauth2Client.getAccessToken();
+  console.log(accessToken);
+  googleApiOauth2Client.setCredentials({
+    access_token: accessToken,
+    refresh_token: tokenDoc.refreshToken,
+  });
+
   const drive = google.drive({ version: "v3", auth: googleApiOauth2Client });
-  //  get a list of file
-  const { data } = await getFileList(drive, folderId);
 
-  // download files
-  const fileData = await downloadFile(drive, data.files, uploadDirId, user._id);
-  // save in the db
-  await Document.insertMany(fileData);
+  if (mimeType === "application/vnd.google-apps.folder") {
+    // when import folder than it create a folder and that is the import also create a same name folder
+    const parentDir = await Directory.findById(uploadDirId, { path: 1 }).lean();
 
-  res.status(201).json(new ApiResponse(201, "Data Import Successfuly"));
+    const newFolder = await Directory.create({
+      name,
+      parentDirId: uploadDirId,
+      userId: user._id,
+      path: [...parentDir.path, parentDir._id],
+      metaData: {
+        source: "google-drive",
+      },
+    });
+
+    const fileData = await downloadFiles(drive, id, newFolder._id, user._id);
+
+    await Document.insertMany(fileData);
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "Folder imported successfully"));
+  } else {
+    console.log({ id, uploadDirId, name, mimeType });
+
+    const fileData = await downloadSingleFile(
+      drive,
+      id,
+      name,
+      mimeType,
+      uploadDirId,
+      user._id,
+    );
+    console.log(fileData);
+    await Document.create(fileData);
+
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "File imported successfully"));
+  }
 };
