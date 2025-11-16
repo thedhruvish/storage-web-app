@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
@@ -19,6 +18,7 @@ export interface PickedFile {
 export function useDrivePicker() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [shouldFetchToken, setShouldFetchToken] = useState(false);
+  const [pickerOpened, setPickerOpened] = useState(false);
 
   const { directoryId = "" } = useParams({ strict: false });
   const importGoogleDriveFolder = useImportFolderByDrive(directoryId);
@@ -63,17 +63,23 @@ export function useDrivePicker() {
   const pickerCallback = useCallback(async (data: any) => {
     const google = window.google;
 
+    // ---- CLEANUP HELPER ----
+    const cleanupPickerFrame = () => {
+      const iframe = document.querySelector("iframe[src*='picker']");
+      if (iframe) iframe.remove();
+    };
+
     if (data.action === google.picker.Action.PICKED) {
       const selected = data.docs || [];
 
       if (!selected.length) {
         toast.warning("No items selected.");
+        cleanupPickerFrame();
         return;
       }
 
       toast.info(`Importing ${selected.length} item(s) from Google Drive...`);
 
-      // Run all imports in parallel
       await Promise.all(
         selected.map(async (item: any) => {
           try {
@@ -85,21 +91,22 @@ export function useDrivePicker() {
 
             toast.success(
               item.mimeType === "application/vnd.google-apps.folder"
-                ? `✅ Folder "${item.name}" imported successfully!`
-                : `📄 File "${item.name}" imported successfully!`
+                ? `Folder "${item.name}" imported successfully!`
+                : `File "${item.name}" imported successfully!`
             );
-          } catch (error: any) {
-            console.error(`Import failed for ${item.name}:`, error);
-            toast.error(`❌ Failed to import "${item.name}".`);
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          } catch (error) {
+            toast.error(`Failed to import "${item.name}".`);
           }
         })
       );
 
-      toast.success("🎉 All selected items processed!");
+      toast.success("All selected items processed!");
+      cleanupPickerFrame();
     }
 
     if (data.action === google.picker.Action.CANCEL) {
-      console.log("❌ Picker closed without selection.");
+      cleanupPickerFrame();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -127,11 +134,13 @@ export function useDrivePicker() {
 
   const openPicker = useCallback(async () => {
     if (isFetching) return;
+
+    setPickerOpened(true);
     setShouldFetchToken(true);
   }, [isFetching]);
 
   useEffect(() => {
-    if (!accessToken) return;
+    if (!accessToken || !pickerOpened) return;
 
     const initPicker = async () => {
       await loadGoogleApi();
@@ -144,12 +153,14 @@ export function useDrivePicker() {
     };
 
     initPicker();
-  }, [accessToken, loadGoogleApi, createPicker]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [accessToken, pickerOpened]);
 
   useEffect(() => {
     return () => {
       const iframe = document.querySelector("iframe[src*='picker']");
       if (iframe) iframe.remove();
+      setPickerOpened(false);
     };
   }, []);
 
