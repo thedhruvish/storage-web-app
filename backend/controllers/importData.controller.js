@@ -211,12 +211,7 @@ export const importDriveData = async (req, res) => {
       uploadDirId,
       user._id,
     );
-    console.log({
-      fileData,
-      total: directory.metaData.size,
-      size: fileData.metaData.size,
-      max: user.maxStorageBytes,
-    });
+
     if (
       directory.metaData.size + fileData.metaData.size >
       user.maxStorageBytes

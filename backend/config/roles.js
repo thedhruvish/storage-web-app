@@ -18,5 +18,3 @@ export const actionRights = {
   update: roleWeights.manager, // all permision execpt share
   delete: roleWeights.owner, // delete to down
 };
-
-// console.log(actionRights["read"]);

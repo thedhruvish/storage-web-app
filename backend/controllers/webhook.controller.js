@@ -5,16 +5,20 @@ import {
 } from "../utils/stripeHelper.js";
 import redisClient from "../config/redis-client.js";
 import User from "../models/User.model.js";
+import WebHookLog from "../models/WebHookLog.model.js";
 
 export const stripeWebhookHandler = async (req, res) => {
   let event;
   try {
     event = await verifyStripeWebhook(req);
   } catch (err) {
-    console.log(`⚠️ Webhook signature verification failed.`, err.message);
     return res.sendStatus(400);
   }
-
+  await WebHookLog.create({
+    type: event.type,
+    data: event.data,
+    paymentType: "stripe",
+  });
   switch (event.type) {
     case "invoice.payment_succeeded":
       const objSub = event.data.object;
@@ -42,7 +46,7 @@ export const stripeWebhookHandler = async (req, res) => {
       if (parentSubscription) {
         await redisClient.del(`user:${parentSubscription.userId}`);
 
-        const userUpdated = await User.findByIdAndUpdate(
+        await User.findByIdAndUpdate(
           parentSubscription.userId,
           {
             $inc: {
@@ -54,8 +58,6 @@ export const stripeWebhookHandler = async (req, res) => {
           },
           { new: true },
         );
-
-        console.log("STORAGE RESTORED AFTER PAYMENT", userUpdated);
       }
 
       break;
@@ -82,12 +84,9 @@ export const stripeWebhookHandler = async (req, res) => {
           new: true,
         },
       );
-      console.log(failedSub);
       break;
 
     case "checkout.session.completed":
-      console.log("checkout completed run");
-      console.log(event.data);
       const checkoutSessionObj = event.data.object;
       //  when first time payment
       if (checkoutSessionObj.status === "complete") {
@@ -98,7 +97,6 @@ export const stripeWebhookHandler = async (req, res) => {
         const subscription = await retrieveStripeSubscription(
           checkoutSessionObj.subscription,
         );
-        console.log(subscription);
 
         await Subscription.create({
           planId: checkoutSessionObj.metadata.planId,
@@ -121,7 +119,6 @@ export const stripeWebhookHandler = async (req, res) => {
             dueDeleteDate: null,
           },
         );
-        console.log(user);
       }
 
     case "customer.subscription.updated":
@@ -183,8 +180,6 @@ export const stripeWebhookHandler = async (req, res) => {
           { $set: updateVal },
           { new: true },
         ).populate("planId");
-
-        console.log({ subscriptionUpdate });
 
         await redisClient.del(`user:${subscriptionUpdate.userId}`);
 

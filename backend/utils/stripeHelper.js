@@ -45,10 +45,10 @@ export const disableStripeProduct = async (id, active) => {
 };
 
 export const deleteStripeProduct = async (pid, priceId) => {
-  const remove = await stripe.products.update(pid, {
+  await stripe.products.update(pid, {
     active: false,
   });
-  console.log(remove);
+
   const product = await stripe.products.del(pid);
   return product;
 };

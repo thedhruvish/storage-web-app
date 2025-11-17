@@ -123,7 +123,7 @@ export const checkOwnerAndAdmin = () => {
     if (req.user.role === "owner" || req.user.role === "admin") {
       return next();
     }
-    console.log("run");
+
     return res.status(403).json(new ApiError(403, "You can't do this action"));
   };
 };
