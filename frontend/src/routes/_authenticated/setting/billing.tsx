@@ -308,6 +308,12 @@ export function BillingSettingsPage() {
                 toggleSubscriptionMutation(currentSubscription._id, {
                   onSuccess: () => {
                     toast.success("Subscription toggled successfully");
+                    currentSubscription.isPauseCollection =
+                      !currentSubscription.isPauseCollection;
+                    currentSubscription.status =
+                      currentSubscription.isPauseCollection
+                        ? "paused"
+                        : "active";
                   },
                 })
               }
@@ -317,9 +323,9 @@ export function BillingSettingsPage() {
                 ? "Active Payment"
                 : "Paused Payment"}
             </Button>
-            {currentSubscription.status === "active" && (
+            {/* {currentSubscription.status === "active" && (
               <Button variant='destructive'>Cancel Subscription</Button>
-            )}
+            )} */}
           </CardFooter>
         )}
       </Card>

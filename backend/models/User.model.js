@@ -46,6 +46,10 @@ const userSchema = new Schema(
       type: String,
       default: null,
     },
+    dueDeleteDate: {
+      type: Date,
+      default: null,
+    },
   },
   { timestamps: true },
 );

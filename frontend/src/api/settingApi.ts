@@ -55,13 +55,9 @@ export const useGetAllSubscriptions = () => {
 
 // toggle subsciption paused
 export const useToggleSubscriptionPaused = () => {
-  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: string) => {
       await axiosClient.put(`/user/subscriptions/${id}/toggle`);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["settings", "subscription"] });
     },
   });
 };

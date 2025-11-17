@@ -46,6 +46,10 @@ const subscriptionSchema = new mongoose.Schema(
       type: String,
       enum: ["stripe", "razorpay"],
     },
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
   },
   { timestamps: true },
 );

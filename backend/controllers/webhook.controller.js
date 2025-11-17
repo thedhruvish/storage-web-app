@@ -14,13 +14,11 @@ export const stripeWebhookHandler = async (req, res) => {
     console.log(`⚠️ Webhook signature verification failed.`, err.message);
     return res.sendStatus(400);
   }
-  console.log(event.type);
-  console.log(event.data.object);
-  // Handle the event
+
   switch (event.type) {
     case "invoice.payment_succeeded":
-      console.log(event.data.object);
       const objSub = event.data.object;
+
       const parentSubscription = await Subscription.findOneAndUpdate(
         { stripeSubscriptionId: objSub.subscription },
         {
@@ -35,13 +33,33 @@ export const stripeWebhookHandler = async (req, res) => {
           },
           $set: {
             status: "active",
+            isActive: true,
           },
         },
-      );
+        { new: true },
+      ).populate("planId");
 
-      console.log("invoice payment succeeded");
-      console.log(parentSubscription);
+      if (parentSubscription) {
+        await redisClient.del(`user:${parentSubscription.userId}`);
+
+        const userUpdated = await User.findByIdAndUpdate(
+          parentSubscription.userId,
+          {
+            $inc: {
+              maxStorageBytes: parentSubscription.planId.totalBytes,
+            },
+            $set: {
+              dueDeleteDate: null,
+            },
+          },
+          { new: true },
+        );
+
+        console.log("STORAGE RESTORED AFTER PAYMENT", userUpdated);
+      }
+
       break;
+
     case "invoice.payment_failed":
       const objSubFail = event.data.object;
       const failedSub = await Subscription.findOneAndUpdate(
@@ -66,6 +84,7 @@ export const stripeWebhookHandler = async (req, res) => {
       );
       console.log(failedSub);
       break;
+
     case "checkout.session.completed":
       console.log("checkout completed run");
       console.log(event.data);
@@ -80,6 +99,7 @@ export const stripeWebhookHandler = async (req, res) => {
           checkoutSessionObj.subscription,
         );
         console.log(subscription);
+
         await Subscription.create({
           planId: checkoutSessionObj.metadata.planId,
           userId: checkoutSessionObj.metadata.userId,
@@ -98,6 +118,7 @@ export const stripeWebhookHandler = async (req, res) => {
           {
             $inc: { maxStorageBytes: checkoutSessionObj.metadata.totalBytes },
             stripeCustomerId: checkoutSessionObj.customer,
+            dueDeleteDate: null,
           },
         );
         console.log(user);
@@ -109,48 +130,83 @@ export const stripeWebhookHandler = async (req, res) => {
       const changedKeys = Object.keys(previous);
       const updateVal = {};
 
-      // Detect cancellation
       if (changedKeys.includes("cancel_at")) {
         if (subscription.cancel_at) {
-          // Scheduled or requested cancellation
           updateVal.status = "cancelled";
           updateVal.cancelDate = new Date(subscription.cancel_at * 1000);
+
+          updateVal.isActive = false;
+          updateVal.serviceStoppedAt = new Date();
         } else {
-          // If cancel_at was removed, subscription resumed
           updateVal.status = "active";
           updateVal.cancelDate = null;
+          updateVal.isActive = true;
         }
       }
 
-      // Detect pause / resume
       if (changedKeys.includes("pause_collection")) {
         if (subscription.pause_collection) {
-          // Subscription is paused
           updateVal.isPauseCollection = true;
           updateVal.status = "paused";
+          updateVal.isActive = false;
+          updateVal.serviceStoppedAt = new Date();
         } else {
-          // Subscription resumed
           updateVal.isPauseCollection = false;
           updateVal.status = "active";
+          updateVal.isActive = true;
         }
       }
 
       if (changedKeys.includes("status")) {
         if (subscription.status === "past_due") {
           updateVal.status = "past_due";
-        } else if (subscription.status === "unpaid") {
+        } else if (
+          subscription.status === "unpaid" ||
+          subscription.status === "incomplete_expired"
+        ) {
           updateVal.status = "failed";
+          updateVal.isActive = false;
+          updateVal.serviceStoppedAt = new Date();
+        } else if (subscription.status === "canceled") {
+          updateVal.status = "cancelled";
+          updateVal.isActive = false;
+          updateVal.serviceStoppedAt = new Date();
         } else if (subscription.status === "active") {
           updateVal.status = "active";
+          updateVal.isActive = true;
         }
       }
 
       if (Object.keys(updateVal).length > 0) {
-        await Subscription.findOneAndUpdate(
+        const subscriptionUpdate = await Subscription.findOneAndUpdate(
           { stripeSubscriptionId: subscription.id },
           { $set: updateVal },
           { new: true },
-        );
+        ).populate("planId");
+
+        console.log({ subscriptionUpdate });
+
+        await redisClient.del(`user:${subscriptionUpdate.userId}`);
+
+        if (subscriptionUpdate.isActive === false) {
+          await User.findByIdAndUpdate(subscriptionUpdate.userId, {
+            $inc: {
+              maxStorageBytes: -subscriptionUpdate.planId.totalBytes,
+            },
+            $set: {
+              dueDeleteDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // +5 days
+            },
+          });
+        }
+
+        if (subscriptionUpdate.isActive === true) {
+          await User.findByIdAndUpdate(subscriptionUpdate.userId, {
+            $inc: {
+              maxStorageBytes: subscriptionUpdate.planId.totalBytes,
+            },
+            $set: { dueDeleteDate: null },
+          });
+        }
       }
 
       break;
@@ -158,11 +214,12 @@ export const stripeWebhookHandler = async (req, res) => {
     case "customer.subscription.deleted":
       subscription = event.data.object;
 
-      await Subscription.findOneAndUpdate(
+      const olderSubscription = await Subscription.findOneAndUpdate(
         { stripeSubscriptionId: subscription.id },
         {
           $set: {
             status: "expired",
+            isActive: false,
             isPauseCollection: false,
             cancelDate: subscription.ended_at
               ? new Date(subscription.ended_at * 1000)
@@ -170,6 +227,21 @@ export const stripeWebhookHandler = async (req, res) => {
           },
         },
         { new: true },
+      ).populate("planId");
+
+      await redisClient.del(`user:${olderSubscription.userId}`);
+
+      await User.findByIdAndUpdate(
+        olderSubscription.userId,
+        {
+          $inc: { maxStorageBytes: -olderSubscription.planId.maxStorageBytes },
+          $set: {
+            dueDeleteDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
+          },
+        },
+        {
+          new: true,
+        },
       );
 
       break;

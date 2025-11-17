@@ -18,7 +18,7 @@ export const useStorageStatus = () => {
     maxStorageBytes,
     formattedRemaining,
   } = useMemo(() => {
-    if (!user?.maxStorageBytes || !user?.totalUsedBytes) {
+    if (!user) {
       return {
         isUploadDisabled: false,
         storageUsedPercentage: 0,
