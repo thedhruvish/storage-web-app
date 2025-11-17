@@ -34,7 +34,7 @@ interface FileToolbarProps {
 }
 
 export function FileToolbar({ viewMode }: FileToolbarProps) {
-  const { openPicker } = useDrivePicker();
+  const { openPicker, pickerOpened, pickerRef, accessToken } = useDrivePicker();
   const { setOpen } = useDialogStore();
   const { setAppearance } = useAppearance();
 
@@ -58,6 +58,21 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
   return (
     <>
       {UploaderInput}
+      {pickerOpened && accessToken ? (
+        <drive-picker
+          ref={pickerRef}
+          multiselect={true}
+          oauth-token={accessToken}
+          title='Select a folder or file to Import'
+          select-folders='true'
+        >
+          <drive-picker-docs-view
+            include-folders='true'
+            parent='root'
+            select-folder-enabled='true'
+          ></drive-picker-docs-view>
+        </drive-picker>
+      ) : null}
 
       <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4 '>
         <div className='flex flex-wrap items-center gap-2'>
@@ -141,7 +156,7 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
                   <span tabIndex={0}>
                     <Button
                       variant='outline'
-                      disabled={isUploadDisabled || isFetching}
+                      disabled={pickerOpened || isUploadDisabled || isFetching}
                       onClick={importFromGoogleDrive}
                     >
                       <Import className='mr-2 h-4 w-4' />

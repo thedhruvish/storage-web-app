@@ -1,4 +1,11 @@
-import { useEffect, useState, useCallback } from "react";
+import {
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+  type SetStateAction,
+  type Dispatch,
+} from "react";
 import { useParams } from "@tanstack/react-router";
 import { toast } from "sonner";
 import {
@@ -6,22 +13,29 @@ import {
   useImportFolderByDrive,
 } from "@/api/importDataApi";
 
-let googleApiLoaded = false;
-
 export interface PickedFile {
   id: string;
   name: string;
   mimeType: string;
   [key: string]: any;
 }
+interface GooglePickerElement extends HTMLElement {
+  visible: boolean;
+}
+
+interface PickerEventDetail {
+  docs: PickedFile[];
+}
 
 export function useDrivePicker() {
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [shouldFetchToken, setShouldFetchToken] = useState(false);
   const [pickerOpened, setPickerOpened] = useState(false);
-
   const { directoryId = "" } = useParams({ strict: false });
   const importGoogleDriveFolder = useImportFolderByDrive(directoryId);
+
+  const [pickerEl, setPickerEl] = useState<GooglePickerElement | null>(null);
+  const handledRef = useRef(false);
 
   const {
     data: tokenData,
@@ -37,132 +51,79 @@ export function useDrivePicker() {
     }
   }, [isSuccess, tokenData]);
 
-  const loadGoogleApi = useCallback(() => {
-    return new Promise<void>((resolve) => {
-      if (googleApiLoaded) return resolve();
-
-      const existing = document.querySelector<HTMLScriptElement>(
-        "script[src='https://apis.google.com/js/api.js']"
-      );
-      if (existing) {
-        googleApiLoaded = true;
-        return resolve();
-      }
-
-      const script = document.createElement("script");
-      script.src = "https://apis.google.com/js/api.js";
-      script.async = true;
-      script.onload = () => {
-        googleApiLoaded = true;
-        resolve();
-      };
-      document.body.appendChild(script);
-    });
-  }, []);
-
-  const pickerCallback = useCallback(async (data: any) => {
-    const google = window.google;
-
-    // ---- CLEANUP HELPER ----
-    const cleanupPickerFrame = () => {
-      const iframe = document.querySelector("iframe[src*='picker']");
-      if (iframe) iframe.remove();
-    };
-
-    if (data.action === google.picker.Action.PICKED) {
-      const selected = data.docs || [];
-
-      if (!selected.length) {
-        toast.warning("No items selected.");
-        cleanupPickerFrame();
-        return;
-      }
-
-      toast.info(`Importing ${selected.length} item(s) from Google Drive...`);
-
-      await Promise.all(
-        selected.map(async (item: any) => {
-          try {
-            await importGoogleDriveFolder.mutateAsync({
-              id: item.id,
-              mimeType: item.mimeType,
-              name: item.name,
-            });
-
-            toast.success(
-              item.mimeType === "application/vnd.google-apps.folder"
-                ? `Folder "${item.name}" imported successfully!`
-                : `File "${item.name}" imported successfully!`
-            );
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          } catch (error) {
-            toast.error(`Failed to import "${item.name}".`);
-          }
-        })
-      );
-
-      toast.success("All selected items processed!");
-      cleanupPickerFrame();
-    }
-
-    if (data.action === google.picker.Action.CANCEL) {
-      cleanupPickerFrame();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const createPicker = useCallback(() => {
-    const google = window.google;
-    if (!google?.picker || !accessToken) return;
-
-    const picker = new google.picker.PickerBuilder()
-      .addView(
-        new google.picker.DocsView()
-          .setIncludeFolders(true)
-          .setSelectFolderEnabled(true)
-          .setOwnedByMe(true)
-          .setParent("root")
-      )
-      .setOAuthToken(accessToken)
-      .setCallback(pickerCallback)
-      .enableFeature(window.google.picker.Feature.MULTISELECT_ENABLED)
-      .setSize(window.innerWidth * 0.8, window.innerHeight * 0.8)
-      .build();
-
-    picker.setVisible(true);
-  }, [accessToken, pickerCallback]);
-
   const openPicker = useCallback(async () => {
     if (isFetching) return;
-
+    await import("@googleworkspace/drive-picker-element");
     setPickerOpened(true);
     setShouldFetchToken(true);
   }, [isFetching]);
 
   useEffect(() => {
-    if (!accessToken || !pickerOpened) return;
+    if (!pickerOpened || !pickerEl) return;
+    const el = pickerEl;
 
-    const initPicker = async () => {
-      await loadGoogleApi();
+    const onPicked = async (e: Event) => {
+      if (handledRef.current) return;
+      handledRef.current = true;
 
-      window.gapi.load("picker", {
-        callback: () => {
-          createPicker();
-        },
-      });
+      const detail = (e as CustomEvent<PickerEventDetail>)?.detail;
+      const docs: PickedFile[] = detail?.docs || [];
+
+      if (!docs.length) {
+        toast.warning("No items selected.");
+        return;
+      } else {
+        await Promise.all(
+          docs.map(async (item: PickedFile) => {
+            try {
+              await importGoogleDriveFolder.mutateAsync({
+                id: item.id,
+                mimeType: item.mimeType,
+                name: item.name,
+              });
+
+              toast.success(
+                item.mimeType === "application/vnd.google-apps.folder"
+                  ? `Folder "${item.name}" imported successfully!`
+                  : `File "${item.name}" imported successfully!`
+              );
+            } catch {
+              toast.error(`Failed to import "${item.name}".`);
+            }
+          })
+        );
+      }
+      setPickerOpened(false);
+
+      handledRef.current = false;
     };
 
-    initPicker();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [accessToken, pickerOpened]);
-
-  useEffect(() => {
-    return () => {
-      const iframe = document.querySelector("iframe[src*='picker']");
-      if (iframe) iframe.remove();
+    const onCanceled = () => {
       setPickerOpened(false);
     };
-  }, []);
 
-  return { openPicker };
+    el.addEventListener("picker:picked", onPicked);
+    el.addEventListener("picker-picked", onPicked);
+    el.addEventListener("picker:canceled", onCanceled);
+    el.addEventListener("picker-canceled", onCanceled);
+
+    Promise.resolve().then(() => {
+      if (el) el.visible = true;
+    });
+
+    return () => {
+      el.removeEventListener("picker:picked", onPicked);
+      el.removeEventListener("picker-picked", onPicked);
+      el.removeEventListener("picker:canceled", onCanceled);
+      el.removeEventListener("picker-canceled", onCanceled);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pickerOpened, pickerEl]);
+
+  return {
+    openPicker,
+    pickerOpened,
+    pickerRef: setPickerEl as Dispatch<SetStateAction<HTMLElement | null>>,
+    accessToken,
+  };
 }
