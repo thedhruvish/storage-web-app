@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
-import { useCreateNewPlan } from "@/api/planApi";
+import { useCreateNewPlan } from "@/api/plan-api";
 import { Button } from "@/components/ui/button";
 import {
   Form,

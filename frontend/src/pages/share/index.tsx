@@ -1,14 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { FileGrid } from "@/pages/directory/components/file-grid";
-import { useAppearance } from "@/store/appearanceStore";
-import { useUser } from "@/store/userStore";
+import { useAppearance } from "@/store/appearance-store";
+import { useUser } from "@/store/user-store";
 import { Moon, Sun } from "lucide-react";
-import { getShareDocument } from "@/api/docuementApi";
+import { getShareDocument } from "@/api/docuement-api";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 import { AppSidebar } from "@/components/app-sidebar";
+import { FileManagerSkeleton } from "@/components/file-manager-skeleton";
 import { SiteHeader } from "@/components/site-header";
 import Error404 from "@/components/status-code/404";
 import { useTheme } from "@/components/theme-provider";

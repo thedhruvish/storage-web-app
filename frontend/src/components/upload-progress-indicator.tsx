@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useUploadStore } from "@/store/uploadStore";
+import { useUploadStore } from "@/store/upload-store";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   CheckCircle2,
@@ -13,7 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useGetCurrentUser } from "@/api/auth";
-import { useGetAllDirectoryList } from "@/api/directoryApi";
+import { useGetAllDirectoryList } from "@/api/directory-api";
 import { Button } from "./ui/button";
 import { Progress } from "./ui/progress";
 import { ScrollArea } from "./ui/scroll-area";

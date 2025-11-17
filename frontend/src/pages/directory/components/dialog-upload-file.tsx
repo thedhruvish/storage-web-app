@@ -4,8 +4,8 @@ import axios, { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
-import { useUser } from "@/store/userStore";
+import { useDialogStore } from "@/store/dialogs-store";
+import { useUser } from "@/store/user-store";
 import {
   AlertCircle,
   CheckCircle2,
@@ -15,8 +15,8 @@ import {
 } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
-import axiosClient from "@/api/axiosClient";
-import { useGetAllDirectoryList } from "@/api/directoryApi";
+import axiosClient from "@/api/axios-client";
+import { useGetAllDirectoryList } from "@/api/directory-api";
 import { truncateFileName } from "@/utils/truncateFileName";
 import { Button } from "@/components/ui/button";
 import {
@@ -170,7 +170,7 @@ export function MultiFileUploadDialog({ open }: Props) {
             toast.error(
               `Error uploading ${
                 file.name.slice(0, 3) + "..."
-              }: ${error.message || "Unknown error"}`
+              }: ${error?.message || "Unknown error"}`
             );
           }
         }

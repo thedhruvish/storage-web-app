@@ -11,11 +11,10 @@ import {
 import type { Coupon } from "./coupon-schema";
 
 // Formats number as INR currency
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const formatINR = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-});
+// const formatINR = new Intl.NumberFormat("en-IN", {
+//   style: "currency",
+//   currency: "INR",
+// });
 
 // Formats number as USD currency
 const formatUSD = new Intl.NumberFormat("en-US", {

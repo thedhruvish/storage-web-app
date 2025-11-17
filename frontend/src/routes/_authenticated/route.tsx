@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useAppearance } from "@/store/appearanceStore";
-import { useUser } from "@/store/userStore";
+import { useAppearance } from "@/store/appearance-store";
+import { useUser } from "@/store/user-store";
 import { useGetCurrentUser } from "@/api/auth";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
-import { FileManagerSkeleton } from "@/components/FileManagerSkeleton";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Dialogs } from "@/components/dialogs";
+import { FileManagerSkeleton } from "@/components/file-manager-skeleton";
 import { SiteHeader } from "@/components/site-header";
 
 export const Route = createFileRoute("/_authenticated")({

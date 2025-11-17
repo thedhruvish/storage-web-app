@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useAppearance } from "@/store/appearanceStore";
+import { useAppearance } from "@/store/appearance-store";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
 import { useLoginWithGoogle } from "@/api/auth";

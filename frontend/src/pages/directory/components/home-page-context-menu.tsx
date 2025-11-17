@@ -1,4 +1,4 @@
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { FileUp, FolderPlus } from "lucide-react";
 import { useFileUploader } from "@/hooks/use-file-uploader";
 import {

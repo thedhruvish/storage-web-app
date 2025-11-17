@@ -27,7 +27,7 @@ export const useAppearanceStore = create<AppearanceStore>()(
         set({
           appearance: {
             ...get().appearance,
-            ...updates, // 👈 merge updates with current state
+            ...updates,
           },
         }),
       clearAppearance: () => set({ appearance: defaultAppearance }),

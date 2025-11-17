@@ -2,7 +2,7 @@ import * as React from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import {
   Check,
   Copy,
@@ -20,7 +20,7 @@ import {
   useCreateDirectoryShareShortLink,
   useGetDirectoryPermissionUsers,
   useRemoveDirectoryPermission,
-} from "@/api/directoryApi";
+} from "@/api/directory-api";
 import { truncateName } from "@/utils/truncateFileName";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";

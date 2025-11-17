@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useUploadStore } from "@/store/uploadStore";
-import { useUser } from "@/store/userStore";
+import { useUploadStore } from "@/store/upload-store";
+import { useUser } from "@/store/user-store";
 import { toast } from "sonner";
 
 export const useFileUploader = () => {

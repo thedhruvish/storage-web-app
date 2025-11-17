@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { SubscriptionCycleDialog } from "@/pages/website/SubscriptionCycleDialog";
+import { SubscriptionCycleDialog } from "@/pages/website/subscription-cycle-dialog";
 import {
   AlertCircle,
   CalendarDays,
@@ -16,7 +16,7 @@ import {
   useToggleSubscriptionPaused,
   useUpdatePaymentDetails,
   type ApiSubscription,
-} from "@/api/settingApi";
+} from "@/api/setting-api";
 import { formatCurrency, formatDate, formatFileSize } from "@/utils/functions";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";

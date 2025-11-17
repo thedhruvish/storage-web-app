@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PlanFormValues } from "@/pages/admin/plan/schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 // get all the plan
 export const useGetAllPlans = () => {

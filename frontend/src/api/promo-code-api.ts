@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { PromoCodeFormValues } from "@/pages/admin/promo-code/promocode-schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 /**
  * fetching all Stripe promotion codes.

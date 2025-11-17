@@ -3,10 +3,10 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { toast } from "sonner";
-import { useUpdateDirectory } from "@/api/directoryApi";
-import { useUpdateDocument } from "@/api/docuementApi";
+import { useUpdateDirectory } from "@/api/directory-api";
+import { useUpdateDocument } from "@/api/docuement-api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import {
   useGoogleAccessToken,
   useImportFolderByDrive,
-} from "@/api/importDataApi";
+} from "@/api/import-data-api";
 
 export interface PickedFile {
   id: string;

@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import type { BackendPlan } from "@/pages/other/PricingCard";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 export const useGetAllPlansPublic = () => {
   return useQuery({

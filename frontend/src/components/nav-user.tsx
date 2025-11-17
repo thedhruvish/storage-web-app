@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import type { User } from "@/store/userStore";
+import type { User } from "@/store/user-store";
 import {
   BadgeCheck,
   Bell,

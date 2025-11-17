@@ -2,9 +2,9 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { toast } from "sonner";
-import { useCreateDirectory } from "@/api/directoryApi";
+import { useCreateDirectory } from "@/api/directory-api";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,

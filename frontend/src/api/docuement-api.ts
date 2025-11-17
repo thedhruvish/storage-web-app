@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 // update
 export const useUpdateDocument = (directoryId?: string) => {

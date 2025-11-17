@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useDialogStore } from "@/store/DialogsStore";
-import axiosClient from "./axiosClient";
+import { useDialogStore } from "@/store/dialogs-store";
+import axiosClient from "./axios-client";
 
 export const useGetAllDirectoryList = (directoryId: string = "") => {
   return useQuery({

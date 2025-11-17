@@ -9,13 +9,12 @@ import {
 } from "@tanstack/react-query";
 import { RouterProvider, createRouter } from "@tanstack/react-router";
 import { GoogleOAuthProvider } from "@react-oauth/google";
-// Import the generated route tree
 import { toast } from "sonner";
 import { ThemeProvider } from "./components/theme-provider.tsx";
 import { Toaster } from "./components/ui/sonner.tsx";
 import reportWebVitals from "./reportWebVitals.ts";
 import { routeTree } from "./routeTree.gen";
-import { useUserStore } from "./store/userStore.ts";
+import { useUserStore } from "./store/user-store.ts";
 import "./styles.css";
 import { handleServerError } from "./utils/handle-server-error.ts";
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { CouponFormValues } from "@/pages/admin/coupon/coupon-schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 /**
  * fetching all Stripe coupons.

@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 export const checkConnectedGoogle = ({ enabled }: { enabled: boolean }) => {
   return useQuery({

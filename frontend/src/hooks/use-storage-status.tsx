@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { useUserStore } from "@/store/userStore";
+import { useUserStore } from "@/store/user-store";
 import { formatFileSize } from "@/utils/functions";
 
 // Define the 10MB storage threshold

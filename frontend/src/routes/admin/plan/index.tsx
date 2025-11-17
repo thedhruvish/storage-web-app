@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getColumns } from "@/pages/admin/plan/column";
 import { toast } from "sonner";
-import { useDeletePlan, useGetAllPlans, useTogglePlan } from "@/api/planApi";
+import { useDeletePlan, useGetAllPlans, useTogglePlan } from "@/api/plan-api";
 import { Button } from "@/components/ui/button";
 import { ContentTableLayout } from "@/components/content-table-layout";
 import { DataTable } from "@/components/data-table";

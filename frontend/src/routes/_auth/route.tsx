@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useUser } from "@/store/userStore";
+import { useUser } from "@/store/user-store";
 
 export const Route = createFileRoute("/_auth")({
   component: RouteComponent,

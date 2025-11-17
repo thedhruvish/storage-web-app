@@ -1,4 +1,4 @@
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import {
   Download,
   FolderPen,
@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { usestarredToggle } from "../../../api/directoryApi";
+import { usestarredToggle } from "../../../api/directory-api";
 import type { FileItem } from "../types";
 
 interface Props {

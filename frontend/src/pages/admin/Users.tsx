@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useUser } from "@/store/userStore";
+import { useUser } from "@/store/user-store";
 import { MoreHorizontal } from "lucide-react";
 import { toast } from "sonner";
 import {
@@ -8,8 +8,8 @@ import {
   useHardDeleteUser,
   useUserChangeRole,
   useUserLogoutAllDevices,
-} from "@/api/adminApi";
-import { useUserDeleteStatusChange } from "@/api/adminApi";
+} from "@/api/admin-api";
+import { useUserDeleteStatusChange } from "@/api/admin-api";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {

@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
 import { useNavigate } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { motion } from "framer-motion";
 import {
   Archive,
@@ -20,7 +20,7 @@ import {
   Video,
 } from "lucide-react";
 import { toast } from "sonner";
-import { usestarredToggle } from "@/api/directoryApi";
+import { usestarredToggle } from "@/api/directory-api";
 import { getFileIconName } from "@/utils/file-icon-helper";
 import { truncateFileName } from "@/utils/truncateFileName";
 import {

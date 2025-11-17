@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { useCreateCoupon } from "@/api/couponApi";
+import { useCreateCoupon } from "@/api/coupon-api";
 import { Button } from "@/components/ui/button";
 import {
   Form,

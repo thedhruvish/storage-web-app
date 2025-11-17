@@ -1,8 +1,8 @@
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { motion } from "framer-motion";
 import { Star, StarOff, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { usestarredToggle } from "@/api/directoryApi";
+import { usestarredToggle } from "@/api/directory-api";
 import { formatDate, formatFileSize } from "@/utils/functions";
 import { Button } from "@/components/ui/button";
 import {

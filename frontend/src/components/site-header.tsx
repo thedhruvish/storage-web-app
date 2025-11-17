@@ -1,6 +1,6 @@
 import { Link } from "@tanstack/react-router";
-import { useBreadCrumStore } from "@/store/breadCrumStore";
-import { useUser } from "@/store/userStore";
+import { useBreadCrumStore } from "@/store/breadCrum-store";
+import { useUser } from "@/store/user-store";
 import { SidebarIcon, MoreHorizontal } from "lucide-react";
 import {
   Breadcrumb,

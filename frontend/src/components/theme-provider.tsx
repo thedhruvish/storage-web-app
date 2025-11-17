@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { useAppearance } from "@/store/appearanceStore";
+import { useAppearance } from "@/store/appearance-store";
 
 type Theme = "dark" | "light" | "system";
 

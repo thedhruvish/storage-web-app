@@ -5,7 +5,7 @@ import { ImportFileDialog } from "@/pages/directory/components/dialog-import-fil
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
 import { ShareDialog } from "@/pages/directory/components/dialog-share";
 import { MultiFileUploadDialog } from "@/pages/directory/components/dialog-upload-file";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 
 export function Dialogs() {
   const { open, setOpen, closeDialog } = useDialogStore();

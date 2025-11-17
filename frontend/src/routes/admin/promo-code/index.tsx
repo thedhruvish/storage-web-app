@@ -2,7 +2,7 @@ import { useMemo } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { getColumnsPromoCode } from "@/pages/admin/promo-code/column-promo-code";
 import { toast } from "sonner";
-import { useGetAllPromoCodes, useTogglePromoCode } from "@/api/promoCodeApi";
+import { useGetAllPromoCodes, useTogglePromoCode } from "@/api/promo-code-api";
 import { Button } from "@/components/ui/button";
 import { ContentTableLayout } from "@/components/content-table-layout";
 import { DataTable } from "@/components/data-table";

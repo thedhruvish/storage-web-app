@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 export const useLoginMutation = () => {
   return useMutation({

@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
-import { useAppearance } from "@/store/appearanceStore";
-import { useUser } from "@/store/userStore";
+import { useAppearance } from "@/store/appearance-store";
+import { useUser } from "@/store/user-store";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Dialogs } from "@/components/dialogs";

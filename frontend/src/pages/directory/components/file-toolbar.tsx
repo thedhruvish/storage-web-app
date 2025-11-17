@@ -1,5 +1,5 @@
-import { useDialogStore } from "@/store/DialogsStore";
-import { useAppearance } from "@/store/appearanceStore";
+import { useAppearance } from "@/store/appearance-store";
+import { useDialogStore } from "@/store/dialogs-store";
 import {
   Filter,
   FolderPlus,
@@ -10,8 +10,8 @@ import {
   SortAsc,
   Upload,
 } from "lucide-react";
-import { checkConnectedGoogle } from "@/api/importDataApi";
-import { useDrivePicker } from "@/hooks/drive-picker";
+import { checkConnectedGoogle } from "@/api/import-data-api";
+import { useDrivePicker } from "@/hooks/use-drive-picker";
 import { useFileUploader } from "@/hooks/use-file-uploader";
 import { useStorageStatus } from "@/hooks/use-storage-status";
 import { Button } from "@/components/ui/button";

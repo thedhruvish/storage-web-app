@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
+import { useDialogStore } from "@/store/dialogs-store";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import { useDeleteDirectory, useGetAllDirectoryList } from "@/api/directoryApi";
-import { useDeleteDocument } from "@/api/docuementApi";
+import {
+  useDeleteDirectory,
+  useGetAllDirectoryList,
+} from "@/api/directory-api";
+import { useDeleteDocument } from "@/api/docuement-api";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface Props {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { create } from "zustand";
-import axiosClient from "@/api/axiosClient";
+import axiosClient from "@/api/axios-client";
 
 type UploadStatus = "queued" | "uploading" | "success" | "error" | "canceled";
 

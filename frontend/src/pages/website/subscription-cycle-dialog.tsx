@@ -1,5 +1,5 @@
 import { ExternalLinkIcon, X } from "lucide-react";
-import type { ApiSubscription } from "@/api/settingApi";
+import type { ApiSubscription } from "@/api/setting-api";
 import { formatCurrency, formatDate } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

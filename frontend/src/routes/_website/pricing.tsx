@@ -5,9 +5,9 @@ import {
   type BillingCycle,
   type Currency,
 } from "@/pages/other/PricingCard";
-import { useUser } from "@/store/userStore";
-import { useGetAllPlansPublic } from "@/api/checkoutApi";
-import { useCheckoutStripe } from "@/api/checkoutApi";
+import { useUser } from "@/store/user-store";
+import { useGetAllPlansPublic } from "@/api/checkout-api";
+import { useCheckoutStripe } from "@/api/checkout-api";
 import {
   Card,
   CardContent,

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { Plan } from "@/pages/admin/plan/schema";
-import axiosClient from "./axiosClient";
+import axiosClient from "./axios-client";
 
 export type StripeSubscriptionCycle = {
   invoice_pdf: string;

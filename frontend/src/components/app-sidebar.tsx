@@ -1,7 +1,7 @@
 import * as React from "react";
 import { Link } from "@tanstack/react-router";
-import { useDialogStore } from "@/store/DialogsStore";
-import { useUser } from "@/store/userStore";
+import { useDialogStore } from "@/store/dialogs-store";
+import { useUser } from "@/store/user-store";
 import {
   Clock,
   Command,
