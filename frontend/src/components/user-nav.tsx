@@ -47,10 +47,7 @@ export function UserNav({
             </div>
           </DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <StorageProgress
-            totalUsedBytes={user.totalUsedBytes}
-            maxStorageBytes={user.maxStorageBytes}
-          />
+          <StorageProgress />
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
             <DropdownMenuItem>Profile</DropdownMenuItem>

@@ -11,6 +11,7 @@ export interface UploadableFile {
   progress: number;
   status: UploadStatus;
   source: AbortController;
+  error?: string;
 }
 
 interface UploadState {
@@ -61,24 +62,32 @@ const uploadFile = async (
     }));
   } catch (error) {
     if (axios.isCancel(error)) {
+      const errorMessage = "Upload canceled";
       set((state) => ({
         files: state.files.map((f) =>
-          f.id === file.id ? { ...f, status: "canceled" } : f
+          f.id === file.id
+            ? { ...f, status: "canceled", error: errorMessage } // Set error message
+            : f
         ),
       }));
     } else {
+      let errorMessage = `Failed to upload ${file.file.name}`; // Default error
+
+      if (axios.isAxiosError(error)) {
+        errorMessage = error.response?.data?.message || error.message;
+        toast.error(errorMessage);
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+        toast.error(errorMessage);
+      } else {
+        toast.error(errorMessage);
+      }
+
       set((state) => ({
         files: state.files.map((f) =>
-          f.id === file.id ? { ...f, status: "error" } : f
+          f.id === file.id ? { ...f, status: "error", error: errorMessage } : f
         ),
       }));
-      if (axios.isAxiosError(error)) {
-        if (error.status === 400) {
-          toast.error(error.message);
-        }
-      } else {
-        toast.error(`Failed to upload ${file.file.name}`);
-      }
     }
   } finally {
     set((state) => {
@@ -117,6 +126,7 @@ export const useUploadStore = create<UploadState>((set, get) => ({
         status: "queued",
         progress: 0,
         source: new AbortController(),
+        error: undefined,
       };
       set((state) => ({
         files: state.files.map((f) => (f.id === id ? newFile : f)),

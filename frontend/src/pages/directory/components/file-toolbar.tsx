@@ -13,6 +13,7 @@ import {
 import { checkConnectedGoogle } from "@/api/importDataApi";
 import { useDrivePicker } from "@/hooks/drive-picker";
 import { useFileUploader } from "@/hooks/use-file-uploader";
+import { useStorageStatus } from "@/hooks/use-storage-status";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,6 +22,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";
@@ -30,6 +37,8 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
   const { openPicker } = useDrivePicker();
   const { setOpen } = useDialogStore();
   const { setAppearance } = useAppearance();
+
+  const { isUploadDisabled, storageTooltipMessage } = useStorageStatus();
 
   const { triggerUploader, UploaderInput } = useFileUploader();
 
@@ -50,9 +59,9 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
     <>
       {UploaderInput}
 
-      <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4'>
+      <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4 '>
         <div className='flex flex-wrap items-center gap-2'>
-          <div className='flex sm:hidden'>
+          <div className='flex sm:hidden cursor-not-allowed'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button>
@@ -65,12 +74,15 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
                   <FolderPlus className='mr-2 h-4 w-4' />
                   New Folder
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={triggerUploader}>
+                <DropdownMenuItem
+                  onClick={triggerUploader}
+                  disabled={isUploadDisabled}
+                >
                   <Upload className='mr-2 h-4 w-4' />
                   File Upload
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  disabled={isFetching}
+                  disabled={isUploadDisabled || isFetching}
                   onClick={importFromGoogleDrive}
                 >
                   <Import className='mr-2 h-4 w-4' />
@@ -80,7 +92,7 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
             </DropdownMenu>
           </div>
           {/* Desktop: Full buttons */}
-          <div className='hidden items-center gap-2 sm:flex'>
+          <div className='hidden items-center gap-2 sm:flex cursor-not-allowed'>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button>
@@ -93,32 +105,60 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
                   <FolderPlus className='mr-2 h-4 w-4' />
                   New Folder
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={triggerUploader}>
+                <DropdownMenuItem
+                  onClick={triggerUploader}
+                  disabled={isUploadDisabled} // Disable based on storage
+                >
                   <Upload className='mr-2 h-4 w-4' />
                   File Upload
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
 
-            <Button variant='outline' onClick={triggerUploader}>
-              <Upload className='mr-2 h-4 w-4' />
-              <span className='hidden md:inline'>Upload</span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      variant='outline'
+                      onClick={triggerUploader}
+                      disabled={isUploadDisabled}
+                    >
+                      <Upload className='mr-2 h-4 w-4' />
+                      <span className='hidden md:inline'>Upload</span>
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {isUploadDisabled && (
+                  <TooltipContent>{storageTooltipMessage}</TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
 
-            <Button
-              variant='outline'
-              disabled={isFetching}
-              onClick={importFromGoogleDrive}
-            >
-              <Import className='mr-2 h-4 w-4' />
-              <span className='hidden md:inline'>
-                {isFetching ? "Checking..." : "Import"}
-              </span>
-            </Button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button
+                      variant='outline'
+                      disabled={isUploadDisabled || isFetching}
+                      onClick={importFromGoogleDrive}
+                    >
+                      <Import className='mr-2 h-4 w-4' />
+                      <span className='hidden md:inline'>
+                        {isFetching ? "Checking..." : "Import"}
+                      </span>
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                {isUploadDisabled && (
+                  <TooltipContent>{storageTooltipMessage}</TooltipContent>
+                )}
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
 
-        {/* Right: Sort / Filter / View Toggle */}
         <div className='flex flex-wrap items-center gap-2'>
           <Button variant='outline' size='icon'>
             <SortAsc className='h-4 w-4' />

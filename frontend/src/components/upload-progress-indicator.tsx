@@ -117,7 +117,7 @@ export function UploadProgressIndicator() {
                           <p className='text-xs text-green-500'>Completed</p>
                         )}
                         {item.status === "error" && (
-                          <p className='text-xs text-red-500'>Failed</p>
+                          <p className='text-xs text-red-500'>{item.error}</p>
                         )}
                         {item.status === "canceled" && (
                           <p className='text-xs text-yellow-500'>Canceled</p>

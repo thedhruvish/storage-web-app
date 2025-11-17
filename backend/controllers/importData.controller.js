@@ -3,9 +3,14 @@ import ImportToken from "../models/ImportToken.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Document from "../models/document.model.js";
-import { downloadFiles, downloadSingleFile } from "../utils/DriveFile.js";
+import {
+  downloadFiles,
+  downloadSingleFile,
+  getFileList,
+} from "../utils/DriveFile.js";
 import Directory from "../models/Directory.model.js";
 import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
+import { rm } from "node:fs/promises";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
@@ -157,6 +162,9 @@ export const importDriveData = async (req, res) => {
   });
 
   const drive = google.drive({ version: "v3", auth: googleApiOauth2Client });
+  const directory = await Directory.findById(user.rootDirId, {
+    metaData: 1,
+  }).lean();
 
   if (mimeType === "application/vnd.google-apps.folder") {
     // when import folder than it create a folder and that is the import also create a same name folder
@@ -172,12 +180,29 @@ export const importDriveData = async (req, res) => {
         size: 0,
       },
     });
+    const fileMetaData = await getFileList(drive, id);
 
-    const fileData = await downloadFiles(drive, id, newFolder._id, user._id);
-    const totalSize = fileData.reduce(
-      (acc, file) => acc + file.metaData.size,
+    const totalSize = fileMetaData.files.reduce(
+      (acc, file) => acc + file.size,
       0,
     );
+    console.log(totalSize);
+
+    console.log(directory);
+    if (directory.metaData.size + totalSize > user.maxStorageBytes) {
+      return res.status(400).json({
+        message: "Storage limit exceeded — file removed.",
+      });
+    }
+
+    const fileData = await downloadFiles(
+      drive,
+      fileMetaData,
+      id,
+      newFolder._id,
+      user._id,
+    );
+
     await updateParentDirectorySize(newFolder._id, totalSize);
     await Document.insertMany(fileData);
 
@@ -193,7 +218,23 @@ export const importDriveData = async (req, res) => {
       uploadDirId,
       user._id,
     );
-
+    console.log({
+      fileData,
+      total: directory.metaData.size,
+      size: fileData.metaData.size,
+      max: user.maxStorageBytes,
+    });
+    if (
+      directory.metaData.size + fileData.metaData.size <
+      user.maxStorageBytes
+    ) {
+      await rm(
+        `${import.meta.dirname}/../storage/${fileData._id}${fileData.extension}`,
+      );
+      return res.status(400).json({
+        message: "Storage limit exceeded — file removed.",
+      });
+    }
     await Document.create(fileData);
     await updateParentDirectorySize(uploadDirId, fileData.metaData.size);
 

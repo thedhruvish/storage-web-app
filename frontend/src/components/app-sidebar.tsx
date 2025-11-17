@@ -15,6 +15,7 @@ import {
   Users,
 } from "lucide-react";
 import { useFileUploader } from "@/hooks/use-file-uploader";
+import { useStorageStatus } from "@/hooks/use-storage-status";
 import {
   Sidebar,
   SidebarContent,
@@ -30,12 +31,18 @@ import {
 import { NavUser } from "@/components/nav-user";
 import { StorageProgress } from "./storage-progress";
 import { Button } from "./ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { user } = useUser();
   const { setOpen } = useDialogStore();
   const { triggerUploader, UploaderInput } = useFileUploader();
-
+  const { isUploadDisabled, storageTooltipMessage } = useStorageStatus();
   if (!user) {
     return null;
   }
@@ -64,24 +71,46 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           </SidebarMenuItem>
         </SidebarMenu>
         {/* Quick Actions */}
-        <div className='flex gap-2 px-2 pb-2'>
-          <Button
-            size='sm'
-            className='flex-1'
-            onClick={() => setOpen("newDirectory")}
-          >
-            <Plus className='mr-2 h-4 w-4' />
-            New Folder
-          </Button>
-          <Button
-            size='sm'
-            variant='outline'
-            className='flex-1 bg-transparent'
-            onClick={triggerUploader}
-          >
-            <Upload className='mr-2 h-4 w-4' />
-            Upload
-          </Button>
+        <div className='flex gap-2 px-2 pb-2 cursor-not-allowed'>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button
+                    size='sm'
+                    className='flex-1'
+                    onClick={() => setOpen("newDirectory")}
+                    disabled={isUploadDisabled}
+                  >
+                    <Plus className='mr-2 h-4 w-4' />
+                    New Folder
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isUploadDisabled && (
+                <TooltipContent>{storageTooltipMessage}</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span tabIndex={0}>
+                  <Button
+                    variant='outline'
+                    onClick={triggerUploader}
+                    disabled={isUploadDisabled}
+                  >
+                    <Upload className='mr-2 h-4 w-4' />
+                    <span className='hidden md:inline'>Upload</span>
+                  </Button>
+                </span>
+              </TooltipTrigger>
+              {isUploadDisabled && (
+                <TooltipContent>{storageTooltipMessage}</TooltipContent>
+              )}
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </SidebarHeader>
 
@@ -190,10 +219,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <StorageProgress
-          totalUsedBytes={user.totalUsedBytes}
-          maxStorageBytes={user.maxStorageBytes}
-        />
+        <StorageProgress />
         <NavUser user={user} />
       </SidebarFooter>
     </Sidebar>

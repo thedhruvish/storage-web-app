@@ -3,7 +3,7 @@ import { createWriteStream } from "node:fs";
 import path from "node:path";
 import fs from "node:fs/promises";
 
-const getFileList = async (drive, folderId) => {
+export const getFileList = async (drive, folderId) => {
   const maxRetries = 3;
   let lastError;
 
@@ -38,8 +38,7 @@ const getFileList = async (drive, folderId) => {
   throw new Error(`Failed to fetch file list: ${lastError.message}`);
 };
 
-export const downloadFiles = async (drive, id, uploadDirId, userId) => {
-  const data = await getFileList(drive, id);
+export const downloadFiles = async (drive, data, id, uploadDirId, userId) => {
   return Promise.all(
     data.files.map((f) =>
       downloadSingleFile(drive, f.id, f.name, f.mimeType, uploadDirId, userId),
