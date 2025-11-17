@@ -15,11 +15,17 @@ export const getFileList = async (drive, folderId) => {
         supportsAllDrives: true,
         includeItemsFromAllDrives: true,
       });
+      const filesOnly =
+        data.files.filter(
+          (file) => file.mimeType !== "application/vnd.google-apps.folder",
+        ) || [];
+      const totalSize = filesOnly.reduce(
+        (acc, file) => acc + (Number(file.size) || 0),
+        0,
+      );
       return {
-        files:
-          data.files.filter(
-            (file) => file.mimeType !== "application/vnd.google-apps.folder",
-          ) || [],
+        files: filesOnly,
+        totalSize: totalSize,
       };
     } catch (error) {
       console.error(
@@ -38,7 +44,7 @@ export const getFileList = async (drive, folderId) => {
   throw new Error(`Failed to fetch file list: ${lastError.message}`);
 };
 
-export const downloadFiles = async (drive, data, id, uploadDirId, userId) => {
+export const downloadFiles = async (drive, data, uploadDirId, userId) => {
   return Promise.all(
     data.files.map((f) =>
       downloadSingleFile(drive, f.id, f.name, f.mimeType, uploadDirId, userId),

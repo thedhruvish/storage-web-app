@@ -181,14 +181,8 @@ export const importDriveData = async (req, res) => {
       },
     });
     const fileMetaData = await getFileList(drive, id);
+    const totalSize = fileMetaData.totalSize;
 
-    const totalSize = fileMetaData.files.reduce(
-      (acc, file) => acc + file.size,
-      0,
-    );
-    console.log(totalSize);
-
-    console.log(directory);
     if (directory.metaData.size + totalSize > user.maxStorageBytes) {
       return res.status(400).json({
         message: "Storage limit exceeded — file removed.",
@@ -198,7 +192,6 @@ export const importDriveData = async (req, res) => {
     const fileData = await downloadFiles(
       drive,
       fileMetaData,
-      id,
       newFolder._id,
       user._id,
     );
@@ -225,7 +218,7 @@ export const importDriveData = async (req, res) => {
       max: user.maxStorageBytes,
     });
     if (
-      directory.metaData.size + fileData.metaData.size <
+      directory.metaData.size + fileData.metaData.size >
       user.maxStorageBytes
     ) {
       await rm(
