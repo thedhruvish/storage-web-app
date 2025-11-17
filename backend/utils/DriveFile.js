@@ -30,7 +30,6 @@ const getFileList = async (drive, folderId) => {
       lastError = error;
 
       if (attempt < maxRetries) {
-        console.log(`Retrying in 1 second...`);
         await delay(1000 * attempt);
       }
     }
@@ -60,18 +59,20 @@ export const downloadSingleFile = async (
   try {
     let finalFileName = fileName;
     let downloadStream;
+    let extension;
+    let totalBytes = 0;
 
     if (mimeType.startsWith("application/vnd.google-apps")) {
       const exportInfo = GOOGLE_EXPORT_MIMES[mimeType];
-      console.log(exportInfo);
       if (!exportInfo) {
         throw new Error(`Unsupported Google native mimeType: ${mimeType}`);
       }
 
-      const { mime, extension } = exportInfo;
+      const { mime } = exportInfo;
+      extension = exportInfo.ext;
 
       finalFileName = fileName + extension;
-      console.log(mime);
+
       const exportRes = await drive.files.export(
         {
           fileId,
@@ -80,6 +81,9 @@ export const downloadSingleFile = async (
         { responseType: "stream" },
       );
 
+      exportRes.data.on("data", (chunk) => {
+        totalBytes += chunk.length;
+      });
       downloadStream = exportRes.data;
     } else {
       const { data } = await drive.files.get({
@@ -95,10 +99,12 @@ export const downloadSingleFile = async (
       );
 
       downloadStream = res.data;
+
+      totalBytes = data.size;
+      extension = path.extname(finalFileName);
     }
 
     const newFileId = new mongoose.Types.ObjectId();
-    const extension = path.extname(finalFileName);
     const filePath = path.resolve(`./storage/${newFileId}${extension}`);
 
     await fs.mkdir(path.dirname(filePath), { recursive: true });
@@ -109,11 +115,6 @@ export const downloadSingleFile = async (
       downloadStream.on("end", resolve).on("error", reject).pipe(dest);
     });
 
-    let totalBytes = 0;
-
-    downloadStream.on("data", (chunk) => {
-      totalBytes += chunk.length;
-    });
     return {
       _id: newFileId,
       name: finalFileName,
@@ -121,7 +122,7 @@ export const downloadSingleFile = async (
       parentDirId: uploadDirId,
       userId,
       metaData: {
-        size: totalBytes,
+        size: +totalBytes,
         mimeType,
         source: "google-drive",
       },

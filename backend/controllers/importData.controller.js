@@ -133,8 +133,6 @@ export const importDriveData = async (req, res) => {
   const { id, mimeType, name } = req.body;
   const user = req.user;
 
-  console.log("📥 Import request:", { uploadDirId, id, mimeType, name });
-
   const tokenDoc = await ImportToken.findOne({
     userId: user._id,
     services: "google",
@@ -152,7 +150,7 @@ export const importDriveData = async (req, res) => {
   });
 
   const { token: accessToken } = await googleApiOauth2Client.getAccessToken();
-  console.log(accessToken);
+
   googleApiOauth2Client.setCredentials({
     access_token: accessToken,
     refresh_token: tokenDoc.refreshToken,
@@ -187,8 +185,6 @@ export const importDriveData = async (req, res) => {
       .status(201)
       .json(new ApiResponse(201, "Folder imported successfully"));
   } else {
-    console.log({ id, uploadDirId, name, mimeType });
-
     const fileData = await downloadSingleFile(
       drive,
       id,
@@ -197,7 +193,6 @@ export const importDriveData = async (req, res) => {
       uploadDirId,
       user._id,
     );
-    console.log(fileData);
 
     await Document.create(fileData);
     await updateParentDirectorySize(uploadDirId, fileData.metaData.size);
