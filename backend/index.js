@@ -20,6 +20,7 @@ import planRoute from "./routes/plan.route.js";
 import paymentStripeRoute from "./routes/paymentStripe.route.js";
 import webhookRoute from "./routes/webhook.route.js";
 import userRoute from "./routes/user.route.js";
+import { startCronJobs } from "./cron-job/index.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
@@ -37,6 +38,9 @@ app.use(
     },
   }),
 );
+
+// cron-job
+startCronJobs();
 
 // handle report violation:
 app.post(

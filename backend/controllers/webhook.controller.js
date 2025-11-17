@@ -9,6 +9,7 @@ import WebHookLog from "../models/WebHookLog.model.js";
 
 export const stripeWebhookHandler = async (req, res) => {
   let event;
+  let subscription;
   try {
     event = await verifyStripeWebhook(req);
   } catch (err) {
@@ -122,7 +123,7 @@ export const stripeWebhookHandler = async (req, res) => {
       }
 
     case "customer.subscription.updated":
-      let subscription = event.data.object;
+      subscription = event.data.object;
       const previous = event.data.previous_attributes || {};
       const changedKeys = Object.keys(previous);
       const updateVal = {};
