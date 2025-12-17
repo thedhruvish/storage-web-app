@@ -2,6 +2,7 @@ import axios from "axios";
 import { toast } from "sonner";
 import { create } from "zustand";
 import axiosClient from "@/api/axios-client";
+import { queryClient } from "@/lib/query-client";
 
 // --- Types ---
 
@@ -126,7 +127,8 @@ const processFile = async (fileItem: UploadableFile, directoryId: string) => {
       });
     }
   } finally {
-    // Check if any other files are still uploading to update global state
+    queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: ["directorys", directoryId] });
     const currentFiles = useUploadStore.getState().files;
     const stillUploading = currentFiles.some((f) => f.status === "uploading");
     store.setGlobalUploading(stillUploading);

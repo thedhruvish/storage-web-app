@@ -47,17 +47,17 @@ const getStatusVariant = (
 ): "default" | "destructive" | "secondary" | "outline" => {
   switch (status) {
     case "active":
-      return "default"; // Green (if customized) or primary
+      return "default";
     case "cancelled":
-      return "destructive"; // Red
+      return "destructive";
     case "failed":
-      return "destructive"; // Red
+      return "destructive";
     case "paused":
-      return "secondary"; // Gray
+      return "secondary";
     case "past_due":
       return "secondary";
     case "expired":
-      return "outline"; // Lighter gray
+      return "outline";
     default:
       return "secondary";
   }
@@ -82,11 +82,6 @@ export function BillingSettingsPage() {
         // Payment was successful!
         toast.success("Payment successful! Refreshing data.");
 
-        // 1. Refetch any data that needs updating
-        // (e.g., the user's new plan)
-        // queryClient.invalidateQueries({ queryKey: ["user-status"] });
-
-        // 2. Clean up the message
         localStorage.removeItem("payment_status");
       }
     };

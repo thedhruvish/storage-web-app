@@ -6,7 +6,6 @@ import { useGetCurrentUser } from "@/api/auth";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Dialogs } from "@/components/dialogs";
-import { FileManagerSkeleton } from "@/components/file-manager-skeleton";
 import { SiteHeader } from "@/components/site-header";
 
 export const Route = createFileRoute("/_authenticated")({
@@ -23,7 +22,8 @@ function RouteComponent() {
     if (getCureentUser.isSuccess) {
       setUser(getCureentUser.data.data.data);
     }
-  }, [getCureentUser.isSuccess, getCureentUser.data, setUser]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [getCureentUser.isSuccess]);
 
   useEffect(() => {
     if (getCureentUser.isError) {
@@ -31,9 +31,9 @@ function RouteComponent() {
     }
   }, [getCureentUser.isError, getCureentUser.error, navagate]);
 
-  if (getCureentUser.isLoading || getCureentUser.isFetching) {
-    return <FileManagerSkeleton />;
-  }
+  // if (getCureentUser.isLoading || getCureentUser.isFetching) {
+  //   return <FileManagerSkeleton />;
+  // }
 
   if (!user) return null;
   return (

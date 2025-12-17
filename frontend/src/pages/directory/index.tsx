@@ -27,7 +27,9 @@ export default function Home({
   const directoryId =
     (params as { directoryId?: string }).directoryId || propDirectoryId;
 
-  const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
+  // Destructure for cleaner access
+  const { data, isLoading, isError, isSuccess } =
+    useGetAllDirectoryList(directoryId);
 
   const { user } = useUser();
 
@@ -51,75 +53,96 @@ export default function Home({
     noClick: true,
   });
 
+  // Handle Side Effects (Breadcrumbs)
   useEffect(() => {
-    if (getDirectoryDataHook.isLoading) setStatus("loading");
-    else if (getDirectoryDataHook.isError) setStatus("error");
-    else if (getDirectoryDataHook.isSuccess) {
+    if (isLoading) setStatus("loading");
+    else if (isError) setStatus("error");
+    else if (isSuccess && data) {
       setStatus("success");
-      const { path } = getDirectoryDataHook.data.data.path;
+      const { path } = data.data.path;
       setPath(path.slice(1));
-      const currentName = getDirectoryDataHook.data.data.path.name;
+      const currentName = data.data.path.name;
       if (currentName.startsWith("root")) {
         setCurrentItem(null);
       } else {
         setCurrentItem(currentName);
       }
     }
-  }, [
-    getDirectoryDataHook.isLoading,
-    getDirectoryDataHook.isError,
-    getDirectoryDataHook.isSuccess,
-    getDirectoryDataHook.data,
-    setPath,
-    setCurrentItem,
-    setStatus,
-  ]);
+  }, [isLoading, isError, isSuccess, data, setPath, setCurrentItem, setStatus]);
 
-  // 🔹 Render states
-  if (getDirectoryDataHook.isLoading) return <FileManagerSkeleton />;
-  if (getDirectoryDataHook.isError) return <div>Error loading directory</div>;
-
-  const { directories, documents } = getDirectoryDataHook.data?.data || {};
+  // Extract data safely
+  const { directories, documents } = data?.data || {};
+  const isEmpty = !directories?.length && !documents?.length;
 
   return (
-    <div {...getRootProps()} className='flex h-full flex-col outline-none'>
+    <div
+      {...getRootProps()}
+      className='bg-background flex h-full flex-col outline-none overflow-hidden'
+    >
       <input {...getInputProps()} />
-      <FileToolbar viewMode={appearance.directoryLayout} />
 
-      {!directories?.length && !documents?.length ? (
-        <div className='flex h-full flex-1 items-center justify-center'>
-          <div className='text-2xl text-muted-foreground'>
-            This folder is empty
+      <div className='flex-none z-10'>
+        <FileToolbar viewMode={appearance.directoryLayout} />
+      </div>
+
+      <div className='flex-1 relative overflow-y-auto'>
+        {/* Drag Drop Overlay */}
+        {isDragActive && (
+          <div className='bg-primary/5 border-primary absolute inset-4 z-50 flex flex-col items-center justify-center rounded-xl border-2 border-dashed backdrop-blur-sm animate-in fade-in zoom-in-95 duration-200'>
+            <UploadCloud className='text-primary size-16 mb-4' />
+            <p className='text-primary text-xl font-semibold'>
+              Drop files to upload
+            </p>
           </div>
-        </div>
-      ) : (
-        <ContextMenu>
-          <ContextMenuTrigger asChild>
-            <div className='flex-1 p-4 relative'>
-              {isDragActive && (
-                <div className='absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg border-2 border-dashed border-primary bg-primary/10'>
-                  <UploadCloud className='h-12 w-12 text-primary' />
-                  <p className='mt-2 text-lg font-semibold text-primary'>
-                    Drop files to upload
-                  </p>
-                </div>
-              )}
-              <FileGrid
-                files={directories || []}
-                documentType='folder'
-                viewMode={appearance.directoryLayout}
-              />
-              <Separator className='my-4' />
-              <FileGrid
-                files={documents || []}
-                documentType='file'
-                viewMode={appearance.directoryLayout}
-              />
+        )}
+
+        {/* Conditional Rendering */}
+        {isLoading ? (
+          <div className='p-4'>
+            <FileManagerSkeleton />
+          </div>
+        ) : isError ? (
+          <div className='flex h-full items-center justify-center text-destructive animate-in fade-in'>
+            <p>Error loading directory content.</p>
+          </div>
+        ) : isEmpty ? (
+          <div className='flex h-full flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-300'>
+            <div className='bg-muted rounded-full p-6 mb-4'>
+              <UploadCloud className='text-muted-foreground size-10' />
             </div>
-          </ContextMenuTrigger>
-          <HomePageContextMenu />
-        </ContextMenu>
-      )}
+            <div className='text-2xl text-muted-foreground font-medium'>
+              This folder is empty
+            </div>
+          </div>
+        ) : (
+          <ContextMenu>
+            <ContextMenuTrigger asChild>
+              <div className='p-4 pb-20 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300'>
+                {directories?.length > 0 && (
+                  <FileGrid
+                    files={directories}
+                    documentType='folder'
+                    viewMode={appearance.directoryLayout}
+                  />
+                )}
+
+                {directories?.length > 0 && documents?.length > 0 && (
+                  <Separator className='bg-border' />
+                )}
+
+                {documents?.length > 0 && (
+                  <FileGrid
+                    files={documents}
+                    documentType='file'
+                    viewMode={appearance.directoryLayout}
+                  />
+                )}
+              </div>
+            </ContextMenuTrigger>
+            <HomePageContextMenu />
+          </ContextMenu>
+        )}
+      </div>
 
       <UploadProgressIndicator />
     </div>
