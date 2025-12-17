@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  cancelUpload,
   checkUploadedObject,
   createDocument,
   createPresigned,
@@ -21,6 +22,7 @@ router.param("parentDirId", paramsValidation);
 
 router.post("/{:parentDirId}/init", createPresigned);
 router.post("/:id/compeleted", checkUploadedObject);
+router.delete("/:id/cancel", cancelUpload);
 
 router.route("/{:parentDirId}").post(
   permissionMiddleware("write"),

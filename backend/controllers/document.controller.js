@@ -80,6 +80,14 @@ export const checkUploadedObject = async (req, res) => {
     .json(new ApiResponse(200, "Document upload completed successfully"));
 };
 
+// cancel upload remove db
+export const cancelUpload = async (req, res) => {
+  const uploadedDocument = await Document.findByIdAndDelete(req.params.id);
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Upload cancelled successfully"));
+};
+
 // create the file
 export const createDocument = async (req, res) => {
   const user = req.user;

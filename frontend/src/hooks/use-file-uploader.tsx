@@ -1,11 +1,10 @@
 import { useRef } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useUploadStore } from "@/store/upload-store";
+import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { toast } from "sonner";
 
 export const useFileUploader = () => {
-  const { addFiles } = useUploadStore();
   const params = useParams({ strict: false });
   const directoryId = (params as { directoryId?: string }).directoryId || "";
   const inputRef = useRef<HTMLInputElement>(null);
@@ -23,7 +22,7 @@ export const useFileUploader = () => {
         toast.error("You have exceeded your storage limit.");
         return;
       }
-      addFiles(Array.from(files), directoryId);
+      uploadFiles(Array.from(files), directoryId);
     }
     // Reset input value to allow re-uploading the same file
     if (event.target) {

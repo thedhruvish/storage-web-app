@@ -1,8 +1,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { useUploadStore } from "@/store/upload-store";
+import {
+  cancelUpload,
+  retryUpload,
+  useUploadStore,
+} from "@/store/upload-store";
 import { motion, AnimatePresence } from "framer-motion";
 import {
+  BanIcon,
   CheckCircle2,
   ChevronDown,
   ChevronUp,
@@ -25,8 +30,7 @@ export function UploadProgressIndicator() {
 
   const [isMinimized, setIsMinimized] = useState(false);
 
-  const { files, isUploading, cancelUpload, retryUpload, clearCompleted } =
-    useUploadStore();
+  const { files, isUploading, clearCompleted } = useUploadStore();
 
   const completedCount = files.filter((f) => f.status === "success").length;
   const totalFiles = files.length;
@@ -118,6 +122,11 @@ export function UploadProgressIndicator() {
                         )}
                         {item.status === "error" && (
                           <p className='text-xs text-red-500'>{item.error}</p>
+                        )}{" "}
+                        {item.status === "fail" && (
+                          <p className='text-xs text-red-500'>
+                            Something went wrong...?
+                          </p>
                         )}
                         {item.status === "canceled" && (
                           <p className='text-xs text-yellow-500'>Canceled</p>
@@ -149,6 +158,9 @@ export function UploadProgressIndicator() {
                           )}
                           {item.status === "queued" && (
                             <Loader2 className='h-4 w-4 animate-spin' />
+                          )}
+                          {item.status === "fail" && (
+                            <BanIcon className='h-4 w-4 text-red-500' />
                           )}
                           {(item.status === "error" ||
                             item.status === "canceled") && (

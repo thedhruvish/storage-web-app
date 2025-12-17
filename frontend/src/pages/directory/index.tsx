@@ -4,7 +4,7 @@ import { FileGrid } from "@/pages/directory/components/file-grid";
 import { FileToolbar } from "@/pages/directory/components/file-toolbar";
 import { useAppearance } from "@/store/appearance-store";
 import { useBreadCrumStore } from "@/store/breadCrum-store";
-import { useUploadStore } from "@/store/upload-store";
+import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -28,7 +28,7 @@ export default function Home({
     (params as { directoryId?: string }).directoryId || propDirectoryId;
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
-  const { addFiles } = useUploadStore();
+
   const { user } = useUser();
 
   const onDrop = useCallback(
@@ -40,10 +40,10 @@ export default function Home({
         return;
       }
       if (acceptedFiles.length > 0) {
-        addFiles(acceptedFiles, directoryId);
+        uploadFiles(acceptedFiles, directoryId);
       }
     },
-    [addFiles, directoryId, user]
+    [directoryId, user]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
