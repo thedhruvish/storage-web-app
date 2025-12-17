@@ -4,6 +4,7 @@ import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
+import { bulkDeleteS3Objects } from "../utils/s3Services.js";
 
 // get Directories list or get by id
 export const getDirectory = async (req, res) => {
@@ -120,18 +121,18 @@ export const deleteDirectoryById = async (req, res) => {
     await listDocumentAndDirectoryForDelete(id);
 
   allDirectory.push({ _id: id });
-  Promise.all(
-    allDocuemt.map(async (file) => {
-      await rm(
-        `${process.cwd()}/storage/${file._id.toString()}${file.extension}`,
-      );
+  // first delete s3 , than document and directory
+  Promise.all([
+    bulkDeleteS3Objects(
+      allDocuemt.map((file) => ({
+        Key: `${file._id.toString()}${file.extension}`,
+      })),
+    ),
+
+    Document.deleteMany({ _id: { $in: allDocuemt.map((doc) => doc._id) } }),
+    Directory.deleteMany({
+      _id: { $in: allDirectory.map((doc) => doc._id) },
     }),
-  );
-
-  await Document.deleteMany({ _id: { $in: allDocuemt.map((doc) => doc._id) } });
-  await Directory.deleteMany({
-    _id: { $in: allDirectory.map((doc) => doc._id) },
-  });
-
+  ]);
   res.status(200).json(new ApiResponse(200, "Directory delete Successfuly"));
 };

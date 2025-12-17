@@ -180,12 +180,9 @@ export const deleteDocumentById = async (req, res) => {
   if (!document) {
     return res.status(404).json(new ApiError(404, "Document not found"));
   }
-  await rm(
-    `${import.meta.dirname}/../storage/${document.id}${document.extension}`,
-  );
-  await updateParentDirectorySize(
-    document.parentDirId,
-    -document.metaData.size,
-  );
+  Promise.all([
+    deleteS3Object(`${document.id}${document.extension}`),
+    updateParentDirectorySize(document.parentDirId, -document.metaData.size),
+  ]);
   res.status(200).json(new ApiResponse(200, "Document delete Successfuly"));
 };

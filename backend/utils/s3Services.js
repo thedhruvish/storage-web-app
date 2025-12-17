@@ -1,5 +1,6 @@
 import {
   DeleteObjectCommand,
+  DeleteObjectsCommand,
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
@@ -76,7 +77,24 @@ export const deleteS3Object = async (fileName) => {
   try {
     const command = new DeleteObjectCommand({
       Bucket: bucketName,
-      Key: encodeURIComponent(fileName),
+      Key: fileName,
+    });
+    await s3Client.send(command);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+// bulk delete objects from S3
+export const bulkDeleteS3Objects = async (fileKeys) => {
+  try {
+    const command = new DeleteObjectsCommand({
+      Bucket: bucketName,
+      Delete: {
+        Objects: fileKeys,
+        Quiet: true,
+      },
     });
     await s3Client.send(command);
     return true;
