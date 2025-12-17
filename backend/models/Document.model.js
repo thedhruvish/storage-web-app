@@ -23,6 +23,10 @@ const documentSchema = new Schema(
       type: Boolean,
       default: false,
     },
+    isCompletedUpload: {
+      type: Boolean,
+      default: false,
+    },
     metaData: {
       type: Object,
     },

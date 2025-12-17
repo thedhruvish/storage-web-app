@@ -28,8 +28,11 @@ const uploadFile = async (
   directoryId: string,
   set: (fn: (state: UploadState) => Partial<UploadState>) => void
 ) => {
-  const formData = new FormData();
-  formData.append("file", file.file);
+  const { data } = await axiosClient.post(`/document/${directoryId}/init`, {
+    fileName: file.file.name,
+    fileSize: file.file.size,
+    ContentType: file.file.type,
+  });
 
   try {
     set((state) => ({
@@ -39,10 +42,10 @@ const uploadFile = async (
       isUploading: true,
     }));
 
-    await axiosClient.post(`/document/${directoryId}`, formData, {
+    await axios.put(data.data.genUrl, file.file, {
       signal: file.source.signal,
       headers: {
-        "Content-Type": "multipart/form-data",
+        "Content-Type": file.file.type,
       },
       onUploadProgress: (event) => {
         if (!event.total) return;
@@ -90,6 +93,8 @@ const uploadFile = async (
       }));
     }
   } finally {
+    await axiosClient.post(`/document/${data.data.id}/compeleted`);
+
     set((state) => {
       const stillUploading = state.files.some((f) => f.status === "uploading");
       return { isUploading: stillUploading };

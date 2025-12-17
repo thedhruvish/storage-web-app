@@ -3,9 +3,82 @@ import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import path from "node:path";
-import fs from "fs";
+import fs from "node:fs";
 import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
 import Directory from "../models/Directory.model.js";
+import {
+  deleteS3Object,
+  generatePresignedUrl,
+  getSignedUrlForGetObject,
+  verifyUploadedObject,
+} from "../utils/s3Services.js";
+
+// gen PresignedUrl
+export const createPresigned = async (req, res) => {
+  const user = req.user;
+  const { ContentType, fileSize, fileName } = req.body;
+
+  const parentDirId = req.params.parentDirId || user.rootDirId;
+  const directory = await Directory.findById(user.rootDirId, {
+    metaData: 1,
+  }).lean();
+
+  const newUsedSize = directory.metaData.size + fileSize;
+
+  if (newUsedSize > user.maxStorageBytes) {
+    return res
+      .status(400)
+      .json(new ApiError(400, " Storage limit exceeded — file removed."));
+  }
+  const extension = path.extname(fileName);
+  const newDocument = await Document.insertOne({
+    extension,
+    name: fileName,
+    userId: user._id,
+    parentDirId,
+    metaData: {
+      size: fileSize,
+    },
+  });
+  const genUrl = await generatePresignedUrl(
+    `${newDocument.id}${extension}`,
+    ContentType,
+  );
+
+  res.status(200).json(
+    new ApiResponse(200, "Document create Successfuly", {
+      genUrl,
+      id: newDocument.id,
+    }),
+  );
+};
+
+// check completed uploading
+export const checkUploadedObject = async (req, res) => {
+  const uploadedDocument = await Document.findById(req.params.id);
+  if (!uploadedDocument) {
+    return res.status(404).json(new ApiError(404, "Document not found"));
+  }
+  const fileName = `${uploadedDocument.id}${uploadedDocument.extension}`;
+  // when is does not same size than delete document
+  if (!(await verifyUploadedObject(fileName, uploadedDocument.metaData.size))) {
+    await Document.deleteOne({ _id: uploadedDocument._id });
+    await deleteS3Object(`${uploadedDocument.id}${uploadedDocument.extension}`);
+    return res.status(400).json(new ApiError(400, "Please, re upload file."));
+  }
+
+  uploadedDocument.isCompletedUpload = true;
+  Promise.all([
+    uploadedDocument.save(),
+    updateParentDirectorySize(
+      uploadedDocument.parentDirId,
+      uploadedDocument.metaData.size,
+    ),
+  ]);
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Document upload completed successfully"));
+};
 
 // create the file
 export const createDocument = async (req, res) => {
@@ -22,9 +95,9 @@ export const createDocument = async (req, res) => {
     // Delete uploaded file immediately to avoid overflow
     await rm(`${import.meta.dirname}/../storage/${id}${extension}`);
     fs.unlinkSync(req.file.path);
-    return res.status(400).json({
-      message: "Storage limit exceeded — file removed.",
-    });
+    return res
+      .status(400)
+      .json(new ApiError(400, " Storage limit exceeded — file removed."));
   }
   const document = new Document({
     _id: id,
@@ -51,20 +124,23 @@ export const getDocumentById = async (req, res) => {
     return res.status(404).json({ error: "Document not found" });
   }
 
-  const filePath = path.resolve(
-    "./storage",
-    `${document.id}${document.extension}`,
-  );
-
-  if (!fs.existsSync(filePath)) {
-    return res.status(404).json({ error: "File not found on server" });
-  }
+  let filePath = null;
 
   if (req.query.action === "download") {
-    return res.download(filePath, document.name);
+    filePath = await getSignedUrlForGetObject(
+      `${document.id}${document.extension}`,
+      document.name,
+      true,
+    );
+  } else {
+    filePath = await getSignedUrlForGetObject(
+      `${document.id}${document.extension}`,
+      document.name,
+      false,
+    );
   }
 
-  res.sendFile(filePath);
+  res.redirect(filePath);
 };
 
 // rename file by id

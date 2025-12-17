@@ -1,6 +1,8 @@
 import express from "express";
 import {
+  checkUploadedObject,
   createDocument,
+  createPresigned,
   deleteDocumentById,
   getDocumentById,
   starredToggleDocument,
@@ -16,6 +18,10 @@ import { checkStorageLimit } from "../utils/checkStorageLimit.js";
 const router = express.Router();
 
 router.param("parentDirId", paramsValidation);
+
+router.post("/{:parentDirId}/init", createPresigned);
+router.post("/:id/compeleted", checkUploadedObject);
+
 router.route("/{:parentDirId}").post(
   permissionMiddleware("write"),
   checkStorageLimit,
