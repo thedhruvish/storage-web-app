@@ -88,6 +88,14 @@ app.use("/user", userRoute);
 app.use("/payment/", paymentRoute);
 app.use("/payment/stripe", paymentStripeRoute);
 
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    statusCode: 404,
+    message: "Not Found",
+  });
+});
+
 app.use((err, req, res, next) => {
   console.error("Error caught by middleware:", err);
 

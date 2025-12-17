@@ -5,6 +5,9 @@ export const connectDB = async () => {
   if (!mongodbURL) {
     throw new Error("add Mongodb Url in env file");
   }
-  await mongoose.connect(mongodbURL);
+  await mongoose.connect(mongodbURL, {
+    tls: true,
+    tlsAllowInvalidCertificates: true,
+  });
   console.log("db connected");
 };

@@ -1,6 +1,6 @@
 import Subscription from "../models/Subscription.model.js";
 import User from "../models/User.model.js";
-import ApiResponse from "../utils/ApiResponse.js  ";
+import ApiResponse from "../utils/ApiResponse.js";
 import {
   createCustomerPortalSession,
   pauseStripeSubscription,
