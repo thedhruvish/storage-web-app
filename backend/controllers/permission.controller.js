@@ -3,7 +3,7 @@ import User from "../models/User.model.js";
 import ShareLink from "../models/ShareLink.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 
 // get dirctory permission Users list
 export const getDirectoryPermissionUsers = async (req, res) => {

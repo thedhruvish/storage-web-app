@@ -1,5 +1,5 @@
 import { rm } from "node:fs/promises";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import path from "node:path";

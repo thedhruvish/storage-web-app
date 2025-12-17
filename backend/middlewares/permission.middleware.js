@@ -1,6 +1,6 @@
 import { actionRights, roleWeights } from "../config/roles.js";
 import Directory from "../models/Directory.model.js";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 import ShareLink from "../models/ShareLink.model.js";
 import User from "../models/User.model.js";
 import ApiError from "../utils/ApiError.js";

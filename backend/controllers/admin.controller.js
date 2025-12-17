@@ -2,7 +2,7 @@ import { rm } from "node:fs/promises";
 import ApiResponse from "../utils/ApiResponse.js";
 import User from "../models/User.model.js";
 import Directory from "../models/Directory.model.js";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 import {
   createAndCheckLimitSession,
   deleteAllUserSessions,

@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import User from "../models/User.model.js";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 import { updateParentDirectorySize } from "../utils/DirectoryHelper.js";
 import { rm } from "node:fs/promises";
 import mongoose from "mongoose";

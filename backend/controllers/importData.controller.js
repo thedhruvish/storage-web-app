@@ -2,7 +2,7 @@ import { google } from "googleapis";
 import ImportToken from "../models/ImportToken.model.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import Document from "../models/document.model.js";
+import Document from "../models/Document.model.js";
 import {
   downloadFiles,
   downloadSingleFile,
