@@ -23,7 +23,7 @@ function RouteComponent() {
       setUser(getCureentUser.data.data.data);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getCureentUser.isSuccess]);
+  }, [getCureentUser.isSuccess, getCureentUser.data]);
 
   useEffect(() => {
     if (getCureentUser.isError) {

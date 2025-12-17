@@ -7,6 +7,8 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { generateCloudfrontSignedUrl } from "./cloudforntCdn.js";
+const privateKey = process.env.PRIVATE_KEY;
 
 export const s3Client = new S3Client({
   credentials: {
@@ -58,14 +60,19 @@ export const getSignedUrlForGetObject = async (
   isDownload = false,
 ) => {
   try {
-    const command = new GetObjectCommand({
-      Bucket: bucketName,
-      Key: encodeURIComponent(key),
-      ResponseContentDisposition: `${isDownload ? "attachment;" : "inline;"} filename="${fileName}"`,
-    });
-    const url = await getSignedUrl(s3Client, command, {
-      expiresIn: PRESIGNED_URL_EXPIRATION,
-    });
+    let url = null;
+    if (privateKey) {
+      url = generateCloudfrontSignedUrl(key, fileName, isDownload);
+    } else {
+      const command = new GetObjectCommand({
+        Bucket: bucketName,
+        Key: encodeURIComponent(key),
+        ResponseContentDisposition: `${isDownload ? "attachment;" : "inline;"} filename="${fileName}"`,
+      });
+      url = await getSignedUrl(s3Client, command, {
+        expiresIn: PRESIGNED_URL_EXPIRATION,
+      });
+    }
     return url;
   } catch (error) {
     return null;
