@@ -19,14 +19,14 @@ export const s3Client = new S3Client({
   // endpoint:process.env.AWS_ENDPOINT_URL||undefined,
 });
 
-export const bucketName = process.env.AWS_BUCKET_NAME;
+export const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
 
 export const PRESIGNED_URL_EXPIRATION = 60;
 
 export const generatePresignedUrl = async (fileName, ContentType) => {
   try {
     const command = new PutObjectCommand({
-      Bucket: bucketName,
+      Bucket: BUCKET_NAME,
       Key: encodeURIComponent(fileName),
       ContentType,
     });
@@ -43,7 +43,7 @@ export const generatePresignedUrl = async (fileName, ContentType) => {
 export const verifyUploadedObject = async (fileName, fileSize) => {
   try {
     const headCommand = new HeadObjectCommand({
-      Bucket: bucketName,
+      Bucket: BUCKET_NAME,
       Key: encodeURIComponent(fileName),
     });
     const headData = await s3Client.send(headCommand);
@@ -65,7 +65,7 @@ export const getSignedUrlForGetObject = async (
       url = generateCloudfrontSignedUrl(key, fileName, isDownload);
     } else {
       const command = new GetObjectCommand({
-        Bucket: bucketName,
+        Bucket: BUCKET_NAME,
         Key: encodeURIComponent(key),
         ResponseContentDisposition: `${isDownload ? "attachment;" : "inline;"} filename="${fileName}"`,
       });
@@ -83,7 +83,7 @@ export const getSignedUrlForGetObject = async (
 export const deleteS3Object = async (fileName) => {
   try {
     const command = new DeleteObjectCommand({
-      Bucket: bucketName,
+      Bucket: BUCKET_NAME,
       Key: fileName,
     });
     await s3Client.send(command);
@@ -97,7 +97,7 @@ export const deleteS3Object = async (fileName) => {
 export const bulkDeleteS3Objects = async (fileKeys) => {
   try {
     const command = new DeleteObjectsCommand({
-      Bucket: bucketName,
+      Bucket: BUCKET_NAME,
       Delete: {
         Objects: fileKeys,
         Quiet: true,

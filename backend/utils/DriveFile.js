@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
-import { createWriteStream } from "node:fs";
 import path from "node:path";
-import fs from "node:fs/promises";
+import { Upload } from "@aws-sdk/lib-storage";
+import { BUCKET_NAME, s3Client } from "./s3Services.js";
 
 export const getFileList = async (drive, folderId) => {
   const maxRetries = 3;
@@ -61,12 +61,12 @@ export const downloadSingleFile = async (
   uploadDirId,
   userId,
 ) => {
-  try {
-    let finalFileName = fileName;
-    let downloadStream;
-    let extension;
-    let totalBytes = 0;
+  let finalFileName = fileName;
+  let downloadStream;
+  let extension;
+  let totalBytes = 0;
 
+  try {
     if (mimeType.startsWith("application/vnd.google-apps")) {
       const exportInfo = GOOGLE_EXPORT_MIMES[mimeType];
       if (!exportInfo) {
@@ -110,15 +110,28 @@ export const downloadSingleFile = async (
     }
 
     const newFileId = new mongoose.Types.ObjectId();
-    const filePath = path.resolve(`./storage/${newFileId}${extension}`);
+    const fileNameKey = `${newFileId}${extension}`;
 
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-
-    const dest = createWriteStream(filePath);
-
-    await new Promise((resolve, reject) => {
-      downloadStream.on("end", resolve).on("error", reject).pipe(dest);
+    const parallelUploads3 = new Upload({
+      client: s3Client,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+      },
+      params: {
+        Bucket: BUCKET_NAME,
+        Key: fileNameKey,
+        Body: downloadStream,
+      },
+      // Optional: Adjust queue size and part size for large media
+      queueSize: 4,
+      partSize: 1024 * 1024 * 5, // 5MB minimum
     });
+    parallelUploads3.on("httpUploadProgress", (progress) => {
+      console.log(`Uploaded ${progress.loaded} bytes to S3`);
+    });
+
+    await parallelUploads3.done();
 
     return {
       _id: newFileId,
