@@ -162,9 +162,9 @@ export function MultiFileUploadDialog({ open }: Props) {
           )
         );
         return true;
-      } catch (error: any) {
+      } catch (error) {
         if (isAxiosError(error)) {
-          if (axios.isCancel(error) || error.name === "CanceledError") {
+          if (axios.isCancel(error) && error.name === "CanceledError") {
             toast.error(`Upload cancelled for ${file.name}`);
           } else {
             toast.error(
