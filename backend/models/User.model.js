@@ -12,11 +12,19 @@ const userSchema = new Schema(
       required: true,
       lowercase: true,
     },
+    googleEmail: {
+      type: String,
+      lowercase: true,
+    },
+    githubEmail: {
+      type: String,
+      lowercase: true,
+    },
     password: {
       type: String,
     },
     loginProvider: {
-      type: String,
+      type: [String],
       enum: ["local", "google", "github"],
       default: "local",
     },
@@ -49,6 +57,25 @@ const userSchema = new Schema(
     dueDeleteDate: {
       type: Date,
       default: null,
+    },
+    twoFactor: {
+      isEnabled: { type: Boolean, default: false },
+
+      totp: {
+        secret: { type: String, select: false },
+        isVerified: { type: Boolean, default: false },
+      },
+
+      passkeys: [
+        {
+          credentialID: { type: String, required: true },
+          credentialPublicKey: { type: Buffer, required: true },
+          counter: { type: Number, required: true },
+          transports: [String], // ['usb', 'nfc', 'ble', 'internal']
+        },
+      ],
+
+      recoveryCodes: [{ type: String, select: false }],
     },
   },
   { timestamps: true },

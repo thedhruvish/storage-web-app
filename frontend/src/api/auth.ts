@@ -57,3 +57,17 @@ export const useResendOtp = () => {
       axiosClient.post("/auth/resend-otp", data),
   });
 };
+
+export const useTwosteupSet = () => {
+  return useMutation({
+    mutationFn: (data: { method: "totp" | "passkeys" }) =>
+      axiosClient.post("/auth/2fa/setup", data),
+  });
+};
+
+export const useTotpVerify = () => {
+  return useMutation({
+    mutationFn: (data: { token: string }) =>
+      axiosClient.post("/auth/2fa/verifys/token", data),
+  });
+};

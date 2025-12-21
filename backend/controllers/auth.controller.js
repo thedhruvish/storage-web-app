@@ -9,6 +9,8 @@ import { sendOtpToMail } from "../utils/mailsend.js";
 import { createAndCheckLimitSession } from "../utils/redisHelper.js";
 import redisClient from "../config/redis-client.js";
 import { isValidTurnstileToken } from "../utils/TurnstileVerfication.js";
+import { generateBackupCode, genTOTPUrl } from "../utils/twoStepVerfiy.js";
+import { authenticator } from "otplib";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -355,6 +357,70 @@ export const reSendOtp = async (req, res) => {
     new ApiResponse(200, "OTP resend successfully", {
       is_verfiy_otp: true,
       userId: userId,
+    }),
+  );
+};
+
+// 2fa setup
+export const twoFASetup = async (req, res) => {
+  const { method } = req.body;
+  let resData;
+  if (method === "totp") {
+    resData = genTOTPUrl(req.user.email);
+    const newdata = await User.findByIdAndUpdate(req.user._id, {
+      "twoFactor.totp.secret": resData.secret,
+      "twoFactor.totp.isVerified": false,
+    });
+    return res
+      .status(201)
+      .json(new ApiResponse(201, "two setup successfuly generator", resData));
+  } else if (method === "passkeys") {
+    // passkey logic
+  } else {
+    res.status(401).json(new ApiError(401, "this is not allowed."));
+  }
+};
+
+export const intiVerfiyTotp = async (req, res) => {
+  const { token } = req.body;
+  const user = await User.findById(req.user._id).select(
+    "+twoFactor.totp.secret",
+  );
+  if (!user || !user.twoFactor?.totp?.secret) {
+    return res
+      .status(400)
+      .json(
+        new ApiError(
+          400,
+          "2FA setup not initiated. Please generate a QR code first.",
+        ),
+      );
+  }
+
+  const isValidTotp = authenticator.verify({
+    secret: user.twoFactor.totp.secret,
+    token,
+  });
+
+  if (!isValidTotp) {
+    return res
+      .status(401)
+      .json(new ApiError(401, "Your Token is expiry or invalid"));
+  }
+  const { hashedCodes, plainTextCodes } = await generateBackupCode();
+  await User.findByIdAndUpdate(req.user._id, {
+    $set: {
+      "twoFactor.totp.isVerified": true,
+      "twoFactor.isEnabled": true,
+      "twoFactor.recoveryCodes": hashedCodes,
+    },
+  });
+  res.status(200).json(
+    new ApiResponse(200, "2FA Enabled Successfully", {
+      verified: true,
+      recoveryCodes: plainTextCodes,
+      message:
+        "Please save these recovery codes safely. You will not see them again.",
     }),
   );
 };

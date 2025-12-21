@@ -10,6 +10,8 @@ import {
   callbackGithub,
   verfiyOtp,
   reSendOtp,
+  twoFASetup,
+  intiVerfiyTotp,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import {
@@ -51,6 +53,10 @@ router.get("/github/callback", callbackGithub);
 // authenticated route
 router.use(checkAuth);
 router.get("/me", getCureentUser);
+
+router.post("/2fa/setup", twoFASetup);
+
+router.post("/2fa/verifys/token", intiVerfiyTotp);
 
 // logout user
 router.post("/logout", logout);

@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { SectionHeader } from "./section-header";
+import { TwoFaDialog } from "./two-fa-dialog";
 import type { TwoFactorType, ConnectedAccount } from "./types";
 
 interface SecuritySettingsProps {
@@ -25,6 +26,7 @@ export function SecuritySettings({
   twoFactorType,
 }: SecuritySettingsProps) {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  // 2FA State
   const [is2FADialogOpen, setIs2FADialogOpen] = useState(false);
 
   // Helper to find specific account status
@@ -223,38 +225,10 @@ export function SecuritySettings({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* 2FA Selection Dialog */}
-      <Dialog open={is2FADialogOpen} onOpenChange={setIs2FADialogOpen}>
-        <DialogContent className='sm:max-w-md'>
-          <DialogHeader>
-            <DialogTitle>Choose Verification Method</DialogTitle>
-            <DialogDescription>
-              Select how you want to authenticate.
-            </DialogDescription>
-          </DialogHeader>
-          <div className='grid grid-cols-2 gap-4 py-4'>
-            <div className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all [&:has([data-state=checked])]:border-primary hover:border-primary/50'>
-              <div className='mb-3 rounded-full w-10 h-10 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center'>
-                <Smartphone className='h-5 w-5 text-blue-600 dark:text-blue-400' />
-              </div>
-              <h3 className='font-medium'>Authenticator</h3>
-              <p className='text-xs text-muted-foreground mt-1'>
-                Google Auth, Authy, etc.
-              </p>
-            </div>
-            <div className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all hover:border-primary/50'>
-              <div className='mb-3 rounded-full w-10 h-10 bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center'>
-                <KeyRound className='h-5 w-5 text-purple-600 dark:text-purple-400' />
-              </div>
-              <h3 className='font-medium'>Passkey</h3>
-              <p className='text-xs text-muted-foreground mt-1'>
-                FaceID, TouchID.
-              </p>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <TwoFaDialog
+        is2FADialogOpen={is2FADialogOpen}
+        setIs2FADialogOpen={(e) => setIs2FADialogOpen(e)}
+      />
     </div>
   );
 }
