@@ -2,7 +2,6 @@ import express from "express";
 import {
   cancelUpload,
   checkUploadedObject,
-  createDocument,
   createPresigned,
   deleteDocumentById,
   getDocumentById,
@@ -10,35 +9,29 @@ import {
   updateDocumentById,
 } from "../controllers/document.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
-import { createUpload } from "../middlewares/multer.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
 import { nameValidation } from "../validators/commanSchema.js";
-import { checkStorageLimit } from "../utils/checkStorageLimit.js";
 
 const router = express.Router();
 
 router.param("parentDirId", paramsValidation);
 
-router.post("/{:parentDirId}/init", createPresigned);
-router.post("/:id/compeleted", checkUploadedObject);
-router.delete("/:id/cancel", cancelUpload);
-
-router.route("/{:parentDirId}").post(
-  permissionMiddleware("write"),
-  checkStorageLimit,
-  (req, res, next) => {
-    const uploader = createUpload(req.remainingStorageBytes).single("file");
-    uploader(req, res, (err) => {
-      if (err)
-        return res.status(400).json({ message: "Storage limit exceeded" });
-      next();
-    });
-  },
-  createDocument,
-);
+router
+  .route("/{:parentDirId}/init")
+  .post(permissionMiddleware("write"),  createPresigned);
 
 router.param("id", paramsValidation);
+
+// upload after check is completed or not
+router.post(
+  "/:id/compeleted",
+  permissionMiddleware("write",false),
+  checkUploadedObject,
+);
+
+// user click canel button than remove the document in the mongo.
+router.delete("/:id/cancel", permissionMiddleware("write",false), cancelUpload);
 
 router.put(
   "/:id/starred",

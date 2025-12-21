@@ -82,45 +82,10 @@ export const checkUploadedObject = async (req, res) => {
 
 // cancel upload remove db
 export const cancelUpload = async (req, res) => {
-  const uploadedDocument = await Document.findByIdAndDelete(req.params.id);
+  await Document.findByIdAndDelete(req.params.id).lean();
   return res
     .status(200)
     .json(new ApiResponse(200, "Upload cancelled successfully"));
-};
-
-// create the file
-export const createDocument = async (req, res) => {
-  const user = req.user;
-  const parentDirId = req.params.parentDirId || user.rootDirId;
-  const { id, extension } = req.customFileInfo;
-  const fileSize = req.file.size;
-  const directory = await Directory.findById(user.rootDirId, {
-    metaData: 1,
-  }).lean();
-  const newUsedSize = directory.metaData.size + fileSize;
-
-  if (newUsedSize > user.maxStorageBytes) {
-    // Delete uploaded file immediately to avoid overflow
-    await rm(`${import.meta.dirname}/../storage/${id}${extension}`);
-    fs.unlinkSync(req.file.path);
-    return res
-      .status(400)
-      .json(new ApiError(400, " Storage limit exceeded — file removed."));
-  }
-  const document = new Document({
-    _id: id,
-    userId: req.user._id,
-    name: req.file.originalname,
-    extension: extension,
-    parentDirId,
-    metaData: {
-      size: fileSize,
-    },
-  });
-  await document.save();
-  await updateParentDirectorySize(parentDirId, fileSize);
-
-  res.status(200).json(new ApiResponse(200, "Document create Successfuly"));
 };
 
 // show or download file by id

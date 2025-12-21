@@ -44,7 +44,7 @@ type DialogState = {
   handleDialog: () => void;
 };
 
-export default function UsersList() {
+export function UsersList() {
   const { user } = useUser();
   const [openDeleteDialog, setOpenDeleteDialog] = useState<boolean>(false);
   const [handleConfimDialog, setHandleConfirmDialog] = useState<DialogState>({
