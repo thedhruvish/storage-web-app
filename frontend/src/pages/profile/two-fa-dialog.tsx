@@ -36,7 +36,12 @@ import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 
 // 1. Update the Step Type
-type DialogStep = "select" | "setup-totp" | "setup-passkey" | "backup-codes";
+type DialogStep =
+  | "select"
+  | "name"
+  | "setup-totp"
+  | "setup-passkey"
+  | "backup-codes";
 
 interface TwoFaDialogProps {
   setIs2FADialogOpen: (d: boolean) => void;
@@ -49,6 +54,10 @@ export function TwoFaDialog({
 }: TwoFaDialogProps) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [dialogStep, setDialogStep] = useState<DialogStep>("select");
+  const [friendlyName, setFriendlyName] = useState("");
+  const [selectedMethod, setSelectedMethod] = useState<
+    "totp" | "passkeys" | null
+  >(null);
   const [otpCode, setOtpCode] = useState("");
 
   // 2. State for Backup Codes
@@ -73,12 +82,28 @@ export function TwoFaDialog({
     if (!open) {
       setTimeout(() => {
         setDialogStep("select");
+        setFriendlyName("");
+        setSelectedMethod(null);
         setOtpCode("");
         setSetupData(null);
         setBackupCodes([]);
         setupMutation.reset();
         verifyMutation.reset();
       }, 300);
+    }
+  };
+
+  const handleMethodSelect = (method: "totp" | "passkeys") => {
+    setSelectedMethod(method);
+    setDialogStep("name");
+  };
+
+  const handleNameSubmit = () => {
+    if (!selectedMethod) return;
+    if (selectedMethod === "totp") {
+      handleStartTotpSetup();
+    } else {
+      handleStartPasskeysSetup();
     }
   };
 
@@ -116,11 +141,14 @@ export function TwoFaDialog({
       return;
     }
 
-    toast.promise(passkeysVerifyMutation.mutateAsync(attResp), {
-      loading: "Verifying passkey...",
-      success: "Passkey registered successfully",
-      error: "Failed to register passkey",
-    });
+    toast.promise(
+      passkeysVerifyMutation.mutateAsync({ response: attResp, friendlyName }),
+      {
+        loading: "Verifying passkey...",
+        success: "Passkey registered successfully",
+        error: "Failed to register passkey",
+      }
+    );
   };
 
   const handleStartPasskeysSetup = () => {
@@ -136,16 +164,13 @@ export function TwoFaDialog({
 
   const handleVerifyToken = () => {
     verifyMutation.mutate(
-      { token: otpCode },
+      { token: otpCode, friendlyName },
       {
         onSuccess: (response: any) => {
           // 3. Capture codes and switch step
           // Assuming response structure: response.data.data.recoveryCodes
           setBackupCodes(response.data.data.recoveryCodes || []);
           setDialogStep("backup-codes");
-        },
-        onError: (error: any) => {
-          console.error("Verification failed", error);
         },
       }
     );
@@ -194,7 +219,7 @@ export function TwoFaDialog({
             </DialogHeader>
             <div className='grid grid-cols-2 gap-4 py-4'>
               <div
-                onClick={handleStartTotpSetup}
+                onClick={() => handleMethodSelect("totp")}
                 className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all hover:border-primary/50'
               >
                 <div className='mb-3 rounded-full w-10 h-10 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center'>
@@ -206,7 +231,7 @@ export function TwoFaDialog({
                 </p>
               </div>
               <div
-                onClick={handleStartPasskeysSetup}
+                onClick={() => handleMethodSelect("passkeys")}
                 className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all hover:border-primary/50'
               >
                 <div className='mb-3 rounded-full w-10 h-10 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center'>
@@ -219,10 +244,56 @@ export function TwoFaDialog({
           </>
         )}
 
+        {dialogStep === "name" && (
+          <div className='animate-in fade-in slide-in-from-right-4 duration-300'>
+            <DialogHeader>
+              <div className='flex items-center gap-2'>
+                <Button
+                  variant='ghost'
+                  size='icon'
+                  className='h-6 w-6 -ml-2'
+                  onClick={() => setDialogStep("select")}
+                >
+                  <ArrowLeft className='h-4 w-4' />
+                </Button>
+                <DialogTitle>Name your device</DialogTitle>
+              </div>
+              <DialogDescription>
+                Give this verification method a memorable name.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className='grid gap-4 py-4'>
+              <div className='space-y-2'>
+                <Label htmlFor='name'>Friendly Name</Label>
+                <Input
+                  id='name'
+                  placeholder='e.g. My iPhone, Work Laptop'
+                  value={friendlyName}
+                  onChange={(e) => setFriendlyName(e.target.value)}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && friendlyName.trim()) {
+                      handleNameSubmit();
+                    }
+                  }}
+                />
+              </div>
+            </div>
+
+            <DialogFooter>
+              <Button
+                onClick={handleNameSubmit}
+                disabled={!friendlyName.trim()}
+              >
+                Continue
+              </Button>
+            </DialogFooter>
+          </div>
+        )}
+
         {/* STEP 2: SETUP TOTP (Unchanged logic, just update copyToClipboard call) */}
         {dialogStep === "setup-totp" && (
-          // ... (Your existing Step 2 Code) ...
-          // Note: update the copy button to use copyToClipboard(setupData.secret)
           <>
             <DialogHeader>
               <div className='flex items-center gap-2'>
@@ -477,7 +548,10 @@ export function TwoFaDialog({
               </div>
               <Button
                 className='w-full sm:w-auto'
-                onClick={() => setIs2FADialogOpen(false)} // Final Close
+                onClick={() => {
+                  setBackupCodes([]);
+                  setIs2FADialogOpen(false);
+                }}
               >
                 I have saved them
               </Button>

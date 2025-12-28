@@ -1,10 +1,7 @@
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 import { authenticator } from "otplib";
-import {
-  generateRegistrationOptions,
-  verifyRegistrationResponse,
-} from "@simplewebauthn/server";
+import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { isoUint8Array } from "@simplewebauthn/server/helpers";
 
 export const genTOTPUrl = (userEmail) => {
@@ -25,7 +22,7 @@ export const generateBackupCode = async (length = 10) => {
   return { hashedCodes, plainTextCodes };
 };
 
-export const generateRegisterOptionInPasskey = async (user) => {
+export const generateRegisterOptionInPasskey = async (user, passkeys) => {
   const options = await generateRegistrationOptions({
     rpName: "Storage app",
     rpID: "localhost",
@@ -33,7 +30,7 @@ export const generateRegisterOptionInPasskey = async (user) => {
     userName: user.email,
     userDisplayName: user.name,
     attestationType: "none",
-    excludeCredentials: user.twoFactor.passkeys.map((pk) => ({
+    excludeCredentials: passkeys?.map((pk) => ({
       id: pk.credentialID,
       type: "public-key",
     })),

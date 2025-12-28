@@ -62,20 +62,22 @@ export const useResendOtp = () => {
 export const useTwosteupSet = () => {
   return useMutation({
     mutationFn: (data: { method: "totp" | "passkeys" }) =>
-      axiosClient.post("/auth/2fa/setup", data),
+      axiosClient.post("/auth/2fa/register/setup", data),
   });
 };
 
 export const useTotpVerify = () => {
   return useMutation({
-    mutationFn: (data: { token: string }) =>
-      axiosClient.post("/auth/2fa/verifys/token", data),
+    mutationFn: (data: { token: string; friendlyName: string }) =>
+      axiosClient.post("/auth/2fa/register/totp", data),
   });
 };
 
 export const usePasskeysRegistrationVerify = () => {
   return useMutation({
-    mutationFn: (data: RegistrationResponseJSON) =>
-      axiosClient.post("/auth/2fa/register/passkeys", data),
+    mutationFn: (data: {
+      response: RegistrationResponseJSON;
+      friendlyName: string;
+    }) => axiosClient.post("/auth/2fa/register/passkeys", data),
   });
 };

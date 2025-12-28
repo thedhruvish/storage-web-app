@@ -10,9 +10,6 @@ import {
   callbackGithub,
   verfiyOtp,
   reSendOtp,
-  twoFASetup,
-  intiVerfiyTotp,
-  passkeyRegisterVerfiy,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import {
@@ -24,6 +21,11 @@ import {
 } from "../validators/authSchema.js";
 import { validateInput } from "../utils/validateInput.js";
 import { getRequestInfo } from "../middlewares/getRequestInfo.js";
+import {
+  totpRegisterVerify,
+  passkeyRegisterVerify,
+  twoFASetup,
+} from "../controllers/twoFa.controller.js";
 
 const router = express.Router();
 
@@ -58,14 +60,17 @@ router.get("/github/callback", callbackGithub);
 // authenticated route
 router.use(checkAuth);
 router.get("/me", getCureentUser);
-
-router.post("/2fa/setup", twoFASetup);
-
-router.post("/2fa/verifys/token", intiVerfiyTotp);
-
-router.post("/2fa/register/passkeys", passkeyRegisterVerfiy);
-
 // logout user
 router.post("/logout", logout);
 router.get("/logoutAll", logoutAllDevices);
+
+// setup first time
+router.post("/2fa/register/setup", twoFASetup);
+
+// totp verfiy to register
+router.post("/2fa/register/totp", totpRegisterVerify);
+
+// passkey register verfiy
+router.post("/2fa/register/passkeys", passkeyRegisterVerify);
+
 export default router;

@@ -59,26 +59,8 @@ const userSchema = new Schema(
       default: null,
     },
     twoFactor: {
-      isEnabled: { type: Boolean, default: false },
-
-      totp: {
-        secret: { type: String, select: false },
-        isVerified: { type: Boolean, default: false },
-        createdAt: { type: Date, default: Date.now },
-      },
-
-      passkeys: [
-        {
-          credentialID: { type: String, required: true },
-          credentialPublicKey: { type: Buffer, required: true },
-          counter: { type: Number, required: true },
-          transports: [String], // ['usb', 'nfc', 'ble', 'internal']
-          friendlyName: { type: Object },
-          createdAt: { type: Date, default: Date.now },
-        },
-      ],
-
-      recoveryCodes: [{ type: String, select: false }],
+      type: Schema.Types.ObjectId,
+      ref: "TwoFa",
     },
   },
   { timestamps: true },
