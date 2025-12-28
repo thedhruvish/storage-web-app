@@ -64,6 +64,7 @@ const userSchema = new Schema(
       totp: {
         secret: { type: String, select: false },
         isVerified: { type: Boolean, default: false },
+        createdAt: { type: Date, default: Date.now },
       },
 
       passkeys: [
@@ -72,6 +73,8 @@ const userSchema = new Schema(
           credentialPublicKey: { type: Buffer, required: true },
           counter: { type: Number, required: true },
           transports: [String], // ['usb', 'nfc', 'ble', 'internal']
+          friendlyName: { type: Object },
+          createdAt: { type: Date, default: Date.now },
         },
       ],
 

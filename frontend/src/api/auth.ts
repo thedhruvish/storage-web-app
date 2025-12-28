@@ -1,4 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
+import type { RegistrationResponseJSON } from "@simplewebauthn/browser";
 import axiosClient from "./axios-client";
 
 export const useLoginMutation = () => {
@@ -69,5 +70,12 @@ export const useTotpVerify = () => {
   return useMutation({
     mutationFn: (data: { token: string }) =>
       axiosClient.post("/auth/2fa/verifys/token", data),
+  });
+};
+
+export const usePasskeysRegistrationVerify = () => {
+  return useMutation({
+    mutationFn: (data: RegistrationResponseJSON) =>
+      axiosClient.post("/auth/2fa/register/passkeys", data),
   });
 };

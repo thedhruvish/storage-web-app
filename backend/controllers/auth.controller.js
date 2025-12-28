@@ -9,8 +9,13 @@ import { sendOtpToMail } from "../utils/mailsend.js";
 import { createAndCheckLimitSession } from "../utils/redisHelper.js";
 import redisClient from "../config/redis-client.js";
 import { isValidTurnstileToken } from "../utils/TurnstileVerfication.js";
-import { generateBackupCode, genTOTPUrl } from "../utils/twoStepVerfiy.js";
+import {
+  generateBackupCode,
+  generateRegisterOptionInPasskey,
+  genTOTPUrl,
+} from "../utils/twoStepVerfiy.js";
 import { authenticator } from "otplib";
+import { verifyRegistrationResponse } from "@simplewebauthn/server";
 
 const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
@@ -371,14 +376,27 @@ export const twoFASetup = async (req, res) => {
       "twoFactor.totp.secret": resData.secret,
       "twoFactor.totp.isVerified": false,
     });
-    return res
-      .status(201)
-      .json(new ApiResponse(201, "two setup successfuly generator", resData));
   } else if (method === "passkeys") {
     // passkey logic
-  } else {
-    res.status(401).json(new ApiError(401, "this is not allowed."));
+    const user = await User.findById(req.user._id);
+    resData = await generateRegisterOptionInPasskey(user);
+    console.log(resData);
+    await redisClient.set(
+      `passkeys:${req.user._id.toString()}`,
+      resData.challenge,
+      {
+        expiration: {
+          type: "EX",
+          value: 60,
+        },
+      },
+    );
+
+    await user.save();
   }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, "two setup successfuly generator", resData));
 };
 
 export const intiVerfiyTotp = async (req, res) => {
@@ -415,6 +433,7 @@ export const intiVerfiyTotp = async (req, res) => {
       "twoFactor.recoveryCodes": hashedCodes,
     },
   });
+
   res.status(200).json(
     new ApiResponse(200, "2FA Enabled Successfully", {
       verified: true,
@@ -423,4 +442,50 @@ export const intiVerfiyTotp = async (req, res) => {
         "Please save these recovery codes safely. You will not see them again.",
     }),
   );
+};
+
+export const passkeyRegisterVerfiy = async (req, res) => {
+  const body = req.body;
+  const userId = req.user._id;
+
+  const expectedChallenge = await redisClient.get(
+    `passkeys:${userId.toString()}`,
+  );
+
+  const verification = await verifyRegistrationResponse({
+    expectedChallenge,
+    response: body,
+    expectedOrigin: "http://localhost:3000",
+  });
+
+  if (verification.registrationInfo && verification.verified) {
+    console.log(JSON.stringify(verification.registrationInfo, null, 2));
+    const user = await User.findByIdAndUpdate(
+      userId,
+      {
+        $set: {
+          "twoFactor.isEnabled": true,
+        },
+        $push: {
+          "twoFactor.passkeys": {
+            credentialID: verification.registrationInfo.credential.id,
+            credentialPublicKey: Buffer.from(
+              verification.registrationInfo.credential.publicKey,
+            ),
+            counter: verification.registrationInfo.credential.counter,
+            transports: verification.registrationInfo.credential.transports,
+            friendlyName: req.ua,
+          },
+        },
+      },
+      { new: true },
+    );
+    console.log("after verifiy user ");
+    console.log(JSON.stringify(user, null, 2));
+    res
+      .status(201)
+      .json(new ApiResponse(201, "Verified SuccessFully", { verified: true }));
+  } else {
+    res.status(400).json(new ApiError(400, "Try Agin", { verified: false }));
+  }
 };

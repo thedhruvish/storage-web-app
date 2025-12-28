@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { startRegistration } from "@simplewebauthn/browser";
 import {
   ArrowLeft,
   Loader2,
@@ -13,7 +14,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
-import { useTotpVerify, useTwosteupSet } from "@/api/auth";
+import { toast } from "sonner";
+import {
+  usePasskeysRegistrationVerify,
+  useTotpVerify,
+  useTwosteupSet,
+} from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -55,6 +61,7 @@ export function TwoFaDialog({
 
   const setupMutation = useTwosteupSet();
   const verifyMutation = useTotpVerify();
+  const passkeysVerifyMutation = usePasskeysRegistrationVerify();
 
   const handleOpenChange = (open: boolean) => {
     // Prevent closing if on backup step (force them to click 'Done')
@@ -85,6 +92,43 @@ export function TwoFaDialog({
             otpauthUrl: response.data.data.otpauthUrl,
             secret: response.data.data.secret,
           });
+        },
+      }
+    );
+  };
+
+  const passkeysRegistration = async (optionsJSON: any) => {
+    let attResp;
+
+    try {
+      attResp = await startRegistration({ optionsJSON });
+    } catch (error: any) {
+      if (error.name === "InvalidStateError") {
+        toast.error(
+          "Error: Authenticator was probably already registered by user"
+        );
+      } else {
+        toast.error(error);
+      }
+    }
+    if (!attResp) {
+      toast.error("Fail to register passkey");
+      return;
+    }
+
+    toast.promise(passkeysVerifyMutation.mutateAsync(attResp), {
+      loading: "Verifying passkey...",
+      success: "Passkey registered successfully",
+      error: "Failed to register passkey",
+    });
+  };
+
+  const handleStartPasskeysSetup = () => {
+    setupMutation.mutateAsync(
+      { method: "passkeys" },
+      {
+        onSuccess: async (res) => {
+          await passkeysRegistration(res.data.data);
         },
       }
     );
@@ -161,14 +205,15 @@ export function TwoFaDialog({
                   Google Auth, Authy, etc.
                 </p>
               </div>
-              <div className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all hover:border-primary/50 opacity-50 cursor-not-allowed'>
-                <div className='mb-3 rounded-full w-10 h-10 bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center'>
+              <div
+                onClick={handleStartPasskeysSetup}
+                className='cursor-pointer rounded-xl border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground transition-all hover:border-primary/50'
+              >
+                <div className='mb-3 rounded-full w-10 h-10 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center'>
                   <KeyRound className='h-5 w-5 text-purple-600 dark:text-purple-400' />
                 </div>
                 <h3 className='font-medium'>Passkey</h3>
-                <p className='text-xs text-muted-foreground mt-1'>
-                  Biometric (Coming soon)
-                </p>
+                <p className='text-xs text-muted-foreground mt-1'>Biometric</p>
               </div>
             </div>
           </>

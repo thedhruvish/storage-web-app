@@ -21,6 +21,7 @@ import paymentStripeRoute from "./routes/paymentStripe.route.js";
 import webhookRoute from "./routes/webhook.route.js";
 import userRoute from "./routes/user.route.js";
 import { startCronJobs } from "./cron-job/index.js";
+import { getRequestInfo } from "./middlewares/getRequestInfo.js";
 
 const port = process.env.PORT || 4000;
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";

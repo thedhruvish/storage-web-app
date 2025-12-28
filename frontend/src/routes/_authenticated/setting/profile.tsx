@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useUserStore } from "@/store/user-store";
 import { ActiveSessions } from "@/pages/profile/active-sessions";
 import { BackupData } from "@/pages/profile/backup-data";
 import { DangerZone } from "@/pages/profile/danger-zone";
@@ -10,6 +9,7 @@ import type {
   ConnectedAccount,
   UserProfile,
 } from "@/pages/profile/types";
+import { useUserStore } from "@/store/user-store";
 
 export const Route = createFileRoute("/_authenticated/setting/profile")({
   component: RouteComponent,
@@ -17,7 +17,6 @@ export const Route = createFileRoute("/_authenticated/setting/profile")({
 
 function RouteComponent() {
   const userStore = useUserStore((state) => state.user);
-
 
   // Transform userStore data to our display type if necessary,
   // or define a comprehensive user object here for the UI

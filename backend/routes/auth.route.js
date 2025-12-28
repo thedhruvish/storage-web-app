@@ -12,6 +12,7 @@ import {
   reSendOtp,
   twoFASetup,
   intiVerfiyTotp,
+  passkeyRegisterVerfiy,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import {
@@ -22,8 +23,12 @@ import {
   verfiyOtpValidation,
 } from "../validators/authSchema.js";
 import { validateInput } from "../utils/validateInput.js";
+import { getRequestInfo } from "../middlewares/getRequestInfo.js";
 
 const router = express.Router();
+
+// get info on the os,browser etc.
+router.use(getRequestInfo);
 
 // router login with email and password
 router.post(
@@ -57,6 +62,8 @@ router.get("/me", getCureentUser);
 router.post("/2fa/setup", twoFASetup);
 
 router.post("/2fa/verifys/token", intiVerfiyTotp);
+
+router.post("/2fa/register/passkeys", passkeyRegisterVerfiy);
 
 // logout user
 router.post("/logout", logout);

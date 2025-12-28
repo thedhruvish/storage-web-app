@@ -19,19 +19,23 @@ router.param("parentDirId", paramsValidation);
 
 router
   .route("/{:parentDirId}/init")
-  .post(permissionMiddleware("write"),  createPresigned);
+  .post(permissionMiddleware("write"), createPresigned);
 
 router.param("id", paramsValidation);
 
 // upload after check is completed or not
 router.post(
   "/:id/compeleted",
-  permissionMiddleware("write",false),
+  permissionMiddleware("write", false),
   checkUploadedObject,
 );
 
 // user click canel button than remove the document in the mongo.
-router.delete("/:id/cancel", permissionMiddleware("write",false), cancelUpload);
+router.delete(
+  "/:id/cancel",
+  permissionMiddleware("write", false),
+  cancelUpload,
+);
 
 router.put(
   "/:id/starred",
