@@ -76,3 +76,11 @@ export const useUpdatePaymentDetails = () => {
     },
   });
 };
+
+// handle  get details
+export const useGetInfoOnSetting = () => {
+  return useQuery({
+    queryKey: ["settings", "info"],
+    queryFn: async () => axiosClient.get("/user/settings/info"),
+  });
+};

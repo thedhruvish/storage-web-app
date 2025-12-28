@@ -2,11 +2,16 @@ import express from "express";
 import {
   getUserSubscriptionHistory,
   listAllSubscription,
+  settingInfo,
   toggleSubscriptionStatus,
   updatePaymentMethodDetails,
 } from "../controllers/user.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
 const router = express.Router();
+// setting  info
+router.get("/settings/info", settingInfo);
+
+// subscription handle
 
 router.get("/subscriptions", listAllSubscription);
 

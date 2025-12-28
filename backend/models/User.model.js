@@ -1,6 +1,8 @@
 import { model, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 
+export const LOGIN_PROVIDER = ["password", "google", "github"];
+
 const userSchema = new Schema(
   {
     name: {
@@ -25,8 +27,8 @@ const userSchema = new Schema(
     },
     loginProvider: {
       type: [String],
-      enum: ["local", "google", "github"],
-      default: "local",
+      enum: LOGIN_PROVIDER,
+      default: "password",
     },
     picture: {
       type: String,

@@ -1,4 +1,7 @@
 import { useState } from "react";
+import z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { startRegistration } from "@simplewebauthn/browser";
 import {
   ArrowLeft,
@@ -31,6 +34,14 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  Form,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -40,7 +51,9 @@ type DialogStep =
   | "select"
   | "name"
   | "setup-totp"
-  | "setup-passkey"
+  | "proccess-passkey"
+  | "fail-passkey"
+  | "success-passkey"
   | "backup-codes";
 
 interface TwoFaDialogProps {
@@ -48,18 +61,32 @@ interface TwoFaDialogProps {
   is2FADialogOpen: boolean;
 }
 
+const nameSchema = z.object({
+  name: z
+    .string()
+    .max(20, "Name not allowed this length is less than 20 characters"),
+});
+
 export function TwoFaDialog({
   setIs2FADialogOpen,
   is2FADialogOpen,
 }: TwoFaDialogProps) {
   const [copySuccess, setCopySuccess] = useState(false);
   const [dialogStep, setDialogStep] = useState<DialogStep>("select");
-  const [friendlyName, setFriendlyName] = useState("");
+  // const [friendlyName, setFriendlyName] = useState("");
   const [selectedMethod, setSelectedMethod] = useState<
     "totp" | "passkeys" | null
   >(null);
   const [otpCode, setOtpCode] = useState("");
 
+  const form = useForm<z.infer<typeof nameSchema>>({
+    resolver: zodResolver(nameSchema),
+    defaultValues: {
+      name: "",
+    },
+  });
+
+  const friendlyName = form.watch("name");
   // 2. State for Backup Codes
   const [backupCodes, setBackupCodes] = useState<string[]>([]);
 
@@ -82,7 +109,6 @@ export function TwoFaDialog({
     if (!open) {
       setTimeout(() => {
         setDialogStep("select");
-        setFriendlyName("");
         setSelectedMethod(null);
         setOtpCode("");
         setSetupData(null);
@@ -100,6 +126,7 @@ export function TwoFaDialog({
 
   const handleNameSubmit = () => {
     if (!selectedMethod) return;
+
     if (selectedMethod === "totp") {
       handleStartTotpSetup();
     } else {
@@ -123,6 +150,7 @@ export function TwoFaDialog({
   };
 
   const passkeysRegistration = async (optionsJSON: any) => {
+    setDialogStep("proccess-passkey");
     let attResp;
 
     try {
@@ -133,20 +161,30 @@ export function TwoFaDialog({
           "Error: Authenticator was probably already registered by user"
         );
       } else {
-        toast.error(error);
+        toast.error(
+          error instanceof Error ? error.message : "An unknown error occurred"
+        );
       }
-    }
-    if (!attResp) {
-      toast.error("Fail to register passkey");
+      setDialogStep("fail-passkey");
       return;
     }
 
-    toast.promise(
-      passkeysVerifyMutation.mutateAsync({ response: attResp, friendlyName }),
+    if (!attResp) {
+      setDialogStep("fail-passkey");
+      return;
+    }
+
+    passkeysVerifyMutation.mutate(
+      { response: attResp, friendlyName },
       {
-        loading: "Verifying passkey...",
-        success: "Passkey registered successfully",
-        error: "Failed to register passkey",
+        onSuccess: () => {
+          setDialogStep("success-passkey");
+          toast.success("Passkey registered successfully");
+        },
+        onError: () => {
+          setDialogStep("fail-passkey");
+          toast.error("Failed to register passkey");
+        },
       }
     );
   };
@@ -206,10 +244,7 @@ export function TwoFaDialog({
             : "sm:max-w-md"
         )}
       >
-        {/* STEP 1: SELECT (Unchanged) */}
         {dialogStep === "select" && (
-          // ... (Your existing Step 1 Code) ...
-          // Simplified here for brevity, paste your previous code
           <>
             <DialogHeader>
               <DialogTitle>Choose Verification Method</DialogTitle>
@@ -245,51 +280,70 @@ export function TwoFaDialog({
         )}
 
         {dialogStep === "name" && (
-          <div className='animate-in fade-in slide-in-from-right-4 duration-300'>
-            <DialogHeader>
-              <div className='flex items-center gap-2'>
+          <Form {...form}>
+            <form
+              onSubmit={form.handleSubmit(handleNameSubmit)}
+              className='animate-in fade-in slide-in-from-right-4 duration-300'
+            >
+              <DialogHeader>
+                <div className='flex items-center gap-2'>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='h-6 w-6 -ml-2'
+                    onClick={() => setDialogStep("select")}
+                  >
+                    <ArrowLeft className='h-4 w-4' />
+                  </Button>
+                  <DialogTitle>Name your device</DialogTitle>
+                </div>
+                <DialogDescription>
+                  Give this verification method a memorable name.
+                </DialogDescription>
+              </DialogHeader>
+              <FormField
+                control={form.control}
+                name='name'
+                render={({ field }) => (
+                  <FormItem className='grid gap-4 py-4'>
+                    <FormLabel>Friendly Name</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder='e.g. My iPhone, Work Laptop'
+                        autoFocus
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" && friendlyName.trim()) {
+                            e.preventDefault();
+                            form.handleSubmit(handleNameSubmit);
+                          }
+                        }}
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <DialogFooter>
                 <Button
-                  variant='ghost'
-                  size='icon'
-                  className='h-6 w-6 -ml-2'
-                  onClick={() => setDialogStep("select")}
+                  type='submit'
+                  disabled={
+                    setupMutation.isPending || friendlyName.length === 0
+                  }
                 >
-                  <ArrowLeft className='h-4 w-4' />
+                  {setupMutation.isPending ? (
+                    <>
+                      <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+                      Setting up...
+                    </>
+                  ) : (
+                    "Continue"
+                  )}
                 </Button>
-                <DialogTitle>Name your device</DialogTitle>
-              </div>
-              <DialogDescription>
-                Give this verification method a memorable name.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className='grid gap-4 py-4'>
-              <div className='space-y-2'>
-                <Label htmlFor='name'>Friendly Name</Label>
-                <Input
-                  id='name'
-                  placeholder='e.g. My iPhone, Work Laptop'
-                  value={friendlyName}
-                  onChange={(e) => setFriendlyName(e.target.value)}
-                  autoFocus
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" && friendlyName.trim()) {
-                      handleNameSubmit();
-                    }
-                  }}
-                />
-              </div>
-            </div>
-
-            <DialogFooter>
-              <Button
-                onClick={handleNameSubmit}
-                disabled={!friendlyName.trim()}
-              >
-                Continue
-              </Button>
-            </DialogFooter>
-          </div>
+              </DialogFooter>
+            </form>
+          </Form>
         )}
 
         {/* STEP 2: SETUP TOTP (Unchanged logic, just update copyToClipboard call) */}
@@ -479,7 +533,66 @@ export function TwoFaDialog({
           </>
         )}
 
-        {/* STEP 3: BACKUP CODES (NEW) */}
+        {/* PASSKEY STEPS */}
+        {dialogStep === "proccess-passkey" && (
+          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
+            <div className='mb-6 rounded-full bg-blue-100 dark:bg-blue-900/30 p-6 relative'>
+              <KeyRound className='h-10 w-10 text-blue-600 dark:text-blue-400' />
+              <div className='absolute -bottom-1 -right-1 bg-background rounded-full p-1'>
+                <Loader2 className='h-5 w-5 animate-spin text-primary' />
+              </div>
+            </div>
+            <h3 className='text-xl font-semibold mb-2'>
+              Continue in your browser
+            </h3>
+            <p className='text-muted-foreground max-w-xs mx-auto'>
+              We've sent a request to your browser. Please follow the prompts to
+              create your passkey.
+            </p>
+          </div>
+        )}
+
+        {dialogStep === "success-passkey" && (
+          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
+            <div className='mb-6 rounded-full bg-green-100 dark:bg-green-900/30 p-6'>
+              <Check className='h-10 w-10 text-green-600 dark:text-green-400' />
+            </div>
+            <h3 className='text-xl font-semibold mb-2'>Passkey Added!</h3>
+            <p className='text-muted-foreground mb-8'>
+              You can now use this passkey to sign in to your account.
+            </p>
+            <Button
+              className='w-full sm:w-auto min-w-[120px]'
+              onClick={() => setIs2FADialogOpen(false)}
+            >
+              Done
+            </Button>
+          </div>
+        )}
+
+        {dialogStep === "fail-passkey" && (
+          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
+            <div className='mb-6 rounded-full bg-red-100 dark:bg-red-900/30 p-6'>
+              <AlertCircle className='h-10 w-10 text-red-600 dark:text-red-400' />
+            </div>
+            <h3 className='text-xl font-semibold mb-2'>Passkey Setup Failed</h3>
+            <p className='text-muted-foreground mb-8 max-w-xs mx-auto'>
+              We couldn't create your passkey. This might happen if you
+              cancelled the request or the operation timed out.
+            </p>
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <Button
+                variant='outline'
+                onClick={() => setIs2FADialogOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={() => setDialogStep("name")}>Try Again</Button>
+            </div>
+          </div>
+        )}
+
+        {/* STEP 3: BACKUP CODES  */}
         {dialogStep === "backup-codes" && (
           <div className='animate-in fade-in slide-in-from-right-4 duration-300'>
             <DialogHeader>

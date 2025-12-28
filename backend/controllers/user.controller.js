@@ -1,5 +1,5 @@
 import Subscription from "../models/Subscription.model.js";
-import User from "../models/User.model.js";
+import User, { LOGIN_PROVIDER } from "../models/User.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import {
   createCustomerPortalSession,
@@ -73,4 +73,63 @@ export const updatePaymentMethodDetails = async (req, res) => {
     .json(
       new ApiResponse(200, "Customer Portal Link gen", { url: session.url }),
     );
+};
+
+// get info about settings
+export const settingInfo = async (req, res) => {
+  let userInfo = await User.findById(req.user._id).populate("twoFactor");
+  let passkey = null;
+
+  // if exsting than it save.
+  if (userInfo.twoFactor) {
+    passkey = userInfo.twoFactor.passkeys?.map((item) => {
+      return {
+        type: "passkey",
+        friendlyName: item.friendlyName,
+        createdAt: item.createdAt,
+        credentialID: item.credentialID,
+        transports: item.transports,
+        lastUsed: item?.lastUsed,
+      };
+    });
+  }
+
+  // tops it exsting than it push array.
+  if (userInfo.twoFactor.totp) {
+    userInfo.twoFactor.totp.type = "totp";
+    passkey.push(userInfo.twoFactor.totp);
+  }
+
+  const isPremium = await Subscription.exists({
+    userId: userInfo._id,
+    status: "active",
+  });
+  const connectedAccounts = LOGIN_PROVIDER.map((method) => {
+    return {
+      provider: method,
+      email:
+        method === "password"
+          ? userInfo.email
+          : method === "google"
+            ? userInfo.googleEmail
+            : method === "github"
+              ? userInfo.githubEmail
+              : null,
+    };
+  });
+
+  const customInfo = {
+    twoFactor: userInfo.twoFactor.isEnabled ? passkey : [],
+    loginProvider: userInfo.loginProvider,
+    connectedAccounts: connectedAccounts,
+    isTwoFactorEnabled: userInfo.twoFactor.isEnabled,
+    user: {
+      name: userInfo.name,
+      email: userInfo.email,
+      avatarUrl: userInfo.picture,
+      isPremium: isPremium ? true : false,
+    },
+  };
+
+  res.status(200).json(new ApiResponse(200, "Get Setting info", customInfo));
 };
