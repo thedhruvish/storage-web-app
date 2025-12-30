@@ -46,6 +46,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import FailPasskey from "./passkey-components/fail-passkey";
+import ProccessPasskey from "./passkey-components/proccess-passkey";
+import SuccessPasskey from "./passkey-components/success-passkey";
 
 // 1. Update the Step Type
 type DialogStep =
@@ -552,62 +555,17 @@ export function TwoFaDialog({
         )}
 
         {/* PASSKEY STEPS */}
-        {dialogStep === "proccess-passkey" && (
-          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
-            <div className='mb-6 rounded-full bg-blue-100 dark:bg-blue-900/30 p-6 relative'>
-              <KeyRound className='h-10 w-10 text-blue-600 dark:text-blue-400' />
-              <div className='absolute -bottom-1 -right-1 bg-background rounded-full p-1'>
-                <Loader2 className='h-5 w-5 animate-spin text-primary' />
-              </div>
-            </div>
-            <h3 className='text-xl font-semibold mb-2'>
-              Continue in your browser
-            </h3>
-            <p className='text-muted-foreground max-w-xs mx-auto'>
-              We've sent a request to your browser. Please follow the prompts to
-              create your passkey.
-            </p>
-          </div>
-        )}
+        {dialogStep === "proccess-passkey" && <ProccessPasskey />}
 
         {dialogStep === "success-passkey" && (
-          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
-            <div className='mb-6 rounded-full bg-green-100 dark:bg-green-900/30 p-6'>
-              <Check className='h-10 w-10 text-green-600 dark:text-green-400' />
-            </div>
-            <h3 className='text-xl font-semibold mb-2'>Passkey Added!</h3>
-            <p className='text-muted-foreground mb-8'>
-              You can now use this passkey to sign in to your account.
-            </p>
-            <Button
-              className='w-full sm:w-auto min-w-[120px]'
-              onClick={() => setIs2FADialogOpen(false)}
-            >
-              Done
-            </Button>
-          </div>
+          <SuccessPasskey doneFunction={() => setIs2FADialogOpen(false)} />
         )}
 
         {dialogStep === "fail-passkey" && (
-          <div className='flex flex-col items-center justify-center py-12 px-4 text-center animate-in fade-in zoom-in duration-300'>
-            <div className='mb-6 rounded-full bg-red-100 dark:bg-red-900/30 p-6'>
-              <AlertCircle className='h-10 w-10 text-red-600 dark:text-red-400' />
-            </div>
-            <h3 className='text-xl font-semibold mb-2'>Passkey Setup Failed</h3>
-            <p className='text-muted-foreground mb-8 max-w-xs mx-auto'>
-              We couldn't create your passkey. This might happen if you
-              cancelled the request or the operation timed out.
-            </p>
-            <div className='flex flex-col sm:flex-row gap-3'>
-              <Button
-                variant='outline'
-                onClick={() => setIs2FADialogOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button onClick={() => setDialogStep("name")}>Try Again</Button>
-            </div>
-          </div>
+          <FailPasskey
+            cancelFunction={() => setDialogStep("name")}
+            tryAgainFunction={() => setDialogStep("proccess-passkey")}
+          />
         )}
 
         {/* STEP 3: BACKUP CODES  */}

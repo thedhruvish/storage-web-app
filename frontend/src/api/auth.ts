@@ -1,5 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { RegistrationResponseJSON } from "@simplewebauthn/browser";
+import type {
+  AuthenticationResponseJSON,
+  RegistrationResponseJSON,
+} from "@simplewebauthn/browser";
 import axiosClient from "./axios-client";
 
 export const useLoginMutation = () => {
@@ -100,9 +103,18 @@ export const useLoginWithTotp = () => {
   });
 };
 
-export const useLoginWithPasskey = () => {
+export const useLoginWithPasskeyChallenge = () => {
   return useMutation({
-    mutationFn: (data: { token: string; userId: string }) =>
-      axiosClient.post("/auth/2fa/login/passkey", data),
+    mutationFn: (data: { userId: string }) =>
+      axiosClient.post("/auth/2fa/login/passkey-challenge", data),
+  });
+};
+
+export const useLoginWithPasskeyChallengeVerify = () => {
+  return useMutation({
+    mutationFn: (data: {
+      response: AuthenticationResponseJSON;
+      userId: string;
+    }) => axiosClient.post("/auth/2fa/login/passkey-verify", data),
   });
 };

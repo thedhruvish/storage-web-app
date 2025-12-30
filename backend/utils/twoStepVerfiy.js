@@ -1,7 +1,11 @@
 import bcrypt from "bcrypt";
 import crypto from "node:crypto";
 import { authenticator } from "otplib";
-import { generateRegistrationOptions } from "@simplewebauthn/server";
+import {
+  generateAuthenticationOptions,
+  generateRegistrationOptions,
+  verifyAuthenticationResponse,
+} from "@simplewebauthn/server";
 import { isoUint8Array } from "@simplewebauthn/server/helpers";
 
 // gen a like for the qrcode
@@ -50,9 +54,42 @@ export const generateRegisterOptionInPasskey = async (user, passkeys) => {
   return options;
 };
 
+// verify the token of totp
 export const isValidTotpToken = ({ secret, token }) => {
   return authenticator.verify({
     secret: secret,
     token,
   });
+};
+
+// gene a challenge for the passkeys for the login
+export const genPasskeyOptions = async () => {
+  const options = await generateAuthenticationOptions({
+    rpID: "localhost",
+    userVerification: "preferred",
+  });
+  return options;
+};
+
+// verify passkey challenge for the login
+export const verifyLoginPasskeyChallenge = async ({
+  response,
+  expectedChallenge,
+  authenticator,
+}) => {
+  
+  const verification = await verifyAuthenticationResponse({
+    response,
+    expectedChallenge,
+    expectedOrigin: "http://localhost:3000",
+    expectedRPID: "localhost",
+    credential: {
+      id: authenticator.credentialID,
+      publicKey: Buffer.from(authenticator.credentialPublicKey),
+      counter: authenticator.counter,
+      transports: authenticator.transports,
+    },
+  });
+
+  return verification;
 };

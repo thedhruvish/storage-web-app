@@ -100,12 +100,12 @@ export const loginWithEmail = async (req, res) => {
   }
   console.log(JSON.stringify(user, null, 2));
   // user enable to the two fa authentication:
-  if (user.twoFactor.isEnabled) {
+  if (user?.twoFactor?.isEnabled) {
     return res.status(200).json(
       new ApiResponse(200, "verify 2FA ", {
         isEnabled2Fa: true,
-        isTotp: user.twoFactor.totp.isVerified === true ? true : false,
-        isPasskey: user.twoFactor.passkeys.length !== 0 ? true : false,
+        isTotp: user.twoFactor.totp?.isVerified === true ? true : false,
+        isPasskey: user.twoFactor.passkeys?.length !== 0 ? true : false,
         userId: user._id,
       }),
     );

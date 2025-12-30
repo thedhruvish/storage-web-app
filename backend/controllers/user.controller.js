@@ -82,7 +82,7 @@ export const settingInfo = async (req, res) => {
   let passkey = null;
 
   // if exsting than it save.
-  if (userInfo.twoFactor) {
+  if (userInfo?.twoFactor) {
     passkey = userInfo.twoFactor.passkeys?.map((item) => {
       return {
         type: "passkey",
@@ -96,7 +96,7 @@ export const settingInfo = async (req, res) => {
   }
   let isAllowedNewTOTP = true;
   // tops it exsting than it push array.
-  if (userInfo.twoFactor.totp) {
+  if (userInfo?.twoFactor?.totp) {
     userInfo.twoFactor.totp.type = "totp";
     passkey.push(userInfo.twoFactor.totp);
     isAllowedNewTOTP = false;
@@ -123,9 +123,9 @@ export const settingInfo = async (req, res) => {
   const customInfo = {
     twoFactor: passkey,
     loginProvider: userInfo.loginProvider,
-    twoFactorId: userInfo.twoFactor._id,
+    twoFactorId: userInfo?.twoFactor?._id,
     connectedAccounts: connectedAccounts,
-    isTwoFactorEnabled: userInfo.twoFactor.isEnabled,
+    isTwoFactorEnabled: userInfo?.twoFactor?.isEnabled,
     isAllowedNewTOTP,
     user: {
       name: userInfo.name,
@@ -144,7 +144,6 @@ export const deleteAuthMethod = async (req, res) => {
   const credentialOrName = req.params.credentialOrName;
 
   if (credentialOrName.length === 43) {
-    console.log("run credent");
     await TwoFa.findOneAndUpdate(
       {
         _id: twoFactorId,

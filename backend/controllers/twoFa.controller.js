@@ -1,8 +1,10 @@
 import {
   generateBackupCode,
   generateRegisterOptionInPasskey,
+  genPasskeyOptions,
   genTOTPUrl,
   isValidTotpToken,
+  verifyLoginPasskeyChallenge,
 } from "../utils/twoStepVerfiy.js";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import ApiResponse from "../utils/ApiResponse.js";
@@ -44,7 +46,7 @@ export const twoFASetup = async (req, res) => {
       const twoFa = await TwoFa.findById(user._id);
       passkey = twoFa?.passkeys;
     }
-    console.log(passkey);
+
     resData = await generateRegisterOptionInPasskey(user, passkey);
 
     await redisClient.set(
@@ -140,7 +142,7 @@ export const passkeyRegisterVerify = async (req, res) => {
         return res.status(401).json(new ApiError(401, "Login Required"));
       }
     }
-    console.log(user);
+
     const passkeyObj = {
       credentialID: credential.id,
       credentialPublicKey: Buffer.from(credential.publicKey),
@@ -210,6 +212,74 @@ export const twoFaLoginTotp = async (req, res) => {
     .status(200)
     .json(
       new ApiResponse(200, "User login Successfuly", { is_verfiy_otp: true }),
-      user,
     );
+};
+
+// generate passkey challenge
+export const generatePasskeyChallenge = async (req, res) => {
+  const { userId } = req.body;
+
+  const options = await genPasskeyOptions();
+
+  // save session challenge to after verify
+  await redisClient.set(`passkeys-login:${userId}`, options.challenge, {
+    expiration: {
+      type: "EX",
+      value: 60,
+    },
+  });
+  res.status(200).json(new ApiResponse(200, "Generator a challenge", options));
+};
+
+// verfiy created session and set create new session and set cookie
+export const verifyPasskeyChallenge = async (req, res) => {
+  const { response, userId } = req.body;
+
+  const expectedChallenge = await redisClient.get(`passkeys-login:${userId}`);
+
+  if (!expectedChallenge) {
+    res.status(400).json(new ApiError(400, "Try agin to login"));
+  }
+
+  const user = await User.findById(userId).populate("twoFactor");
+
+  const authenticator = user.twoFactor.passkeys.find(
+    (p) => p.credentialID === response.id,
+  );
+  const verification = await verifyLoginPasskeyChallenge({
+    response,
+    expectedChallenge,
+    authenticator,
+  });
+  if (!verification.verified) {
+    return res
+      .status(400)
+      .json(new ApiError(400, "You passkey are the different."));
+  }
+  const { authenticationInfo } = verification;
+
+
+  const updateAuthInfo = await TwoFa.findOneAndUpdate(
+    {
+      _id: user.twoFactor._id,
+      "passkeys.credentialID": response.id,
+    },
+    {
+      $set: {
+        "passkeys.$.counter": authenticationInfo.newCounter,
+        "passkeys.$.lastUsed": new Date(),
+      },
+    },
+  );
+
+  const sessionId = await createAndCheckLimitSession(user.id.toString());
+
+  res.cookie("sessionId", sessionId, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    signed: true,
+  });
+
+  res.status(200).json(new ApiResponse(200, "User login Successfuly"));
 };

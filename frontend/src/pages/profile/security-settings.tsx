@@ -52,7 +52,7 @@ interface SecuritySettingsProps {
 export function SecuritySettings({
   connectedAccounts,
   twoFactor,
-  isTwoFactorEnabled,
+  isTwoFactorEnabled = false,
   twoFactorId,
   isAllowedNewTOTP,
 }: SecuritySettingsProps) {
@@ -282,7 +282,13 @@ export function SecuritySettings({
             <Switch
               id='2fa-toggle'
               checked={isTwoFactorEnabled}
-              onCheckedChange={() => setIsToggle2FAOpen(true)}
+              onCheckedChange={() => {
+                if (twoFactor === null) {
+                  setIs2FADialogOpen(true);
+                } else {
+                  setIsToggle2FAOpen(true);
+                }
+              }}
             />
           </div>
         </div>
@@ -411,6 +417,24 @@ export function SecuritySettings({
                 </Button>
               </div>
             )}
+          </div>
+        ) : twoFactor === null ? (
+          <div className='p-8 text-center'>
+            <div className='mx-auto h-12 w-12 rounded-full bg-yellow-100 flex items-center justify-center text-yellow-600 mb-3'>
+              <AlertCircle className='h-6 w-6' />
+            </div>
+            <h3 className='text-sm font-medium'>Configuration Incomplete</h3>
+            <p className='text-xs text-muted-foreground max-w-xs mx-auto mt-1 mb-4'>
+              Two-factor authentication is on, but you haven't added any methods
+              yet.
+            </p>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => setIs2FADialogOpen(true)}
+            >
+              Configure Now
+            </Button>
           </div>
         ) : (
           // Empty State (2FA Disabled)

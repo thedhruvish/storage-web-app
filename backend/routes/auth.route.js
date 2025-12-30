@@ -26,6 +26,8 @@ import {
   passkeyRegisterVerify,
   twoFASetup,
   twoFaLoginTotp,
+  verifyPasskeyChallenge,
+  generatePasskeyChallenge,
 } from "../controllers/twoFa.controller.js";
 
 const router = express.Router();
@@ -60,6 +62,10 @@ router.get("/github/callback", callbackGithub);
 
 // two fa auth login
 router.post("/2fa/login/totp", twoFaLoginTotp);
+
+router.post("/2fa/login/passkey-challenge", generatePasskeyChallenge);
+
+router.post("/2fa/login/passkey-verify",verifyPasskeyChallenge)
 
 // authenticated route
 router.use(checkAuth);
