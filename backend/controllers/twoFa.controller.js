@@ -258,7 +258,7 @@ export const verifyPasskeyChallenge = async (req, res) => {
   }
   const { authenticationInfo } = verification;
 
-  await TwoFa.updateOne(
+  await TwoFa.updateOnedhruv(
     {
       _id: user.twoFactor._id,
       "passkeys.credentialID": response.id,

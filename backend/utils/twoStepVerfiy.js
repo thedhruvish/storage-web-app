@@ -32,7 +32,7 @@ export const generateBackupCode = async (length = 10) => {
 export const generateRegisterOptionInPasskey = async (user, passkeys) => {
   const options = await generateRegistrationOptions({
     rpName: "Storage app",
-    rpID: "localhost",
+    rpID: process.env.DOMAIN_NAME,
     userID: isoUint8Array.fromUTF8String(user._id.toString()),
     userName: user.email,
     userDisplayName: user.name,
@@ -65,7 +65,7 @@ export const isValidTotpToken = ({ secret, token }) => {
 // gene a challenge for the passkeys for the login
 export const genPasskeyOptions = async () => {
   const options = await generateAuthenticationOptions({
-    rpID: "localhost",
+    rpID: process.env.DOMAIN_NAME,
     userVerification: "preferred",
   });
   return options;
@@ -77,12 +77,11 @@ export const verifyLoginPasskeyChallenge = async ({
   expectedChallenge,
   authenticator,
 }) => {
-  
   const verification = await verifyAuthenticationResponse({
     response,
     expectedChallenge,
-    expectedOrigin: "http://localhost:3000",
-    expectedRPID: "localhost",
+    expectedOrigin: process.env.FRONTEND_URL,
+    expectedRPID: process.env.DOMAIN_NAME,
     credential: {
       id: authenticator.credentialID,
       publicKey: Buffer.from(authenticator.credentialPublicKey),
