@@ -10,6 +10,7 @@ import {
 } from "../controllers/user.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.js";
 const router = express.Router();
+
 // setting  info
 router.get("/settings/info", settingInfo);
 
