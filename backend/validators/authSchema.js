@@ -25,3 +25,16 @@ export const verfiyOtpValidation = z.object({
 export const reSendOtpValidation = z.object({
   userId: z.string("User Id is required"),
 });
+
+export const verifiyToken = reSendOtpValidation.extend({
+  token: z
+    .string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only digits"),
+});
+
+export const twoFaRegisterMethod = z.object({
+  method: z.enum(["totp", "passkeys"], {
+    error: "invalid method type",
+  }),
+});

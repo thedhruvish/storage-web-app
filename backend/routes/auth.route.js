@@ -18,6 +18,7 @@ import {
   registerWithEmailValidation,
   reSendOtpValidation,
   verfiyOtpValidation,
+  verifiyToken,
 } from "../validators/authSchema.js";
 import { validateInput } from "../utils/validateInput.js";
 import { getRequestInfo } from "../middlewares/getRequestInfo.js";
@@ -61,11 +62,15 @@ router.get("/github", loginWithGithub);
 router.get("/github/callback", callbackGithub);
 
 // two fa auth login
-router.post("/2fa/login/totp", twoFaLoginTotp);
+router.post("/2fa/login/totp", validateInput(verifiyToken), twoFaLoginTotp);
 
-router.post("/2fa/login/passkey-challenge", generatePasskeyChallenge);
+router.post(
+  "/2fa/login/passkey-challenge",
+  validateInput(reSendOtpValidation),
+  generatePasskeyChallenge,
+);
 
-router.post("/2fa/login/passkey-verify",verifyPasskeyChallenge)
+router.post("/2fa/login/passkey-verify", verifyPasskeyChallenge);
 
 // authenticated route
 router.use(checkAuth);
@@ -75,10 +80,18 @@ router.post("/logout", logout);
 router.get("/logoutAll", logoutAllDevices);
 
 // setup first time
-router.post("/2fa/register/setup", twoFASetup);
+router.post(
+  "/2fa/register/setup",
+  validateInput(twoFaRegisterMethod),
+  twoFASetup,
+);
 
 // totp verfiy to register
-router.post("/2fa/register/totp", totpRegisterVerify);
+router.post(
+  "/2fa/register/totp",
+  validateInput(verifiyToken),
+  totpRegisterVerify,
+);
 
 // passkey register verfiy
 router.post("/2fa/register/passkeys", passkeyRegisterVerify);

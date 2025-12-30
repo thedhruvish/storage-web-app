@@ -14,7 +14,11 @@ const router = express.Router();
 // setting  info
 router.get("/settings/info", settingInfo);
 
+router.param("twoFactorId", paramsValidation);
+
 router.delete("/settings/:twofactor/:credentialOrName", deleteAuthMethod);
+
+router.param("id", paramsValidation);
 
 router.put("/settings/2fa/:id/toggle", toggleTwoFaAuth);
 
@@ -23,8 +27,6 @@ router.put("/settings/2fa/:id/toggle", toggleTwoFaAuth);
 router.get("/subscriptions", listAllSubscription);
 
 router.get("/update-payment-details", updatePaymentMethodDetails);
-
-router.param("id", paramsValidation);
 
 router.put("/subscriptions/:id/toggle", toggleSubscriptionStatus);
 
