@@ -84,3 +84,27 @@ export const useGetInfoOnSetting = () => {
     queryFn: async () => axiosClient.get("/user/settings/info"),
   });
 };
+
+export const useDeleteTwoFactorMethod = (twoFactorId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: string) => {
+      await axiosClient.delete(`/user/settings/${twoFactorId}/${id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};
+
+export const useToggleTwoFactor = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (twoFactorId: string) => {
+      await axiosClient.put(`/user/settings/2fa/${twoFactorId}/toggle`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};

@@ -13,6 +13,17 @@ const PasskeySchema = new Schema(
   { _id: false },
 );
 
+const totp = new Schema(
+  {
+    friendlyName: { type: String },
+    secret: { type: String, select: false },
+    isVerified: { type: Boolean, default: false },
+    createdAt: { type: Date, default: Date.now },
+    lastUsed: { type: Date },
+  },
+  { _id: false },
+);
+
 const twoFaSchema = new Schema({
   // Recovery Codes:
   recoveryCodes: [{ type: String, select: false }],
@@ -21,11 +32,8 @@ const twoFaSchema = new Schema({
 
   //   totp details
   totp: {
-    friendlyName: { type: String },
-    secret: { type: String, select: false },
-    isVerified: { type: Boolean, default: false },
-    createdAt: { type: Date, default: Date.now },
-    lastUsed: { type: Date },
+    type: totp,
+    default: undefined,
   },
 
   //   passkey details.

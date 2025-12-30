@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { RegistrationResponseJSON } from "@simplewebauthn/browser";
 import axiosClient from "./axios-client";
 
@@ -67,17 +67,25 @@ export const useTwosteupSet = () => {
 };
 
 export const useTotpVerify = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: { token: string; friendlyName: string }) =>
       axiosClient.post("/auth/2fa/register/totp", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
   });
 };
 
 export const usePasskeysRegistrationVerify = () => {
+  const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: {
       response: RegistrationResponseJSON;
       friendlyName: string;
     }) => axiosClient.post("/auth/2fa/register/passkeys", data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
   });
 };

@@ -10,8 +10,13 @@ import {
   AlertCircle,
   QrCode,
   Fingerprint,
+  Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+  useDeleteTwoFactorMethod,
+  useToggleTwoFactor,
+} from "@/api/setting-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -40,15 +45,20 @@ interface SecuritySettingsProps {
   connectedAccounts: ConnectedAccount[];
   twoFactor: TwoFactorMethod[];
   isTwoFactorEnabled: boolean;
+  twoFactorId: string;
+  isAllowedNewTOTP: boolean;
 }
 
 export function SecuritySettings({
   connectedAccounts,
   twoFactor,
   isTwoFactorEnabled,
+  twoFactorId,
+  isAllowedNewTOTP,
 }: SecuritySettingsProps) {
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [is2FADialogOpen, setIs2FADialogOpen] = useState(false);
+  const [isToggle2FAOpen, setIsToggle2FAOpen] = useState(false);
 
   // Delete State
   const [deleteDialogOpen, setDeleteDialogOpen] = useState<string | null>(null);
@@ -56,6 +66,15 @@ export function SecuritySettings({
     null
   );
   const [deleteConfirmationText, setDeleteConfirmationText] = useState("");
+  const {
+    mutateAsync: deleteTwoFactorMethod,
+    isPending: deleteTwoFactorMethodIsPending,
+  } = useDeleteTwoFactorMethod(twoFactorId);
+
+  const {
+    mutateAsync: toggleTwoFactorMethod,
+    isPending: toggleTwoFactorMethodIsPending,
+  } = useToggleTwoFactor();
 
   const handleDeleteMethod = (method: TwoFactorMethod) => {
     setMethodToDelete(method);
@@ -69,11 +88,30 @@ export function SecuritySettings({
     }
   };
 
-  const confirmDelete = () => {
-    // API Call to delete would go here
-    toast.success("Authentication method removed.");
-    setDeleteDialogOpen(null);
-    setMethodToDelete(null);
+  const confirmDelete = async () => {
+    if (!deleteDialogOpen) {
+      return;
+    }
+    toast.promise(deleteTwoFactorMethod(deleteDialogOpen), {
+      loading: "Removing...",
+      success: () => {
+        setDeleteDialogOpen(null);
+        setMethodToDelete(null);
+        return "Method removed successfully";
+      },
+      error: "Failed to remove method",
+    });
+  };
+
+  const handleDisable2FA = async () => {
+    toast.promise(toggleTwoFactorMethod(twoFactorId), {
+      loading: "Disabling 2FA...",
+      success: () => {
+        setIsToggle2FAOpen(false);
+        return "Two-factor authentication disabled";
+      },
+      error: "Failed to disable 2FA",
+    });
   };
 
   // Helper to find account status
@@ -244,10 +282,7 @@ export function SecuritySettings({
             <Switch
               id='2fa-toggle'
               checked={isTwoFactorEnabled}
-              onCheckedChange={(checked) => {
-                if (checked) setIs2FADialogOpen(true);
-                // handle disable logic via a dialog usually
-              }}
+              onCheckedChange={() => setIsToggle2FAOpen(true)}
             />
           </div>
         </div>
@@ -388,7 +423,7 @@ export function SecuritySettings({
               Two-factor authentication adds an extra layer of security to your
               account by requiring more than just a password to log in.
             </p>
-            <Button onClick={() => setIs2FADialogOpen(true)}>
+            <Button onClick={() => setIsToggle2FAOpen(true)}>
               Enable Two-Factor Authentication
             </Button>
           </div>
@@ -441,6 +476,7 @@ export function SecuritySettings({
       <TwoFaDialog
         is2FADialogOpen={is2FADialogOpen}
         setIs2FADialogOpen={setIs2FADialogOpen}
+        isAllowedNewTOTP={isAllowedNewTOTP}
       />
 
       {/* Delete Confirmation Dialog */}
@@ -472,9 +508,18 @@ export function SecuritySettings({
             </div>
           </div>
         }
-        confirmText='Remove Method'
+        confirmText={
+          deleteTwoFactorMethodIsPending ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              Removing...
+            </>
+          ) : (
+            "Remove Method"
+          )
+        }
         handleConfirm={confirmDelete}
-        isLoading={false}
+        isLoading={deleteTwoFactorMethodIsPending}
       >
         <div className='space-y-2 mt-4'>
           <Label className='text-xs text-muted-foreground'>
@@ -490,6 +535,29 @@ export function SecuritySettings({
           />
         </div>
       </ConfirmDialog>
+
+      {/* Disable 2FA Confirmation Dialog */}
+      <ConfirmDialog
+        open={isToggle2FAOpen}
+        onOpenChange={setIsToggle2FAOpen}
+        title='Disable Two-Factor Authentication?'
+        destructive={isTwoFactorEnabled}
+        desc='Are you sure you want to disable two-factor authentication? Your account will be less secure.'
+        confirmText={
+          toggleTwoFactorMethodIsPending ? (
+            <>
+              <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+              {isTwoFactorEnabled ? "Disabling..." : "Enabling..."}
+            </>
+          ) : isTwoFactorEnabled ? (
+            "Disable"
+          ) : (
+            "Enable"
+          )
+        }
+        handleConfirm={handleDisable2FA}
+        isLoading={toggleTwoFactorMethodIsPending}
+      />
     </div>
   );
 }

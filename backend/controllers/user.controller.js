@@ -1,4 +1,5 @@
 import Subscription from "../models/Subscription.model.js";
+import TwoFa from "../models/TwoFa.model.js";
 import User, { LOGIN_PROVIDER } from "../models/User.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import {
@@ -93,11 +94,12 @@ export const settingInfo = async (req, res) => {
       };
     });
   }
-
+  let isAllowedNewTOTP = true;
   // tops it exsting than it push array.
   if (userInfo.twoFactor.totp) {
     userInfo.twoFactor.totp.type = "totp";
     passkey.push(userInfo.twoFactor.totp);
+    isAllowedNewTOTP = false;
   }
 
   const isPremium = await Subscription.exists({
@@ -119,10 +121,12 @@ export const settingInfo = async (req, res) => {
   });
 
   const customInfo = {
-    twoFactor: userInfo.twoFactor.isEnabled ? passkey : [],
+    twoFactor: passkey,
     loginProvider: userInfo.loginProvider,
+    twoFactorId: userInfo.twoFactor._id,
     connectedAccounts: connectedAccounts,
     isTwoFactorEnabled: userInfo.twoFactor.isEnabled,
+    isAllowedNewTOTP,
     user: {
       name: userInfo.name,
       email: userInfo.email,
@@ -132,4 +136,57 @@ export const settingInfo = async (req, res) => {
   };
 
   res.status(200).json(new ApiResponse(200, "Get Setting info", customInfo));
+};
+
+// delete a auth method
+export const deleteAuthMethod = async (req, res) => {
+  const twoFactorId = req.params.twofactor;
+  const credentialOrName = req.params.credentialOrName;
+
+  if (credentialOrName.length === 43) {
+    console.log("run credent");
+    await TwoFa.findOneAndUpdate(
+      {
+        _id: twoFactorId,
+        "passkeys.credentialID": credentialOrName,
+      },
+      {
+        $pull: {
+          passkeys: { credentialID: credentialOrName },
+        },
+      },
+      { new: true },
+    );
+  } else {
+    await TwoFa.findOneAndUpdate(
+      {
+        _id: twoFactorId,
+        "totp.friendlyName": credentialOrName,
+      },
+      {
+        $unset: { totp },
+      },
+      {
+        new: true,
+      },
+    );
+  }
+
+  res.status(200).json(new ApiResponse(200, "successfully delete auth method"));
+};
+
+/**
+ * toggle 2 fa auth.
+ */
+
+export const toggleTwoFaAuth = async (req, res) => {
+  const twoFaid = req.params.id;
+  await TwoFa.findByIdAndUpdate(twoFaid, [
+    {
+      $set: {
+        isEnabled: { $not: ["$isEnabled"] },
+      },
+    },
+  ]);
+  res.status(200).json(new ApiResponse(200, "successfully Toggle 2 fa auth"));
 };

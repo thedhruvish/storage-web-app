@@ -49,6 +49,8 @@ function RouteComponent() {
             connectedAccounts={userData.connectedAccounts}
             twoFactor={userData.twoFactor}
             isTwoFactorEnabled={userData.isTwoFactorEnabled}
+            twoFactorId={userData.twoFactorId}
+            isAllowedNewTOTP={userData.isAllowedNewTOTP}
           />
         </div>
 
