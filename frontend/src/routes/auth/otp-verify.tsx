@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import InputOTPPage from "@/pages/auth/otp-verify";
+import { OtpVerfiyForm } from "@/pages/auth/otp-form";
 
 export const Route = createFileRoute("/auth/otp-verify")({
-  component: InputOTPPage,
+  component: OtpVerfiyForm,
 });

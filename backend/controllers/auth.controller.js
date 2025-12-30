@@ -78,7 +78,10 @@ export const loginWithEmail = async (req, res) => {
       .json(new ApiError(400, "recaptcha is not valid try again"));
   }
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).populate({
+    path: "twoFactor",
+    select: "+totp.secret",
+  });
 
   if (!user) {
     throw new ApiError(401, "Invalid email and password");
@@ -95,6 +98,19 @@ export const loginWithEmail = async (req, res) => {
   if (!isValidPWD) {
     throw new ApiError(401, "Invalid email and password");
   }
+  console.log(JSON.stringify(user, null, 2));
+  // user enable to the two fa authentication:
+  if (user.twoFactor.isEnabled) {
+    return res.status(200).json(
+      new ApiResponse(200, "verify 2FA ", {
+        isEnabled2Fa: true,
+        isTotp: user.twoFactor.totp.isVerified === true ? true : false,
+        isPasskey: user.twoFactor.passkeys.length !== 0 ? true : false,
+        userId: user._id,
+      }),
+    );
+  }
+
   // check if is_verfiy otp are the true than check the using opt
   if (process.env.IS_VERFIY_OTP == "true") {
     await sendOtpToMail(user._id.toString());

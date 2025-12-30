@@ -25,6 +25,7 @@ import {
   totpRegisterVerify,
   passkeyRegisterVerify,
   twoFASetup,
+  twoFaLoginTotp,
 } from "../controllers/twoFa.controller.js";
 
 const router = express.Router();
@@ -56,6 +57,9 @@ router.post(
 // github login
 router.get("/github", loginWithGithub);
 router.get("/github/callback", callbackGithub);
+
+// two fa auth login
+router.post("/2fa/login/totp", twoFaLoginTotp);
 
 // authenticated route
 router.use(checkAuth);

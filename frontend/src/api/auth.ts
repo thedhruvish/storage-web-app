@@ -89,3 +89,20 @@ export const usePasskeysRegistrationVerify = () => {
     },
   });
 };
+
+/**
+ * login for the 2 fa
+ */
+export const useLoginWithTotp = () => {
+  return useMutation({
+    mutationFn: (data: { token: string; userId: string }) =>
+      axiosClient.post("/auth/2fa/login/totp", data),
+  });
+};
+
+export const useLoginWithPasskey = () => {
+  return useMutation({
+    mutationFn: (data: { token: string; userId: string }) =>
+      axiosClient.post("/auth/2fa/login/passkey", data),
+  });
+};

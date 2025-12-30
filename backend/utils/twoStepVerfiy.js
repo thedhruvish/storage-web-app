@@ -4,6 +4,7 @@ import { authenticator } from "otplib";
 import { generateRegistrationOptions } from "@simplewebauthn/server";
 import { isoUint8Array } from "@simplewebauthn/server/helpers";
 
+// gen a like for the qrcode
 export const genTOTPUrl = (userEmail) => {
   const secret = authenticator.generateSecret();
   const serviceName = "Storage app";
@@ -12,6 +13,7 @@ export const genTOTPUrl = (userEmail) => {
   return { otpauthUrl, secret };
 };
 
+// backup code gen for the revcity
 export const generateBackupCode = async (length = 10) => {
   const plainTextCodes = Array.from({ length }, () =>
     crypto.randomBytes(4).toString("hex").toUpperCase(),
@@ -22,6 +24,7 @@ export const generateBackupCode = async (length = 10) => {
   return { hashedCodes, plainTextCodes };
 };
 
+// passkey register
 export const generateRegisterOptionInPasskey = async (user, passkeys) => {
   const options = await generateRegistrationOptions({
     rpName: "Storage app",
@@ -45,4 +48,11 @@ export const generateRegisterOptionInPasskey = async (user, passkeys) => {
   });
 
   return options;
+};
+
+export const isValidTotpToken = ({ secret, token }) => {
+  return authenticator.verify({
+    secret: secret,
+    token,
+  });
 };

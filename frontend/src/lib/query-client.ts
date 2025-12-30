@@ -57,12 +57,12 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (error instanceof AxiosError) {
-        if (error.response?.status === 401) {
+        if (error.response?.status === 403) {
           toast.error("Session expired!");
           useUserStore.getState().clearUser();
           // Simple browser redirect ensures a clean state reset
           navigateTo(
-            "/login?redirect=" + encodeURIComponent(window.location.href)
+            "/auth/login?redirect=" + encodeURIComponent(window.location.href)
           );
         }
         if (error.code === "ERR_NETWORK") {

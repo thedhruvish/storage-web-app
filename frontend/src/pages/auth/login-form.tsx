@@ -37,7 +37,7 @@ export function LoginForm({
 
   const loginMutation = useLoginMutation();
 
-  const navagate = useNavigate();
+  const navigate = useNavigate();
   const formSchema = z.object({
     email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
@@ -57,12 +57,23 @@ export function LoginForm({
     loginMutation.mutate(
       { ...data, turnstileToken },
       {
-        onSuccess(data) {
-          if (data.data.data.is_verfiy_otp) {
-            localStorage.setItem("userId", data.data.data.userId);
-            navagate({ to: "/auth/otp-verify" });
+        onSuccess(res) {
+          // Access the data safely
+          const responseData = res.data.data;
+
+          if (responseData.isEnabled2Fa) {
+            localStorage.setItem("userId", responseData.userId);
+            localStorage.setItem("isTotp", String(responseData.isTotp));
+            localStorage.setItem("isPasskey", String(responseData.isPasskey));
+
+            navigate({
+              to: "/auth/2fa",
+            });
+          } else if (responseData.is_verfiy_otp) {
+            localStorage.setItem("userId", responseData.userId);
+            navigate({ to: "/auth/otp-verify" });
           } else {
-            navagate({ to: "/app" });
+            navigate({ to: "/app" });
           }
         },
         onError(error) {

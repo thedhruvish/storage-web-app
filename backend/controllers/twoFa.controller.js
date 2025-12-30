@@ -2,14 +2,15 @@ import {
   generateBackupCode,
   generateRegisterOptionInPasskey,
   genTOTPUrl,
+  isValidTotpToken,
 } from "../utils/twoStepVerfiy.js";
-import { authenticator } from "otplib";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import redisClient from "../config/redis-client.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
+import { createAndCheckLimitSession } from "../utils/redisHelper.js";
 
 // 2fa setup register
 export const twoFASetup = async (req, res) => {
@@ -81,7 +82,7 @@ export const totpRegisterVerify = async (req, res) => {
       );
   }
 
-  const isValidTotp = authenticator.verify({
+  const isValidTotp = isValidTotpToken({
     secret: user.twoFactor.totp.secret,
     token,
   });
@@ -170,4 +171,45 @@ export const passkeyRegisterVerify = async (req, res) => {
   } else {
     res.status(400).json(new ApiError(400, "Try Agin", { verified: false }));
   }
+};
+
+/**
+ * login with 2fa
+ */
+export const twoFaLoginTotp = async (req, res) => {
+  const { userId, token } = req.body;
+  if (!userId || !token) {
+    return res.status(422).json(new ApiError(422, "Invalid body"));
+  }
+  const user = await User.findById(userId).populate({
+    path: "twoFactor",
+    select: "+totp.secret",
+  });
+  if (!user) {
+    return res.status(422).json(new ApiError(422, "User does not exsting"));
+  }
+
+  const isValidTotp = isValidTotpToken({
+    secret: user.twoFactor.totp.secret,
+    token,
+  });
+
+  if (!isValidTotp) {
+    return res.status(422).json(new ApiError(422, "Invalid OTP"));
+  }
+  const sessionId = await createAndCheckLimitSession(user.id.toString());
+
+  res.cookie("sessionId", sessionId, {
+    httpOnly: true,
+    secure: true,
+    maxAge: 24 * 60 * 60 * 1000,
+    signed: true,
+  });
+
+  res
+    .status(200)
+    .json(
+      new ApiResponse(200, "User login Successfuly", { is_verfiy_otp: true }),
+      user,
+    );
 };
