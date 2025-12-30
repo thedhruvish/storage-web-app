@@ -1,5 +1,3 @@
-"use client";
-
 import { GalleryVerticalEnd } from "lucide-react";
 import { OtpVerfiyForm } from "./components/otp-form";
 

@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import AccountDeletionWarning from "@/pages/other/account-delete-contact";
 
-export const Route = createFileRoute("/_website/account-deleted")({
+export const Route = createFileRoute("/_web/account-deleted")({
   component: AccountDeletionWarning,
 });

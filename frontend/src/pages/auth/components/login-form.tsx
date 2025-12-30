@@ -60,9 +60,9 @@ export function LoginForm({
         onSuccess(data) {
           if (data.data.data.is_verfiy_otp) {
             localStorage.setItem("userId", data.data.data.userId);
-            navagate({ to: "/otp-verify" });
+            navagate({ to: "/auth/otp-verify" });
           } else {
-            navagate({ to: "/" });
+            navagate({ to: "/app" });
           }
         },
         onError(error) {
@@ -148,7 +148,10 @@ export function LoginForm({
                 </div>
                 <div className='text-center text-sm'>
                   Don&apos;t have an account?{" "}
-                  <Link to='/signup' className='underline underline-offset-4'>
+                  <Link
+                    to='/auth/signup'
+                    className='underline underline-offset-4'
+                  >
                     Sign up
                   </Link>
                 </div>

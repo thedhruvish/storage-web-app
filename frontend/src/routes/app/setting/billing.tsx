@@ -38,7 +38,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export const Route = createFileRoute("/_authenticated/setting/billing")({
+export const Route = createFileRoute("/app/setting/billing")({
   component: BillingSettingsPage,
 });
 

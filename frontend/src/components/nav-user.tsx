@@ -68,12 +68,14 @@ export function NavUser({ user }: NavUserProps) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => navigate({ to: "/app/setting/profile" })}
+              >
                 <BadgeCheck />
                 Account
               </DropdownMenuItem>
               <DropdownMenuItem
-                onClick={() => navigate({ to: "/setting/billing" })}
+                onClick={() => navigate({ to: "/app/setting/billing" })}
               >
                 <CreditCard />
                 Billing
@@ -86,7 +88,7 @@ export function NavUser({ user }: NavUserProps) {
             <DropdownMenuSeparator />
             <DropdownMenuItem
               onClick={() => {
-                navigate({ to: "/logout" });
+                navigate({ to: "/app/logout" });
               }}
             >
               <LogOut />

@@ -29,7 +29,7 @@ const pricingSearchSchema = z.object({
   currency: z.enum(["inr", "usd"]).optional().default("inr"),
 });
 
-export const Route = createFileRoute("/_website/pricing")({
+export const Route = createFileRoute("/_web/pricing")({
   validateSearch: (search) => pricingSearchSchema.parse(search),
   component: PricingPage,
 });
@@ -46,7 +46,7 @@ export default function PricingPage() {
   const filteredPlans = data?.filter((plan) => plan.interval === billing) ?? [];
   const checkoutStripeHandler = (id: string) => {
     if (!user) {
-      navigate({ to: "/login" });
+      navigate({ to: "/auth/login" });
       return;
     }
     if (currency === "usd") {

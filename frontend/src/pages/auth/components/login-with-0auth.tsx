@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useAppearance } from "@/store/appearance-store";
 import { GoogleLogin } from "@react-oauth/google";
@@ -10,20 +9,25 @@ const LoginWithOauth = () => {
   const navagate = useNavigate();
   const { appearance } = useAppearance();
   const logoinwithGoogle = useLoginWithGoogle();
-  useEffect(() => {
-    if (logoinwithGoogle.isSuccess) {
-      navagate({ to: "/" });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [logoinwithGoogle.isSuccess]);
+
   // Login with google
   const loginWithGoogleHandler = (credentialResponse: {
     credential?: string;
   }) => {
     if (credentialResponse.credential) {
-      logoinwithGoogle.mutate({
-        idToken: credentialResponse.credential,
-      });
+      toast.promise(
+        logoinwithGoogle.mutateAsync({
+          idToken: credentialResponse.credential,
+        }),
+        {
+          loading: "Logging in...",
+          success: () => {
+            navagate({ to: "/" });
+            return "Logged in successfully";
+          },
+          error: "Login failed",
+        }
+      );
     }
   };
   return (

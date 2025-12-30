@@ -104,13 +104,13 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
                   <Button
                     variant='outline'
                     className='rounded-full'
-                    onClick={() => navigate({ to: "/login" })}
+                    onClick={() => navigate({ to: "/auth/login" })}
                   >
                     Login
                   </Button>
                   <Button
                     className='bg-primary hover:bg-primary/90 rounded-full'
-                    onClick={() => navigate({ to: "/signup" })}
+                    onClick={() => navigate({ to: "/auth/signup" })}
                   >
                     Register
                   </Button>

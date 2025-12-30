@@ -121,7 +121,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to='/directory' className='flex items-center gap-3'>
+                  <Link to='/app/directory' className='flex items-center gap-3'>
                     <HardDrive className='h-4 w-4' />
                     <span>My Drive</span>
                   </Link>

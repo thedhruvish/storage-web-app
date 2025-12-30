@@ -8,7 +8,7 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Dialogs } from "@/components/dialogs";
 import { SiteHeader } from "@/components/site-header";
 
-export const Route = createFileRoute("/_authenticated")({
+export const Route = createFileRoute("/app")({
   component: RouteComponent,
 });
 
@@ -27,7 +27,7 @@ function RouteComponent() {
 
   useEffect(() => {
     if (getCureentUser.isError) {
-      navagate({ to: "/login" });
+      navagate({ to: "/auth/login" });
     }
   }, [getCureentUser.isError, getCureentUser.error, navagate]);
 

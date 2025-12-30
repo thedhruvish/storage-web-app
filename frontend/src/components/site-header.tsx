@@ -88,7 +88,7 @@ export function SiteHeader() {
                           {hiddenItems.map((item) => (
                             <DropdownMenuItem key={item._id} asChild>
                               <Link
-                                to={"/directory/$directoryId"}
+                                to={"/app/directory/$directoryId"}
                                 params={{ directoryId: item._id }}
                               >
                                 {item.name}

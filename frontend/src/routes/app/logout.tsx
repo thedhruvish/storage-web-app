@@ -3,7 +3,7 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useUser } from "@/store/user-store";
 import { useLogout } from "@/api/auth";
 
-export const Route = createFileRoute("/_authenticated/logout")({
+export const Route = createFileRoute("/app/logout")({
   component: LogoutComponent,
 });
 
@@ -17,7 +17,7 @@ function LogoutComponent() {
       clearUser();
       logouthook.mutate();
     }
-    navigate({ to: "/login" });
+    navigate({ to: "/auth/login" });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, clearUser, logouthook]);
   if (logouthook.isPending) {

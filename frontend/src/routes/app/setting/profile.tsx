@@ -7,7 +7,7 @@ import { SecuritySettings } from "@/pages/profile/security-settings";
 import type { Session } from "@/pages/profile/types";
 import { useGetInfoOnSetting } from "@/api/setting-api";
 
-export const Route = createFileRoute("/_authenticated/setting/profile")({
+export const Route = createFileRoute("/app/setting/profile")({
   component: RouteComponent,
 });
 

@@ -50,9 +50,13 @@ export function UserNav({
           <StorageProgress />
           <DropdownMenuSeparator />
           <DropdownMenuGroup>
-            <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem
-              onClick={() => navigate({ to: "/setting/billing" })}
+              onClick={() => navigate({ to: "/app/setting/profile" })}
+            >
+              Profile
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => navigate({ to: "/app/setting/billing" })}
             >
               Billing
             </DropdownMenuItem>
@@ -60,7 +64,7 @@ export function UserNav({
             <DropdownMenuItem>New Team</DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => navigate({ to: "/logout" })}>
+          <DropdownMenuItem onClick={() => navigate({ to: "/app/logout" })}>
             <DropdownMenuItem>Sign Out</DropdownMenuItem>
           </DropdownMenuItem>
         </DropdownMenuContent>

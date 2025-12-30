@@ -55,26 +55,8 @@ export function OtpVerfiyForm({
   });
 
   if (!userId) {
-    navagate({ to: "/login" });
+    navagate({ to: "/auth/login" });
   }
-
-  useEffect(() => {
-    if (verfiyOpt.isSuccess) {
-      localStorage.removeItem("userId");
-      navagate({ to: "/" });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verfiyOpt.isSuccess]);
-
-  useEffect(() => {
-    if (verfiyOpt.isError) {
-      const errorMsg =
-        (verfiyOpt.error as AxiosError<{ message?: string }>).response?.data
-          .message || "OTP are invalid";
-      toast.error(errorMsg);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [verfiyOpt.isError]);
 
   useEffect(() => {
     if (countdown <= 0) return;
@@ -85,7 +67,27 @@ export function OtpVerfiyForm({
   // submit otp
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
     if (!data.pin || !userId) return;
-    verfiyOpt.mutate({ otp: data.pin, userId });
+    toast.promise(
+      verfiyOpt.mutateAsync(
+        { otp: data.pin, userId },
+        {
+          onError(error) {
+            const errorMsg =
+              (error as AxiosError<{ message?: string }>).response?.data
+                .message || "OTP are invalid";
+            toast.error(errorMsg);
+          },
+        }
+      ),
+      {
+        loading: "Verifying OTP...",
+        success: () => {
+          localStorage.removeItem("userId");
+          navagate({ to: "/" });
+          return "OTP verified successfully";
+        },
+      }
+    );
     form.reset();
   };
   // reset otp

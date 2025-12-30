@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-export const Route = createFileRoute("/_website/payment-success")({
+export const Route = createFileRoute("/_web/payment-success")({
   component: RouteComponent,
 });
 

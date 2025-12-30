@@ -173,7 +173,10 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
                 onClick={(e) => {
                   e.stopPropagation();
                   if (documentType === "folder") {
-                    navigate({ to: `/directory/${file._id}` });
+                    navigate({
+                      to: `/app/directory/$directoryId`,
+                      params: { directoryId: file._id },
+                    });
                   }
                 }}
                 onDoubleClick={() => {
@@ -185,7 +188,10 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
                 <div
                   onClick={() => {
                     if (documentType === "folder") {
-                      navigate({ to: `/directory/${file._id}` });
+                      navigate({
+                        to: `/app/directory/$directoryId`,
+                        params: { directoryId: file._id },
+                      });
                     } else {
                       window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
                     }
