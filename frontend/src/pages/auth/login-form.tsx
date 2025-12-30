@@ -60,7 +60,7 @@ export function LoginForm({
         onSuccess(res) {
           // Access the data safely
           const responseData = res.data.data;
-
+          
           if (responseData.isEnabled2Fa) {
             localStorage.setItem("userId", responseData.userId);
             localStorage.setItem("isTotp", String(responseData.isTotp));
@@ -69,6 +69,9 @@ export function LoginForm({
             navigate({
               to: "/auth/2fa",
             });
+          } else if (responseData?.showSetUp2Fa) {
+            localStorage.setItem("userId", responseData.userId);
+            navigate({ to: "/auth/2fa/setup" });
           } else if (responseData.is_verfiy_otp) {
             localStorage.setItem("userId", responseData.userId);
             navigate({ to: "/auth/otp-verify" });

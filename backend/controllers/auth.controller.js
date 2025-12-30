@@ -45,6 +45,9 @@ export const registerWithEmail = async (req, res, next) => {
       email,
       password,
       rootDirId: dirId,
+      metaData: {
+        showSetUp2Fa: true,
+      },
     });
     await user.save({ session: mongoSesssion });
 
@@ -98,7 +101,7 @@ export const loginWithEmail = async (req, res) => {
   if (!isValidPWD) {
     throw new ApiError(401, "Invalid email and password");
   }
-  console.log(JSON.stringify(user, null, 2));
+
   // user enable to the two fa authentication:
   if (user?.twoFactor?.isEnabled) {
     return res.status(200).json(
@@ -132,11 +135,29 @@ export const loginWithEmail = async (req, res) => {
     signed: true,
   });
 
+  if (user?.metaData?.showSetUp2Fa) {
+    await User.updateOne(
+      { _id: user._id },
+      {
+        $unset: {
+          "metaData.showSetUp2Fa": "",
+        },
+      },
+    );
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        "User login Successfuly . and you can set the optionality to the 2 FA auth",
+        {
+          showSetUp2Fa: true,
+        },
+      ),
+    );
+  }
   res
     .status(200)
     .json(
       new ApiResponse(200, "User login Successfuly", { is_verfiy_otp: false }),
-      user,
     );
 };
 

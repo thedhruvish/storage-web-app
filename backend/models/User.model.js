@@ -64,6 +64,9 @@ const userSchema = new Schema(
       type: Schema.Types.ObjectId,
       ref: "TwoFa",
     },
+    metaData: {
+      type: Object,
+    },
   },
   { timestamps: true },
 );

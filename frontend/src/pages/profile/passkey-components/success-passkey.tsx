@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 
 function SuccessPasskey({
   doneFunction,
-  title="Passkey Added!",
-  description="You can now use this passkey to sign in to your account.",
+  title = "Passkey Added!",
+  description = "You can now use this passkey to sign in to your account.",
 }: {
   doneFunction?: () => void;
   title?: string;
@@ -16,9 +16,7 @@ function SuccessPasskey({
         <Check className='h-10 w-10 text-green-600 dark:text-green-400' />
       </div>
       <h3 className='text-xl font-semibold mb-2'>{title}</h3>
-      <p className='text-muted-foreground mb-8'>
-        {description}
-      </p>
+      <p className='text-muted-foreground mb-8'>{description}</p>
       {doneFunction && (
         <Button
           className='w-full sm:w-auto min-w-[120px]'
