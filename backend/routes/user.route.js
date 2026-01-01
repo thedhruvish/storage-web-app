@@ -8,7 +8,7 @@ import {
   toggleTwoFaAuth,
   updatePaymentMethodDetails,
 } from "../controllers/user.controller.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 const router = express.Router();
 
 // setting  info

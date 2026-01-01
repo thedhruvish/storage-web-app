@@ -8,8 +8,8 @@ import {
 } from "../controllers/admin.controller.js";
 import { adminPermissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { userRoleChangeValidation } from "../validators/adminSchema.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+import { userRoleChangeValidation } from "../validators/admin.validator.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 
 const route = Router();
 

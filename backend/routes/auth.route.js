@@ -15,7 +15,7 @@ import {
   connectWithGoogle,
   connectWithEmailVerifyOtp,
 } from "../controllers/auth.controller.js";
-import { checkAuth } from "../middlewares/auth.js";
+import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
   loginWithEmailValidation,
   loginWithGoogleValidation,
@@ -24,9 +24,9 @@ import {
   twoFaRegisterMethod,
   verfiyOtpValidation,
   verifiyToken,
-} from "../validators/authSchema.js";
+} from "../validators/auth.validator.js";
 import { validateInput } from "../utils/validateInput.js";
-import { getRequestInfo } from "../middlewares/getRequestInfo.js";
+import { getRequestInfo } from "../middlewares/getRequestInfo.middleware.js";
 import {
   totpRegisterVerify,
   passkeyRegisterVerify,

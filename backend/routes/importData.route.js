@@ -8,8 +8,8 @@ import {
 } from "../controllers/importData.controller.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { importDriveDataValidation } from "../validators/commanSchema.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+import { importDriveDataValidation } from "../validators/comman.validator.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 
 const router = express.Router();
 

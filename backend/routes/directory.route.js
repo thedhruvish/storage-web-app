@@ -6,10 +6,10 @@ import {
   starredToggleDirectory,
   updateDirectoryById,
 } from "../controllers/directory.controller.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { nameValidation } from "../validators/commanSchema.js";
+import { nameValidation } from "../validators/comman.validator.js";
 
 const router = express.Router();
 // check the id are the valid or not

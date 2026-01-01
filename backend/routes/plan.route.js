@@ -6,11 +6,11 @@ import {
   togglePlan,
   getAllPlansForPublic,
 } from "../controllers/plan.controller.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { planCreateValidation } from "../validators/planSchema.js";
+import { planCreateValidation } from "../validators/plan.validator.js";
 import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
-import { checkAuth } from "../middlewares/auth.js";
+import { checkAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 

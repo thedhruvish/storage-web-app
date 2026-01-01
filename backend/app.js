@@ -3,8 +3,8 @@ import cors from "cors";
 import cookiesParser from "cookie-parser";
 import helmet from "helmet";
 
-import { checkAuth } from "./middlewares/auth.js";
-import { rateLimiter } from "./middlewares/rateLimit.js";
+import { checkAuth } from "./middlewares/auth.middleware.js";
+import { rateLimiter } from "./middlewares/rateLimit.middleware.js";
 
 import authRoute from "./routes/auth.route.js";
 import directoryRoute from "./routes/directory.route.js";

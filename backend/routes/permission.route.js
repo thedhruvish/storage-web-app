@@ -7,7 +7,6 @@ import {
   getShareLink,
   removeDirectoryPermision,
 } from "../controllers/permission.controller.js";
-import { checkAuth } from "../middlewares/auth.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
 import {
@@ -15,8 +14,9 @@ import {
   changeDirectoryPermisionValidation,
   createShareLinkValidation,
   removeDirectoryPermisionValidation,
-} from "../validators/permissionSchema.js";
-import paramsValidation from "../middlewares/paramsValidation.js";
+} from "../validators/permission.validator.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
+import { checkAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 // public route to get the document

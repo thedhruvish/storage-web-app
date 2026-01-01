@@ -14,7 +14,7 @@ import {
   createPromoCodeValidation,
   idValidation,
   togglePromoCodeValidation,
-} from "../validators/paymentSchema.js";
+} from "../validators/payment.validator.js";
 import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
 
 const router = express.Router();
