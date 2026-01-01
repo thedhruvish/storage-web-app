@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
-import bcrypt from "bcrypt";
-
+import { ROLE } from "../constants/role.js";
+import { DEFAULT_STORAGE } from "../constants/constant.js";
 
 const userSchema = new Schema(
   {
@@ -22,13 +22,13 @@ const userSchema = new Schema(
     },
     role: {
       type: String,
-      enum: ["owner", "admin", "manager", "user"],
+      enum: ROLE,
       default: "user",
     },
     maxStorageBytes: {
       type: Number,
       required: true,
-      default: 1024 ** 3,
+      default: DEFAULT_STORAGE,
     },
     isDeleted: {
       type: Boolean,
@@ -42,7 +42,7 @@ const userSchema = new Schema(
       type: Date,
       default: null,
     },
-    twoFactorId: {
+    twoFactor: {
       type: Schema.Types.ObjectId,
       ref: "TwoFa",
     },
@@ -52,18 +52,6 @@ const userSchema = new Schema(
   },
   { timestamps: true },
 );
-
-// monog hook to before the save data to covert into hash
-userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
-  this.password = await bcrypt.hash(this.password, 10);
-  next();
-});
-
-// compare password is valid or not
-userSchema.method("isValidPassword", async function (inputPassowrd) {
-  return await bcrypt.compare(inputPassowrd, this.password);
-});
 
 const User = model("User", userSchema);
 

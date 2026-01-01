@@ -1,7 +1,6 @@
 import mongoose, { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
-
-export const LOGIN_PROVIDER = ["EAMIL", "GOOGLE", "GITHUB"];
+import { LOGIN_PROVIDER } from "./../constants/constant.js";
 
 const authIdentitySchema = new Schema(
   {
@@ -67,4 +66,4 @@ authIdentitySchema.method("isValidPassword", async function (inputPassowrd) {
 });
 
 const AuthIdentity = model("AuthIdentity", authIdentitySchema);
-export default AuthIdentity
+export default AuthIdentity;

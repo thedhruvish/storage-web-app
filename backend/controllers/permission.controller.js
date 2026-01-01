@@ -143,7 +143,9 @@ export const getShareLink = async (req, res) => {
   }
 
   // get directory thorw the document list
-  const documents = await Document.find({ parentDirId: shareLink.directoryId });
+  const documents = await Document.find({
+    parentDirId: shareLink.directoryId,
+  });
   if (!documents) {
     return res.status(404).json(new ApiError(404, "Documents not found"));
   }

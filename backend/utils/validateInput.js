@@ -34,7 +34,10 @@ export const validateInput = (ValidateSchema) => {
       Object.entries(req.body).map(([key, value]) => [
         key,
         typeof value === "string"
-          ? DOMPurify.sanitize(value, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] })
+          ? DOMPurify.sanitize(value, {
+              ALLOWED_TAGS: [],
+              ALLOWED_ATTR: [],
+            })
           : value,
       ]),
     );

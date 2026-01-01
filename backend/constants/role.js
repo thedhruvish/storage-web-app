@@ -1,3 +1,6 @@
+export const ROLE = ["owner", "admin", "manager", "user"];
+export const PERMISSION_ROLE = ["owner", "manager", "editor", "viewer"];
+
 export const role = {
   owner: ["read", "write", "update", "delete"],
   manager: ["read", "write", "update"],

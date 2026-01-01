@@ -32,17 +32,17 @@ export const twoFASetup = async (req, res) => {
       isEnabled: true,
       "totp.secret": resData.secret,
     };
-    if (user?.twoFactor) {
-      await TwoFa.findByIdAndUpdate(user.twoFactor, twoFaObject);
+    if (user?.twoFactorId) {
+      await TwoFa.findByIdAndUpdate(user.twoFactorId, twoFaObject);
     } else {
       const newTwoFa = await TwoFa.create(twoFaObject);
-      user.twoFactor = newTwoFa._id;
+      user.twoFactorId = newTwoFa._id;
       user.save();
     }
   } else if (method === "passkeys") {
     // passkey logic
     let passkey = [];
-    if (user?.twoFactor) {
+    if (user?.twoFactorId) {
       const twoFa = await TwoFa.findById(user._id);
       passkey = twoFa?.passkeys;
     }
@@ -69,11 +69,11 @@ export const twoFASetup = async (req, res) => {
 export const totpRegisterVerify = async (req, res) => {
   const { token, friendlyName } = req.body;
   const user = await User.findById(req.user._id).populate({
-    path: "twoFactor",
+    path: "twoFactorId",
     select: "+totp.secret",
   });
 
-  if (!user || !user.twoFactor) {
+  if (!user || !user.twoFactorId) {
     return res
       .status(400)
       .json(
@@ -85,7 +85,7 @@ export const totpRegisterVerify = async (req, res) => {
   }
 
   const isValidTotp = isValidTotpToken({
-    secret: user.twoFactor.totp.secret,
+    secret: user.twoFactorId.totp.secret,
     token,
   });
 
@@ -95,7 +95,7 @@ export const totpRegisterVerify = async (req, res) => {
       .json(new ApiError(401, "Your Token is expiry or invalid"));
   }
   const { hashedCodes, plainTextCodes } = await generateBackupCode();
-  await TwoFa.findByIdAndUpdate(user.twoFactor._id, {
+  await TwoFa.findByIdAndUpdate(user.twoFactorId._id, {
     "totp.isVerified": true,
     isEnabled: true,
     "totp.friendlyName": friendlyName,
@@ -150,9 +150,9 @@ export const passkeyRegisterVerify = async (req, res) => {
       transports: credential.transports,
       friendlyName: body.friendlyName,
     };
-    if (user.twoFactor) {
+    if (user.twoFactorId) {
       // is exsting mean they alredy setup the TOTP than just update
-      await TwoFa.findByIdAndUpdate(user.twoFactor, {
+      await TwoFa.findByIdAndUpdate(user.twoFactorId, {
         $push: {
           passkeys: passkeyObj,
         },
@@ -164,7 +164,7 @@ export const passkeyRegisterVerify = async (req, res) => {
         passkeys: passkeyObj,
         isEnabled: true,
       });
-      user.twoFactor = newTwoFa._id;
+      user.twoFactorId = newTwoFa._id;
       await user.save();
     }
     res
@@ -192,7 +192,7 @@ export const twoFaLoginTotp = async (req, res) => {
   }
 
   const isValidTotp = isValidTotpToken({
-    secret: user.twoFactor.totp.secret,
+    secret: user.twoFactorId.totp.secret,
     token,
   });
 
@@ -243,7 +243,7 @@ export const verifyPasskeyChallenge = async (req, res) => {
 
   const user = await User.findById(userId).populate("twoFactor");
 
-  const authenticator = user.twoFactor.passkeys.find(
+  const authenticator = user.twoFactorId.passkeys.find(
     (p) => p.credentialID === response.id,
   );
   const verification = await verifyLoginPasskeyChallenge({
@@ -260,7 +260,7 @@ export const verifyPasskeyChallenge = async (req, res) => {
 
   await TwoFa.updateOnedhruv(
     {
-      _id: user.twoFactor._id,
+      _id: user.twoFactorId._id,
       "passkeys.credentialID": response.id,
     },
     {

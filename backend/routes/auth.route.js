@@ -21,6 +21,7 @@ import {
   loginWithGoogleValidation,
   registerWithEmailValidation,
   reSendOtpValidation,
+  twoFaRegisterMethod,
   verfiyOtpValidation,
   verifiyToken,
 } from "../validators/authSchema.js";

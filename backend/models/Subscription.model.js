@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { PAYMENT_GETWAY, SUBSCRIPTION_STATUS } from "../constants/constant.js";
 
 const subscriptionSchema = new mongoose.Schema(
   {
@@ -14,7 +15,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["active", "cancelled", "paused", "expired", "failed", "past_due"],
+      enum: SUBSCRIPTION_STATUS,
       default: "active",
     },
     stripeSubscriptionCycle: {
@@ -44,7 +45,7 @@ const subscriptionSchema = new mongoose.Schema(
     },
     paymentType: {
       type: String,
-      enum: ["stripe", "razorpay"],
+      enum: PAYMENT_GETWAY,
     },
     isActive: {
       type: Boolean,

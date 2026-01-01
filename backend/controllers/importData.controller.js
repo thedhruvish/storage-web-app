@@ -168,7 +168,9 @@ export const importDriveData = async (req, res) => {
 
   if (mimeType === "application/vnd.google-apps.folder") {
     // when import folder than it create a folder and that is the import also create a same name folder
-    const parentDir = await Directory.findById(uploadDirId, { path: 1 }).lean();
+    const parentDir = await Directory.findById(uploadDirId, {
+      path: 1,
+    }).lean();
 
     const newFolder = await Directory.create({
       name,

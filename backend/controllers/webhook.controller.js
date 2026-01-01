@@ -115,7 +115,9 @@ export const stripeWebhookHandler = async (req, res) => {
         const user = await User.findByIdAndUpdate(
           checkoutSessionObj.metadata.userId,
           {
-            $inc: { maxStorageBytes: checkoutSessionObj.metadata.totalBytes },
+            $inc: {
+              maxStorageBytes: checkoutSessionObj.metadata.totalBytes,
+            },
             stripeCustomerId: checkoutSessionObj.customer,
             dueDeleteDate: null,
           },
@@ -230,7 +232,9 @@ export const stripeWebhookHandler = async (req, res) => {
       await User.findByIdAndUpdate(
         olderSubscription.userId,
         {
-          $inc: { maxStorageBytes: -olderSubscription.planId.maxStorageBytes },
+          $inc: {
+            maxStorageBytes: -olderSubscription.planId.maxStorageBytes,
+          },
           $set: {
             dueDeleteDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),
           },

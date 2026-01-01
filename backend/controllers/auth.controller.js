@@ -113,12 +113,12 @@ export const loginWithEmail = async (req, res) => {
   }
 
   // user enable to the two fa authentication:
-  if (user?.twoFactor?.isEnabled) {
+  if (user?.twoFactorId?.isEnabled) {
     return res.status(200).json(
       new ApiResponse(200, "verify 2FA ", {
         isEnabled2Fa: true,
-        isTotp: user.twoFactor.totp?.isVerified === true ? true : false,
-        isPasskey: user.twoFactor.passkeys?.length !== 0 ? true : false,
+        isTotp: user.twoFactorId.totp?.isVerified === true ? true : false,
+        isPasskey: user.twoFactorId.passkeys?.length !== 0 ? true : false,
         userId: user._id,
       }),
     );
@@ -164,11 +164,11 @@ export const loginWithEmail = async (req, res) => {
       ),
     );
   }
-  res
-    .status(200)
-    .json(
-      new ApiResponse(200, "User login Successfuly", { is_verfiy_otp: false }),
-    );
+  res.status(200).json(
+    new ApiResponse(200, "User login Successfuly", {
+      is_verfiy_otp: false,
+    }),
+  );
 };
 
 // get user
@@ -188,7 +188,11 @@ export const getCureentUser = async (req, res) => {
 export const logout = async (req, res) => {
   const { sessionId } = req.signedCookies;
   await redisClient.del(`session:${sessionId}`);
-  res.clearCookie("sessionId", { httpOnly: true, secure: true, signed: true });
+  res.clearCookie("sessionId", {
+    httpOnly: true,
+    secure: true,
+    signed: true,
+  });
   res.status(200).json(new ApiResponse(200, "User logout Successfuly"));
 };
 

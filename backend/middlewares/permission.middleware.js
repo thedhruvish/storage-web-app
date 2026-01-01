@@ -1,4 +1,4 @@
-import { actionRights, roleWeights } from "../config/roles.js";
+import { actionRights, roleWeights } from "../constants/role.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ShareLink from "../models/ShareLink.model.js";
@@ -48,7 +48,9 @@ export const permissionMiddleware = (action, isDirectory = true) => {
 
     // if folder are the anyone
     if (action === "read") {
-      const isShared = await ShareLink.exists({ directoryId: directory._id });
+      const isShared = await ShareLink.exists({
+        directoryId: directory._id,
+      });
 
       if (isShared) {
         return next();

@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import { PERMISSION_ROLE } from "../constants/role.js";
 
 const directorySchema = new Schema(
   {
@@ -24,10 +25,14 @@ const directorySchema = new Schema(
     ],
     permission: [
       {
-        userId: { type: Schema.Types.ObjectId, ref: "User", default: null },
+        userId: {
+          type: Schema.Types.ObjectId,
+          ref: "User",
+          default: null,
+        },
         role: {
           type: String,
-          enum: ["owner", "manager", "editor", "viewer"],
+          enum: PERMISSION_ROLE,
           default: "viewer",
         },
       },

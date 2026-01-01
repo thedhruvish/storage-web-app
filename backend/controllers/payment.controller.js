@@ -35,9 +35,11 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
   const checkoutUrl = await redisClient.get(`checkoutUrl:${userId}:${id}`);
 
   if (checkoutUrl) {
-    return res
-      .status(200)
-      .json(new ApiResponse(200, "checkout url created", { url: checkoutUrl }));
+    return res.status(200).json(
+      new ApiResponse(200, "checkout url created", {
+        url: checkoutUrl,
+      }),
+    );
   }
   const plan = await Plan.findById(id);
 
@@ -58,11 +60,11 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
     },
   });
 
-  res
-    .status(201)
-    .json(
-      new ApiResponse(201, "checkout url created", { url: checkoutStripe.url }),
-    );
+  res.status(201).json(
+    new ApiResponse(201, "checkout url created", {
+      url: checkoutStripe.url,
+    }),
+  );
 };
 
 // handle the coupons

@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { PAYMENT_GETWAY } from "../constants/constant.js";
 
 const webHookLogSchema = new mongoose.Schema({
   type: {
@@ -11,7 +12,7 @@ const webHookLogSchema = new mongoose.Schema({
   },
   paymentType: {
     type: String,
-    enum: ["stripe", "razorpay"],
+    enum: PAYMENT_GETWAY,
   },
   createdAt: {
     type: Date,

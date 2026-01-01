@@ -1,6 +1,7 @@
+import { LOGIN_PROVIDER } from "../constants/constant.js";
 import Subscription from "../models/Subscription.model.js";
 import TwoFa from "../models/TwoFa.model.js";
-import User, { LOGIN_PROVIDER } from "../models/User.model.js";
+import User from "../models/User.model.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import {
   createCustomerPortalSession,
@@ -110,11 +111,11 @@ export const settingInfo = async (req, res) => {
     return {
       provider: method,
       email:
-        method === "password"
+        method === LOGIN_PROVIDER[0]
           ? userInfo.email
-          : method === "google"
+          : method === LOGIN_PROVIDER[1]
             ? userInfo.googleEmail
-            : method === "github"
+            : method === LOGIN_PROVIDER[2]
               ? userInfo.githubEmail
               : null,
     };
@@ -123,9 +124,9 @@ export const settingInfo = async (req, res) => {
   const customInfo = {
     twoFactor: passkey,
     loginProvider: userInfo.loginProvider,
-    twoFactorId: userInfo?.twoFactor?._id,
+    twoFactorId: userInfo?.twoFactorId?._id,
     connectedAccounts: connectedAccounts,
-    isTwoFactorEnabled: userInfo?.twoFactor?.isEnabled,
+    isTwoFactorEnabled: userInfo?.twoFactorId?.isEnabled,
     isAllowedNewTOTP,
     user: {
       name: userInfo.name,
