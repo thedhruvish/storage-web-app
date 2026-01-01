@@ -1,7 +1,7 @@
 import mongoose, { Schema, model } from "mongoose";
 import bcrypt from "bcrypt";
 
-export const LOGIN_PROVIDER = ["email", "google", "github"];
+export const LOGIN_PROVIDER = ["EAMIL", "GOOGLE", "GITHUB"];
 
 const authIdentitySchema = new Schema(
   {
@@ -21,8 +21,9 @@ const authIdentitySchema = new Schema(
       type: String,
       required: true,
     },
+
     providerId: {
-      type: String,
+      type: String, // for email provider it eamil other provider thay id like google sub id
       required: true,
     },
 
@@ -65,4 +66,5 @@ authIdentitySchema.method("isValidPassword", async function (inputPassowrd) {
   return await bcrypt.compare(inputPassowrd, this.passwordHash);
 });
 
-export const AuthIdentity = model("AuthIdentity", authIdentitySchema);
+const AuthIdentity = model("AuthIdentity", authIdentitySchema);
+export default AuthIdentity

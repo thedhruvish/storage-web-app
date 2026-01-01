@@ -10,6 +10,10 @@ import {
   callbackGithub,
   verfiyOtp,
   reSendOtp,
+  connectWithGithub,
+  connectWithEmail,
+  connectWithGoogle,
+  connectWithEmailVerifyOtp,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.js";
 import {
@@ -58,8 +62,10 @@ router.post(
 );
 
 // github login
-router.get("/github", loginWithGithub);
+router.post("/github", loginWithGithub);
 router.get("/github/callback", callbackGithub);
+// link account
+router.get("/github/link", connectWithGithub);
 
 // two fa auth login
 router.post("/2fa/login/totp", validateInput(verifiyToken), twoFaLoginTotp);
@@ -75,6 +81,12 @@ router.post("/2fa/login/passkey-verify", verifyPasskeyChallenge);
 // authenticated route
 router.use(checkAuth);
 router.get("/me", getCureentUser);
+
+// link account
+router.post("/google/link", connectWithGoogle);
+router.post("/email/link", connectWithEmail);
+router.post("/email/link-verify", connectWithEmailVerifyOtp);
+
 // logout user
 router.post("/logout", logout);
 router.get("/logoutAll", logoutAllDevices);
