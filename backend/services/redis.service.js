@@ -73,3 +73,7 @@ export const countCheckoutUrls = async (MATCH) => {
 
   return total;
 };
+
+export const deleteRedisKey = async (key) => {
+  await redisClient.del(key);
+};

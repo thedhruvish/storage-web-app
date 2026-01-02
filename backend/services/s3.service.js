@@ -4,25 +4,13 @@ import {
   GetObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
-  S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { generateCloudfrontSignedUrl } from "./cloudforntCdn.service.js";
+import { s3Client } from "../lib/s3.client.js";
+import { PRESIGNED_URL_EXPIRATION } from "../constants/s3.constants.js";
 
 const privateKey = process.env.PRIVATE_KEY;
-
-export const s3Client = new S3Client({
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  },
-  region: process.env.AWS_REGION,
-  // endpoint:process.env.AWS_ENDPOINT_URL||undefined,
-});
-
-export const BUCKET_NAME = process.env.AWS_BUCKET_NAME;
-
-export const PRESIGNED_URL_EXPIRATION = 60;
 
 export const generatePresignedUrl = async (fileName, ContentType) => {
   try {

@@ -1,4 +1,6 @@
-export const isValidTurnstileToken = async (token) => {
+import ApiError from "./ApiError.js";
+
+export const validTurnstileToken = async (token) => {
   const response = await fetch(
     "https://challenges.cloudflare.com/turnstile/v0/siteverify",
     {
@@ -12,6 +14,8 @@ export const isValidTurnstileToken = async (token) => {
   );
 
   const data = await response.json();
-
-  return data.success; //is return true or false
+  if (!data.success) {
+    throw new ApiError(404, "recaptcha is not valid try again");
+  }
+  return data.success;
 };

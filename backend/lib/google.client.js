@@ -1,3 +1,4 @@
+import { OAuth2Client } from "google-auth-library";
 import { google } from "googleapis";
 
 const CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
@@ -18,3 +19,5 @@ export const DRIVE_SCOPES = [
 ];
 
 export const getDriveClient = (auth) => google.drive({ version: "v3", auth });
+
+export const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);

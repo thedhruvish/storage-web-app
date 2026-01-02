@@ -1,14 +1,13 @@
+import { rm } from "node:fs/promises";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
-import { getDriveClient } from "../lib/googleDrive.client.js";
 import {
   downloadFiles,
   downloadSingleFile,
   getFileList,
 } from "./gdrive.service.js";
-import { googleOAuthClient } from "../lib/googleDrive.client.js";
-import { rm } from "node:fs/promises";
+import { googleOAuthClient, getDriveClient } from "../lib/google.client.js";
 import { updateParentDirectorySize } from "./directory.service.js";
 
 export const importFromGoogleDrive = async ({

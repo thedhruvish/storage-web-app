@@ -1,6 +1,6 @@
 import ImportToken from "../models/ImportToken.model.js";
 import ApiError from "../utils/ApiError.js";
-import { googleOAuthClient, DRIVE_SCOPES } from "../lib/googleDrive.client.js";
+import { googleOAuthClient, DRIVE_SCOPES } from "../lib/google.client.js";
 
 export const generateAuthUrl = () => {
   return googleOAuthClient.generateAuthUrl({

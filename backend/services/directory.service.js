@@ -167,3 +167,7 @@ export const updateParentDirectorySize = async (dirId, size) => {
     console.error("❌ Error updating parent directory size:", error);
   }
 };
+
+export const singleFindDirectory = async (dirId, select) => {
+  return Directory.findById(dirId, select);
+};
