@@ -19,7 +19,7 @@ export const getOneAuthIdentity = async (filter) => {
       path: "twoFactorId",
       select: "_id totp isEnabled passkeys",
     },
-  });
+  }).select("+passwordHash");
 };
 
 export const createAuthIdentity = (data, session = undefined) => {

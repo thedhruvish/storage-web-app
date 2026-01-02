@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 import User from "../models/User.model.js";
 import Directory from "../models/Directory.model.js";
-import AuthIdentity from "../models/AuthIdentity.model.js";
 import ApiError from "../utils/ApiError.js";
 import { validTurnstileToken } from "../utils/TurnstileVerfication.js";
 import {
@@ -12,6 +11,7 @@ import {
 import { createAndCheckLimitSession } from "./redis.service.js";
 import { sendOtpToMail } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
+import { LOGIN_PROVIDER } from "../constants/constant.js";
 
 export const registerWithEmailService = async ({
   name,
@@ -24,7 +24,7 @@ export const registerWithEmailService = async ({
   await validTurnstileToken(turnstileToken);
 
   await exstingAuthIdentity({
-    provider: "EMAIL",
+    provider: LOGIN_PROVIDER[0],
     providerId: normalizedEmail,
   });
 
@@ -35,7 +35,7 @@ export const registerWithEmailService = async ({
       metaData: { showSetUp2Fa: true },
     },
     normalizedEmail,
-    "EMAIL",
+    LOGIN_PROVIDER[0],
     password,
   );
 };
@@ -49,15 +49,16 @@ export const loginWithEmailService = async ({
 
   const authIdentity = await getOneAuthIdentity({
     providerEmail: email,
-    provider: "EMAIL",
-  });
+    provider: LOGIN_PROVIDER[0],
 
-  if (!authIdentity) throw new ApiError(401, "Invalid email or password");
+  });
+  console.log(authIdentity);
+  if (!authIdentity) throw new ApiError(401, "Invalidss email or password");
   if (authIdentity.userId.isDeleted)
     throw new ApiError(409, "Account deleted. Contact admin");
 
   const isValidPwd = await authIdentity.isValidPassword(password);
-  if (!isValidPwd) throw new ApiError(401, "Invalid email or password");
+  if (!isValidPwd) throw new ApiError(401, "Invalids email or password");
 
   // 2FA flow
   if (authIdentity.userId.twoFactorId?.isEnabled) {
