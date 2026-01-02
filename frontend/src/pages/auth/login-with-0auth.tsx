@@ -2,13 +2,14 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAppearance } from "@/store/appearance-store";
 import { GoogleLogin } from "@react-oauth/google";
 import { toast } from "sonner";
-import { useLoginWithGoogle } from "@/api/auth";
+import { useLoginWithGithub, useLoginWithGoogle } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 
 const LoginWithOauth = () => {
   const navagate = useNavigate();
   const { appearance } = useAppearance();
   const logoinwithGoogle = useLoginWithGoogle();
+  const logoinwithGithub = useLoginWithGithub();
 
   // Login with google
   const loginWithGoogleHandler = (credentialResponse: {
@@ -21,8 +22,18 @@ const LoginWithOauth = () => {
         }),
         {
           loading: "Logging in...",
-          success: () => {
-            navagate({ to: "/" });
+          success: (data) => {
+            if (data.data.data.showSetUp2Fa) {
+              navagate({
+                to: "/auth/2fa/setup",
+                replace: true,
+              });
+            } else {
+              navagate({
+                to: "/app",
+                replace: true,
+              });
+            }
             return "Logged in successfully";
           },
           error: "Login failed",
@@ -30,6 +41,26 @@ const LoginWithOauth = () => {
       );
     }
   };
+
+  const loginWithGithubHandler = () => {
+    toast.promise(
+      logoinwithGithub.mutateAsync(
+        {
+          hint: "LOGIN",
+        },
+        {
+          onSuccess(data) {
+            window.location.href = data.data.data;
+          },
+        }
+      ),
+      {
+        loading: "Logging in...",
+        error: "Login failed",
+      }
+    );
+  };
+  const disableBtns = logoinwithGoogle.isPending || logoinwithGithub.isPending;
   return (
     <div className='flex flex-col gap-4'>
       {/* GitHub Button */}
@@ -37,9 +68,8 @@ const LoginWithOauth = () => {
         variant='outline'
         className='w-full'
         type='button'
-        onClick={() =>
-          (window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/github`)
-        }
+        onClick={loginWithGithubHandler}
+        disabled={disableBtns}
       >
         <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'>
           <path
@@ -51,7 +81,9 @@ const LoginWithOauth = () => {
       </Button>
 
       {/* Google Button – full-width wrapper, centered content */}
-      <div className='flex w-full justify-center'>
+      <div
+        className={`flex w-full justify-center ${disableBtns ? "opacity-50 cursor-not-allowed" : ""}`}
+      >
         <GoogleLogin
           onSuccess={loginWithGoogleHandler}
           onError={() => toast.error("Login Failed")}

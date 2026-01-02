@@ -2,11 +2,13 @@ import { useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate, useLocation } from "@tanstack/react-router";
+import { AlertTriangle } from "lucide-react";
 import { useTurnstile } from "react-turnstile";
 import { toast } from "sonner";
 import { useLoginMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -34,6 +36,14 @@ export function LoginForm({
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileLoading, setTurnstileLoading] = useState(false);
   const turnstile = useTurnstile();
+  const location = useLocation();
+
+  // Check for error query params
+  // location.search is already parsed by TanStack Router
+  const { error, error_description: errorDescription } = location.search as {
+    error?: string;
+    error_description?: string;
+  };
 
   const loginMutation = useLoginMutation();
 
@@ -60,7 +70,7 @@ export function LoginForm({
         onSuccess(res) {
           // Access the data safely
           const responseData = res.data.data;
-          
+
           if (responseData.isEnabled2Fa) {
             localStorage.setItem("userId", responseData.userId);
             localStorage.setItem("isTotp", String(responseData.isTotp));
@@ -97,6 +107,15 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {(error || errorDescription) && (
+            <Alert variant='destructive' className='mb-6'>
+              <AlertTriangle className='h-4 w-4' />
+              <AlertTitle>Login Failed</AlertTitle>
+              <AlertDescription>
+                {errorDescription || error || "An error occurred during login."}
+              </AlertDescription>
+            </Alert>
+          )}
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)}>
               <div className='grid gap-6'>

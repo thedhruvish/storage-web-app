@@ -46,6 +46,13 @@ export const useLoginWithGoogle = () => {
   });
 };
 
+export const useLoginWithGithub = () => {
+  return useMutation({
+    mutationFn: (data: { hint: "LOGIN" | "LINK"; userId?: string }) =>
+      axiosClient.post("/auth/github", data),
+  });
+};
+
 // verify opt
 export const useVerifyOtp = () => {
   return useMutation({

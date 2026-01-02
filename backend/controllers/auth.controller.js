@@ -195,10 +195,16 @@ export const loginWithGithub = async (req, res) => {
 
 // callback github
 export const callbackGithub = async (req, res) => {
-  const { code } = req.query;
+  const query = req.query;
 
-  const { providerId, accessToken, name, picture } =
-    await getGithubUserDetails(code);
+  if (!query?.code) {
+
+    return res.redirect(`${process.env.FRONTEND_URL}/auth/github?error=${query?.error}&error_description=${query?.error_description}`);
+  }
+
+  const { providerId, accessToken, name, picture } = await getGithubUserDetails(
+    query.code,
+  );
 
   const exstingEmail = await getOneAuthIdentity({
     providerId,
@@ -214,9 +220,9 @@ export const callbackGithub = async (req, res) => {
       showSetUp2Fa = false;
       // direct login
       if (exstingEmail.userId?.isDeleted) {
-        const errorMessge = "Your Account is Deleted. Please Contact Admin";
+        const errorMessge = "Account is Deleted";
         return res.redirect(
-          `${process.env.FRONTEND_URL}/github?error=${errorMessge}`,
+          `${process.env.FRONTEND_URL}/auth/github?error=${errorMessge}error_description=Your Account is Deleted. Please Contact Admin`,
         );
       }
       userId = exstingEmail.userId;
@@ -227,7 +233,7 @@ export const callbackGithub = async (req, res) => {
         const twoFa = exstingEmail.userId?.twoFactorId;
 
         return res.redirect(
-          `${process.env.FRONTEND_URL}/github?isEnabled2Fa=${true}&isTotp=${twoFa.totp?.isVerified === true ? true : false}&isPasskey=${twoFa.passkeys?.length !== 0 ? true : false}&userId=${userId}`,
+          `${process.env.FRONTEND_URL}/auth/github?isEnabled2Fa=${true}&isTotp=${twoFa.totp?.isVerified === true ? true : false}&isPasskey=${twoFa.passkeys?.length !== 0 ? true : false}&userId=${userId}`,
         );
       }
     } else {
@@ -260,7 +266,7 @@ export const callbackGithub = async (req, res) => {
   } catch (error) {
     queryParms = "error=something want wrong Try agin";
   } finally {
-    res.redirect(`${process.env.FRONTEND_URL}/github?${queryParms}`);
+    res.redirect(`${process.env.FRONTEND_URL}/auth/github?${queryParms}`);
   }
 
   // process.env.FRONTEND_URL + "/github/session?sessionId=" + session.id,
