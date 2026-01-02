@@ -14,7 +14,6 @@ import permissionRoute from "./routes/permission.route.js";
 import adminRoute from "./routes/admin.route.js";
 import paymentRoute from "./routes/payment.route.js";
 import planRoute from "./routes/plan.route.js";
-import paymentStripeRoute from "./routes/paymentStripe.route.js";
 import webhookRoute from "./routes/webhook.route.js";
 import userRoute from "./routes/user.route.js";
 import { startCronJobs } from "./cron-job/index.js";
@@ -83,7 +82,6 @@ app.use("/document", docuemntRoute);
 app.use("/import-data", importDataRoute);
 app.use("/user", userRoute);
 app.use("/payment", paymentRoute);
-app.use("/payment/stripe", paymentStripeRoute);
 
 /**
  * error handle

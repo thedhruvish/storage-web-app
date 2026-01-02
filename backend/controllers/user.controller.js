@@ -7,7 +7,7 @@ import {
   createCustomerPortalSession,
   pauseStripeSubscription,
   resumeStripeSubscription,
-} from "../utils/stripeHelper.js";
+} from "../services/stripe.service.js";
 
 export const listAllSubscription = async (req, res) => {
   const userId = req.user;

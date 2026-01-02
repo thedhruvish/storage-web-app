@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import path from "node:path";
 import { Upload } from "@aws-sdk/lib-storage";
-import { BUCKET_NAME, s3Client } from "./s3Services.js";
+import { BUCKET_NAME, s3Client } from "./s3.service.js";
 
 export const getFileList = async (drive, folderId) => {
   const maxRetries = 3;

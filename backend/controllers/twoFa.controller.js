@@ -5,14 +5,14 @@ import {
   genTOTPUrl,
   isValidTotpToken,
   verifyLoginPasskeyChallenge,
-} from "../utils/twoStepVerfiy.js";
+} from "../services/twoStep.service.js";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import ApiResponse from "../utils/ApiResponse.js";
 import ApiError from "../utils/ApiError.js";
 import redisClient from "../config/redis-client.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
-import { createAndCheckLimitSession } from "../utils/redisHelper.js";
+import { createAndCheckLimitSession } from "../services/redis.service.js";
 
 // 2fa setup register
 export const twoFASetup = async (req, res) => {

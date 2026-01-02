@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  createDirectory,
+  createDirectoryController,
   deleteDirectoryById,
   getDirectory,
   starredToggleDirectory,
@@ -22,7 +22,7 @@ router
   .post(
     validateInput(nameValidation),
     permissionMiddleware("write"),
-    createDirectory,
+    createDirectoryController,
   );
 
 // starr toggle

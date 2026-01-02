@@ -7,7 +7,7 @@ import {
   getAllCoupons,
   getAllPromoCode,
   togglePromoCode,
-} from "../controllers/payment.controller.js";
+} from "../controllers/billing.controller.js";
 import { validateInput } from "../utils/validateInput.js";
 import {
   createCouponsValidation,

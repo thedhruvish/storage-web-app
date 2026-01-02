@@ -3,9 +3,8 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Plan from "../models/Plan.model.js";
 import {
   createStripeProduct,
-  deleteStripeProduct,
   disableStripeProduct,
-} from "../utils/stripeHelper.js";
+} from "../services/stripe.service.js";
 
 // handle the plances with stripe
 export const getAllPlans = async (req, res) => {

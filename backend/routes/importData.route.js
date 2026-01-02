@@ -5,7 +5,7 @@ import {
   getGoogleAccessToken,
   googleDriveCallback,
   importDriveData,
-} from "../controllers/importData.controller.js";
+} from "../controllers/gdrive.controller.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
 import { importDriveDataValidation } from "../validators/comman.validator.js";

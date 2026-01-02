@@ -1,6 +1,6 @@
 import express from "express";
 import {
-  cancelUpload,
+  cancelUploadController,
   checkUploadedObject,
   createPresigned,
   deleteDocumentById,
@@ -34,7 +34,7 @@ router.post(
 router.delete(
   "/:id/cancel",
   permissionMiddleware("write", false),
-  cancelUpload,
+  cancelUploadController,
 );
 
 router.put(

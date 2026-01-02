@@ -6,7 +6,7 @@ import {
   getDirectoryPermissionUsers,
   getShareLink,
   removeDirectoryPermision,
-} from "../controllers/permission.controller.js";
+} from "../controllers/share.controller.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
 import {

@@ -7,7 +7,8 @@ import {
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
-import { generateCloudfrontSignedUrl } from "./cloudforntCdn.js";
+import { generateCloudfrontSignedUrl } from "./cloudforntCdn.service.js";
+
 const privateKey = process.env.PRIVATE_KEY;
 
 export const s3Client = new S3Client({
