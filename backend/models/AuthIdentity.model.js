@@ -51,7 +51,7 @@ authIdentitySchema.index({ userId: 1, provider: 1 }, { unique: true });
  * monog hook to before the save data to covert into hash
  */
 authIdentitySchema.pre("save", async function (next) {
-  if (!this.isModified("passwordHash")) {
+  if (!this.isModified("passwordHash") || !this.passwordHash) {
     return next();
   }
   this.passwordHash = await bcrypt.hash(this.passwordHash, 10);

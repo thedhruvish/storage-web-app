@@ -77,3 +77,11 @@ export const countCheckoutUrls = async (MATCH) => {
 export const deleteRedisKey = async (key) => {
   await redisClient.del(key);
 };
+
+export const setRedisValue = async (key, value) => {
+  await redisClient.set(key, value);
+};
+
+export const getRedisValue = async (key) => {
+  return await redisClient.get(key);
+};

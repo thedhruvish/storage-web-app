@@ -8,7 +8,10 @@ import {
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { generateCloudfrontSignedUrl } from "./cloudforntCdn.service.js";
 import { s3Client } from "../lib/s3.client.js";
-import { PRESIGNED_URL_EXPIRATION } from "../constants/s3.constants.js";
+import {
+  BUCKET_NAME,
+  PRESIGNED_URL_EXPIRATION,
+} from "../constants/s3.constants.js";
 
 const privateKey = process.env.PRIVATE_KEY;
 
@@ -24,7 +27,7 @@ export const generatePresignedUrl = async (fileName, ContentType) => {
     });
     return url;
   } catch (error) {
-    return null;
+    throw new Error(error);
   }
 };
 

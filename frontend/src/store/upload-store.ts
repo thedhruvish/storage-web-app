@@ -85,7 +85,7 @@ const processFile = async (fileItem: UploadableFile, directoryId: string) => {
     store.setGlobalUploading(true);
 
     // B. Upload Step: PUT to the generated URL
-    await axios.put(data.data.genUrl, fileItem.file, {
+    await axios.put(data.data.presignedUrl, fileItem.file, {
       signal: fileItem.source.signal,
       headers: { "Content-Type": fileItem.file.type },
       onUploadProgress: (event) => {

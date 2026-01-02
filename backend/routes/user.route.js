@@ -1,14 +1,14 @@
 import express from "express";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import {
+  settingInfo,
   deleteAuthMethod,
+  toggleTwoFaAuth,
   getUserSubscriptionHistory,
   listAllSubscription,
-  settingInfo,
   toggleSubscriptionStatus,
-  toggleTwoFaAuth,
   updatePaymentMethodDetails,
-} from "../controllers/user.controller.js";
-import paramsValidation from "../middlewares/paramsValidation.middleware.js";
+} from "../controllers/account.controller.js";
 const router = express.Router();
 
 // setting  info

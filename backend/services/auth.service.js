@@ -7,9 +7,11 @@ import { validTurnstileToken } from "../utils/TurnstileVerfication.js";
 import {
   createAuthIdentity,
   exstingAuthIdentity,
+  getOneAuthIdentity,
 } from "./authIdentity.service.js";
 import { createAndCheckLimitSession } from "./redis.service.js";
 import { sendOtpToMail } from "./mail.service.js";
+import { googleClient } from "../lib/google.client.js";
 
 export const registerWithEmailService = async ({
   name,
@@ -26,58 +28,16 @@ export const registerWithEmailService = async ({
     providerId: normalizedEmail,
   });
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
-  try {
-    const dirId = new mongoose.Types.ObjectId();
-
-    const user = await User.create(
-      [
-        {
-          name,
-          email: normalizedEmail,
-          rootDirId: dirId,
-          metaData: { showSetUp2Fa: true },
-        },
-      ],
-      { session },
-    );
-
-    await Directory.create(
-      [
-        {
-          _id: dirId,
-          name: `root-${normalizedEmail}`,
-          userId: user[0]._id,
-          parentDirId: null,
-          metaData: { size: 0 },
-        },
-      ],
-      { session },
-    );
-
-    await AuthIdentity.create(
-      [
-        {
-          userId: user[0]._id,
-          provider: "EMAIL",
-          providerEmail: normalizedEmail,
-          providerId: normalizedEmail,
-          passwordHash: password,
-        },
-      ],
-      { session },
-    );
-
-    await session.commitTransaction();
-    return user[0];
-  } catch (err) {
-    await session.abortTransaction();
-    throw err;
-  } finally {
-    session.endSession();
-  }
+  await createNewUser(
+    {
+      name,
+      email: normalizedEmail,
+      metaData: { showSetUp2Fa: true },
+    },
+    normalizedEmail,
+    "EMAIL",
+    password,
+  );
 };
 
 export const loginWithEmailService = async ({
@@ -87,42 +47,45 @@ export const loginWithEmailService = async ({
 }) => {
   await validTurnstileToken(turnstileToken);
 
-  const user = await User.findOne({ email }).populate({
-    path: "twoFactorId",
-    select: "+totp.secret",
+  const authIdentity = await getOneAuthIdentity({
+    providerEmail: email,
+    provider: "EMAIL",
   });
 
-  if (!user) throw new ApiError(401, "Invalid email or password");
-  if (user.isDeleted) throw new ApiError(409, "Account deleted. Contact admin");
+  if (!authIdentity) throw new ApiError(401, "Invalid email or password");
+  if (authIdentity.userId.isDeleted)
+    throw new ApiError(409, "Account deleted. Contact admin");
 
-  const isValidPwd = await user.isValidPassword(password);
+  const isValidPwd = await authIdentity.isValidPassword(password);
   if (!isValidPwd) throw new ApiError(401, "Invalid email or password");
 
   // 2FA flow
-  if (user.twoFactorId?.isEnabled) {
+  if (authIdentity.userId.twoFactorId?.isEnabled) {
     return {
       step: "2FA",
       data: {
-        isTotp: !!user.twoFactorId.totp?.isVerified,
-        isPasskey: user.twoFactorId.passkeys?.length > 0,
-        userId: user._id,
+        isTotp: !!authIdentity.userId.twoFactorId.totp?.isVerified,
+        isPasskey: authIdentity.userId.twoFactorId.passkeys?.length > 0,
+        userId: authIdentity.userId._id,
       },
     };
   }
 
   // OTP flow
   if (process.env.IS_VERFIY_OTP === "true") {
-    await sendOtpToMail(user._id.toString());
-    return { step: "OTP", userId: user._id };
+    await sendOtpToMail(authIdentity.userId._id.toString());
+    return { step: "OTP", userId: authIdentity.userId._id };
   }
 
-  const sessionId = await createAndCheckLimitSession(user._id.toString());
+  const sessionId = await createAndCheckLimitSession(
+    authIdentity.userId._id.toString(),
+  );
 
   return {
     step: "LOGIN",
     sessionId,
-    showSetUp2Fa: user.metaData?.showSetUp2Fa === true,
-    userId: user._id,
+    showSetUp2Fa: authIdentity.userId.metaData?.showSetUp2Fa === true,
+    userId: authIdentity.userId._id,
   };
 };
 
@@ -134,48 +97,51 @@ export const googleIdTokenVerify = async (idToken) => {
   return await googleUser.getPayload();
 };
 
-export const createNewUser = async (userData, providerId, provider) => {
-  const mongoSesssion = await mongoose.startSession();
-  let userId = null;
-  mongoSesssion.startTransaction();
+export const createNewUser = async (
+  userData,
+  providerId,
+  provider,
+  passwordHash,
+) => {
+  const session = await mongoose.startSession();
+  let userId;
+
   try {
-    const dirId = new mongoose.Types.ObjectId();
+    await session.withTransaction(async () => {
+      const dirId = new mongoose.Types.ObjectId();
 
-    const user = new User({ ...userData, rootDirId: dirId });
-    userId = user._id;
+      const user = new User({ ...userData, rootDirId: dirId });
+      userId = user._id;
 
-    const userPromise = user.save({ session: mongoSesssion });
+      const rootDir = new Directory({
+        _id: dirId,
+        name: `root-${user.email}`,
+        userId,
+        parentDirId: null,
+        metaData: { size: 0 },
+      });
 
-    const rootDir = new Directory({
-      _id: dirId,
-      name: `root-${user.email}`,
-      userId,
-      parentDirId: null,
-      metaData: { size: 0 },
+      await Promise.all([
+        user.save({ session }),
+        rootDir.save({ session }),
+        createAuthIdentity(
+          {
+            userId,
+            provider,
+            providerEmail: user.email,
+            providerId,
+            passwordHash,
+          },
+          session,
+        ),
+      ]);
     });
 
-    const rootPromise = rootDir.save({ session: mongoSesssion });
-
-    const newAuthPromise = createAuthIdentity(
-      {
-        userId,
-        provider,
-        providerEmail: user.email,
-        providerId,
-      },
-      mongoSesssion,
-    );
-
-    await Promise([userPromise, rootPromise, newAuthPromise]);
-
-    await mongoSesssion.commitTransaction();
-  } catch (error) {
-    console.log(error);
-    await mongoSesssion.abortTransaction();
-    next(new ApiError(400, error.message));
-  } finally {
-    mongoSesssion.endSession();
     return userId;
+  } catch (error) {
+    throw new ApiError(400, error.message);
+  } finally {
+    session.endSession();
   }
 };
 

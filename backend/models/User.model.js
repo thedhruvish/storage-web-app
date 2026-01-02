@@ -42,7 +42,7 @@ const userSchema = new Schema(
       type: Date,
       default: null,
     },
-    twoFactor: {
+    twoFactorId: {
       type: Schema.Types.ObjectId,
       ref: "TwoFa",
     },

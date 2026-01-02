@@ -61,14 +61,14 @@ export const generateCustomerPortalService = async (userId) => {
 
 // settings
 export const getSettingInfoService = async (userId) => {
-  const userInfo = await User.findById(userId).populate("twoFactor");
+  const userInfo = await User.findById(userId).populate("twoFactorId");
   if (!userInfo) throw new ApiError(404, "User not found");
 
   let passkey = [];
   let isAllowedNewTOTP = true;
 
-  if (userInfo?.twoFactor?.passkeys?.length) {
-    passkey = userInfo.twoFactor.passkeys.map((item) => ({
+  if (userInfo?.twoFactorId?.passkeys?.length) {
+    passkey = userInfo.twoFactorId.passkeys.map((item) => ({
       type: "passkey",
       friendlyName: item.friendlyName,
       createdAt: item.createdAt,
@@ -78,9 +78,9 @@ export const getSettingInfoService = async (userId) => {
     }));
   }
 
-  if (userInfo?.twoFactor?.totp) {
-    userInfo.twoFactor.totp.type = "totp";
-    passkey.push(userInfo.twoFactor.totp);
+  if (userInfo?.twoFactorId?.totp) {
+    userInfo.twoFactorId.totp.type = "totp";
+    passkey.push(userInfo.twoFactorId.totp);
     isAllowedNewTOTP = false;
   }
 

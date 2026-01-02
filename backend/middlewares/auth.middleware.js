@@ -1,6 +1,6 @@
 import ApiError from "../utils/ApiError.js";
-import redisClient from "../config/redis-client.js";
 import User from "../models/User.model.js";
+import { getRedisValue, setRedisValue } from "../services/redis.service.js";
 
 export const checkAuth = async (req, res, next) => {
   const { sessionId } = req.signedCookies;
@@ -9,19 +9,19 @@ export const checkAuth = async (req, res, next) => {
     return res.status(401).json(new ApiError(401, "Unauthorized"));
   }
 
-  const userId = await redisClient.get(`session:${sessionId}`);
+  const userId = await getRedisValue(`session:${sessionId}`);
 
   if (!userId) {
     return res.status(401).json(new ApiError(401, "Unauthorized"));
   }
 
-  let user = await redisClient.get(`user:${userId}`);
+  let user = await getRedisValue(`user:${userId}`);
   if (user) {
     user = JSON.parse(user);
   } else {
     user = await User.findById(userId);
-    console.log("run on db");
-    await redisClient.set(
+
+    await setRedisValue(
       `user:${userId}`,
       JSON.stringify({
         _id: userId,
