@@ -27,7 +27,7 @@ export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
   ]);
 
   return {
-    path:directory,
+    path: directory,
     directories,
     documents,
   };

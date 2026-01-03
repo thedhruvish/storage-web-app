@@ -50,7 +50,6 @@ export const loginWithEmailService = async ({
   const authIdentity = await getOneAuthIdentity({
     providerEmail: email,
     provider: LOGIN_PROVIDER[0],
-
   });
   console.log(authIdentity);
   if (!authIdentity) throw new ApiError(401, "Invalidss email or password");

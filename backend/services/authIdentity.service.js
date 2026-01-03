@@ -12,14 +12,16 @@ export const exstingAuthIdentity = async (
 };
 
 export const getOneAuthIdentity = async (filter) => {
-  return await AuthIdentity.findOne(filter).populate({
-    path: "userId",
-    select: "_id isDeleted twoFactorId metaData",
-    populate: {
-      path: "twoFactorId",
-      select: "_id totp isEnabled passkeys",
-    },
-  }).select("+passwordHash");
+  return await AuthIdentity.findOne(filter)
+    .populate({
+      path: "userId",
+      select: "_id isDeleted twoFactorId metaData",
+      populate: {
+        path: "twoFactorId",
+        select: "_id totp isEnabled passkeys",
+      },
+    })
+    .select("+passwordHash");
 };
 
 export const createAuthIdentity = (data, session = undefined) => {

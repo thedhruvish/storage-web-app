@@ -97,5 +97,4 @@ export const otpTemplate = (otp) => {
       </tr>
     </table>
   </body>`;
-
-}
+};
