@@ -8,10 +8,11 @@ import {
   exstingAuthIdentity,
   getOneAuthIdentity,
 } from "./authIdentity.service.js";
-import { createAndCheckLimitSession } from "./redis.service.js";
-import { sendOtpToMail } from "./mail.service.js";
+import { createAndCheckLimitSession, setRedisValue } from "./redis.service.js";
+import { sendOtpToMail, verifyMailOTP } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
+import AuthIdentity from "../models/AuthIdentity.model.js";
 
 export const registerWithEmailService = async ({
   name,
@@ -94,7 +95,11 @@ export const googleIdTokenVerify = async (idToken) => {
     idToken,
     audience: process.env.GOOGLE_CLIENT_ID,
   });
-  return await googleUser.getPayload();
+  const playload = await googleUser.getPayload();
+  if (!playload) {
+    throw new ApiError(400, "Do not get the information on from the google");
+  }
+  return playload;
 };
 
 export const createNewUser = async (
@@ -197,4 +202,118 @@ export const getGithubUserEmail = async (AccessToken) => {
     .find((e) => e.primary && e.verified)
     ?.email?.toLowerCase()
     .trim();
+};
+
+/**
+ *
+ *  account connect
+ */
+export const accConnectGoogle = async (userSession, idToken) => {
+  const { tokens } = await googleClient.getToken(idToken);
+  if (!tokens) {
+    throw new ApiError(400, "Try agin");
+  }
+  console.log(JSON.stringify(tokens, null, 2));
+  const { sub, email } = await googleIdTokenVerify(tokens.id_token);
+  console.log({ sub, email });
+  // create If Not Exist
+  const exsting = await AuthIdentity.findOneAndUpdate(
+    {
+      provider: LOGIN_PROVIDER[1],
+      providerId: sub,
+    },
+    {
+      $setOnInsert: {
+        userId: userSession._id,
+        provider: LOGIN_PROVIDER[1],
+        providerId: sub,
+        providerEmail: email,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+      includeResultMetadata: true,
+    },
+  );
+  if (exsting.lastErrorObject?.updatedExisting) {
+    throw new ApiError(400, "This email alredy Link to another account");
+  }
+  return exsting.value;
+};
+
+export const accConnectEmail = async (userSession, { email, password }) => {
+  if (process.env.IS_VERFIY_OTP === "true") {
+    const exting = await AuthIdentity.exists({
+      provider: LOGIN_PROVIDER[0],
+      providerId: email,
+    });
+    if (exting) {
+      throw new ApiError(400, "This email alredy Link to another account");
+    }
+    await sendOtpToMail(userSession._id);
+    return {
+      is_otp: true,
+    };
+  }
+
+  const exsting = await AuthIdentity.findOneAndUpdate(
+    {
+      provider: LOGIN_PROVIDER[0],
+      providerId: email,
+    },
+    {
+      $setOnInsert: {
+        userId: userSession._id,
+        provider: LOGIN_PROVIDER[0],
+        providerId: email,
+        providerEmail: email,
+        passwordHash: password,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+      includeResultMetadata: true,
+    },
+  );
+  if (exsting.lastErrorObject?.updatedExisting) {
+    throw new ApiError(400, "This email alredy Link to another account");
+  }
+  return exsting.value;
+};
+
+// verify mail otp
+export const verifyAccConnectOtp = async (userSession, { email, password }) => {
+  await verifyMailOTP(userSession._id);
+
+  const exsting = await AuthIdentity.findOneAndUpdate(
+    {
+      provider: LOGIN_PROVIDER[0],
+      providerId: email,
+    },
+    {
+      $setOnInsert: {
+        userId: userSession._id,
+        provider: LOGIN_PROVIDER[0],
+        providerId: email,
+        providerEmail: email,
+        passwordHash: password,
+      },
+    },
+    {
+      new: true,
+      upsert: true,
+      includeResultMetadata: true,
+    },
+  );
+  if (exsting.lastErrorObject?.updatedExisting) {
+    throw new ApiError(400, "This email alredy Link to another account");
+  }
+
+  return exsting.value;
+};
+
+export const disConnectLinkAccount = async (id) => {
+  await AuthIdentity.deleteOne({ _id: id });
 };

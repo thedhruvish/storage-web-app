@@ -1,18 +1,22 @@
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import Otp from "../models/Otp.model.js";
-import { sendOtpToMail } from "../services/mail.service.js";
+import { sendOtpToMail, verifyMailOTP } from "../services/mail.service.js";
 import {
   createAndCheckLimitSession,
   deleteRedisKey,
 } from "../services/redis.service.js";
 import {
+  accConnectEmail,
+  accConnectGoogle,
   createNewUser,
+  disConnectLinkAccount,
   getGithubUserDetails,
   getGithubUserEmail,
   googleIdTokenVerify,
   loginWithEmailService,
   registerWithEmailService,
+  verifyAccConnectOtp,
 } from "../services/auth.service.js";
 import { singleFindDirectory } from "../services/directory.service.js";
 import {
@@ -270,14 +274,7 @@ export const githubCookieSet = async (req, res) => {
 export const verfiyOtp = async (req, res) => {
   const { otp, userId } = req.body;
 
-  const optDoc = await Otp.findOne({ userId, otp });
-
-  if (!optDoc) {
-    return res.status(400).json(new ApiError(400, "Invalid otp or It Expired"));
-  }
-  // delete after verfiy otp
-  await optDoc.deleteOne();
-
+  await verifyMailOTP(userId, otp);
   // genrate session
   const sessionId = await createAndCheckLimitSession(userId);
 
@@ -378,4 +375,30 @@ export const connectWithEmailVerifyOtp = async (req, res) => {
   // delete after verfiy otp
   await optDoc.deleteOne();
   res.status(201).json(new ApiResponse(201, "SuccessFully Link Email Account"));
+};
+
+/**
+ * link account
+ */
+
+export const connectAccountWithGoogle = async (req, res) => {
+  await accConnectGoogle(req.user, req.body.idToken);
+  res.status(201).json(new ApiResponse(200, "Account Link Successfully"));
+};
+
+export const connectAccountWithEmail = async (req, res) => {
+  const result = await accConnectEmail(req.user, req.body);
+  res
+    .status(201)
+    .json(new ApiResponse(200, "Account Link Successfully", result));
+};
+
+export const emailAccountVerifyByOtp = async (req, res) => {
+  await verifyAccConnectOtp(req.user, req.body);
+  res.status(201).json(new ApiResponse(200, "Account Link Successfully"));
+};
+
+export const disConnectAccount = async (req, res) => {
+  await disConnectLinkAccount(req.params.id);
+  res.status(201).json(new ApiResponse(200, "Account UnLink Successfully"));
 };

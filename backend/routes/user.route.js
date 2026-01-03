@@ -9,6 +9,7 @@ import {
   toggleSubscriptionStatus,
   updatePaymentMethodDetails,
 } from "../controllers/account.controller.js";
+
 const router = express.Router();
 
 // setting  info

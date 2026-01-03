@@ -45,6 +45,19 @@ export interface ConnectedAccount {
   email: string;
   lastUsed?: string;
 }
+// {
+//               "_id": "6957db3d9a7d1d3db8f2793c",
+//               "provider": "EAMIL",
+//               "providerEmail": "admin@gmail.com",
+//               "providerId": "admin@gmail.com"
+//           },
+
+export interface Authenticate {
+  _id?: string;
+  provider: AuthProvider;
+  providerEmail: string;
+  providerId: string;
+}
 
 export interface UserProfile {
   name: string;

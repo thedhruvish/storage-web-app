@@ -78,8 +78,8 @@ export const deleteRedisKey = async (key) => {
   await redisClient.del(key);
 };
 
-export const setRedisValue = async (key, value) => {
-  await redisClient.set(key, value);
+export const setRedisValue = async (key, value, option = undefined) => {
+  await redisClient.set(key, value, option);
 };
 
 export const getRedisValue = async (key) => {

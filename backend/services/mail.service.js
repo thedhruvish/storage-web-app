@@ -45,3 +45,13 @@ export const sendOtpToMail = async (userId) => {
     throw new ApiError(500, "Mail send failed");
   }
 };
+
+export const verifyMailOTP = async (userId, otp) => {
+  const optDoc = await Otp.findOne({ userId, otp });
+
+  if (!optDoc) {
+    throw new ApiError(400, "Invalid otp or It Expired");
+  }
+  // delete after verfiy otp
+  await optDoc.deleteOne();
+};

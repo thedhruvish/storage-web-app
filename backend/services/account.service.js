@@ -1,4 +1,5 @@
 import { LOGIN_PROVIDER } from "../constants/constant.js";
+import AuthIdentity from "../models/AuthIdentity.model.js";
 import Subscription from "../models/Subscription.model.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
@@ -62,6 +63,9 @@ export const generateCustomerPortalService = async (userId) => {
 // settings
 export const getSettingInfoService = async (userId) => {
   const userInfo = await User.findById(userId).populate("twoFactorId");
+  const authenticate = await AuthIdentity.find({ userId: userInfo._id }).select(
+    "-userId -createdAt -updatedAt -__v",
+  );
   if (!userInfo) throw new ApiError(404, "User not found");
 
   let passkey = [];
@@ -103,7 +107,7 @@ export const getSettingInfoService = async (userId) => {
 
   return {
     twoFactor: passkey,
-    loginProvider: userInfo.loginProvider,
+    authenticate,
     twoFactorId: userInfo?.twoFactorId?._id,
     connectedAccounts,
     isTwoFactorEnabled: userInfo?.twoFactorId?.isEnabled,

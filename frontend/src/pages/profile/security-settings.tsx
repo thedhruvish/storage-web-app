@@ -1,9 +1,6 @@
 import { useState } from "react";
 import {
-  Mail,
-  Github,
   KeyRound,
-  Lock,
   Plus,
   Trash2,
   ShieldCheck,
@@ -19,14 +16,6 @@ import {
 } from "@/api/setting-api";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -38,25 +27,25 @@ import {
 } from "@/components/ui/tooltip";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { SectionHeader } from "./section-header";
+import SignInMethods from "./sign-in-method";
 import { TwoFaDialog } from "./two-fa-dialog";
-import type { TwoFactorMethod, ConnectedAccount } from "./types";
+import type { TwoFactorMethod, Authenticate } from "./types";
 
 interface SecuritySettingsProps {
-  connectedAccounts: ConnectedAccount[];
   twoFactor: TwoFactorMethod[];
+  authenticate: Authenticate[];
   isTwoFactorEnabled: boolean;
   twoFactorId: string;
   isAllowedNewTOTP: boolean;
 }
 
 export function SecuritySettings({
-  connectedAccounts,
+  authenticate,
   twoFactor,
   isTwoFactorEnabled = false,
   twoFactorId,
   isAllowedNewTOTP,
 }: SecuritySettingsProps) {
-  const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
   const [is2FADialogOpen, setIs2FADialogOpen] = useState(false);
   const [isToggle2FAOpen, setIsToggle2FAOpen] = useState(false);
 
@@ -114,13 +103,6 @@ export function SecuritySettings({
     });
   };
 
-  // Helper to find account status
-  const getAccount = (provider: string) =>
-    connectedAccounts.find((acc) => acc.provider === provider);
-  const googleAccount = getAccount("google");
-  const githubAccount = getAccount("github");
-  const passwordAccount = getAccount("password");
-
   // Format Date Helper
   const formatDate = (date: Date | string) => {
     return new Date(date).toLocaleDateString("en-US", {
@@ -138,124 +120,7 @@ export function SecuritySettings({
       />
 
       {/* --- Section 1: Sign-in Methods --- */}
-      <div className='rounded-xl border bg-card shadow-sm overflow-hidden'>
-        <div className='p-4 border-b bg-muted/40 flex justify-between items-center'>
-          <div>
-            <h4 className='font-semibold text-sm'>Sign-in Methods</h4>
-            <p className='text-xs text-muted-foreground mt-0.5'>
-              Control how you access your account.
-            </p>
-          </div>
-        </div>
-
-        <div className='divide-y'>
-          {/* Password */}
-          <div className='flex items-center justify-between p-4 group hover:bg-muted/20 transition-colors'>
-            <div className='flex items-center gap-4'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'>
-                <Lock className='h-5 w-5' />
-              </div>
-              <div>
-                <p className='font-medium text-sm'>Password</p>
-                <p className='text-xs text-muted-foreground'>
-                  {passwordAccount?.email
-                    ? "You have a secure password set."
-                    : "Protect your account with a password."}
-                </p>
-              </div>
-            </div>
-            {passwordAccount?.email ? (
-              <Button
-                variant='outline'
-                size='sm'
-                onClick={() => setIsPasswordDialogOpen(true)}
-              >
-                Change
-              </Button>
-            ) : (
-              <Button size='sm' onClick={() => setIsPasswordDialogOpen(true)}>
-                Set Password
-              </Button>
-            )}
-          </div>
-
-          {/* Google */}
-          <div className='flex items-center justify-between p-4 group hover:bg-muted/20 transition-colors'>
-            <div className='flex items-center gap-4'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400'>
-                <Mail className='h-5 w-5' />
-              </div>
-              <div>
-                <div className='flex items-center gap-2'>
-                  <p className='font-medium text-sm'>Google</p>
-                  {googleAccount?.email && (
-                    <Badge
-                      variant='secondary'
-                      className='h-5 px-1.5 text-[10px] font-medium text-green-700 bg-green-50 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800'
-                    >
-                      Connected
-                    </Badge>
-                  )}
-                </div>
-                <p className='text-xs text-muted-foreground'>
-                  {googleAccount?.email
-                    ? googleAccount.email
-                    : "Enable one-click login with Google."}
-                </p>
-              </div>
-            </div>
-            {googleAccount?.email ? (
-              <Button
-                variant='ghost'
-                size='sm'
-                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-              >
-                Disconnect
-              </Button>
-            ) : (
-              <Button size='sm'>Connect</Button>
-            )}
-          </div>
-
-          {/* GitHub */}
-          <div className='flex items-center justify-between p-4 group hover:bg-muted/20 transition-colors'>
-            <div className='flex items-center gap-4'>
-              <div className='flex h-10 w-10 items-center justify-center rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100'>
-                <Github className='h-5 w-5' />
-              </div>
-              <div>
-                <div className='flex items-center gap-2'>
-                  <p className='font-medium text-sm'>GitHub</p>
-                  {githubAccount?.email && (
-                    <Badge
-                      variant='secondary'
-                      className='h-5 px-1.5 text-[10px] font-medium text-green-700 bg-green-50 dark:bg-green-900/30 dark:text-green-400 border-green-200 dark:border-green-800'
-                    >
-                      Connected
-                    </Badge>
-                  )}
-                </div>
-                <p className='text-xs text-muted-foreground'>
-                  {githubAccount?.email
-                    ? githubAccount.email
-                    : "Link your GitHub account."}
-                </p>
-              </div>
-            </div>
-            {githubAccount?.email ? (
-              <Button
-                variant='ghost'
-                size='sm'
-                className='text-muted-foreground hover:text-destructive hover:bg-destructive/10'
-              >
-                Disconnect
-              </Button>
-            ) : (
-              <Button size='sm'>Connect</Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <SignInMethods authenticate={authenticate} />
 
       <div
         className={`rounded-xl border bg-card shadow-sm overflow-hidden transition-all duration-300 ${isTwoFactorEnabled ? "ring-1 ring-primary/20" : ""}`}
@@ -461,48 +326,6 @@ export function SecuritySettings({
           </div>
         )}
       </div>
-
-      {/* Password Dialog */}
-      <Dialog
-        open={isPasswordDialogOpen}
-        onOpenChange={setIsPasswordDialogOpen}
-      >
-        <DialogContent className='sm:max-w-[425px]'>
-          <DialogHeader>
-            <DialogTitle>
-              {passwordAccount?.email ? "Change Password" : "Set Password"}
-            </DialogTitle>
-            <DialogDescription>
-              Choose a strong password with at least 8 characters.
-            </DialogDescription>
-          </DialogHeader>
-          <div className='space-y-4 py-4'>
-            <div className='space-y-2'>
-              <Label htmlFor='new-password'>New Password</Label>
-              <Input id='new-password' type='password' placeholder='••••••••' />
-            </div>
-            <div className='space-y-2'>
-              <Label htmlFor='confirm-password'>Confirm Password</Label>
-              <Input
-                id='confirm-password'
-                type='password'
-                placeholder='••••••••'
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button
-              variant='outline'
-              onClick={() => setIsPasswordDialogOpen(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={() => setIsPasswordDialogOpen(false)}>
-              Save Password
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
 
       {/* 2FA Setup Dialog */}
       <TwoFaDialog

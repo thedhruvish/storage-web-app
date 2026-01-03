@@ -125,3 +125,52 @@ export const useLoginWithPasskeyChallengeVerify = () => {
     }) => axiosClient.post("/auth/2fa/login/passkey-verify", data),
   });
 };
+
+/**
+ * link accounts
+ */
+
+// send otp to email
+export const useSendOtpToEmail = () => {
+  return useMutation({
+    mutationFn: (data: { email: string; password: string; otp: string }) =>
+      axiosClient.post("/auth/link/email/verify-otp", data),
+  });
+};
+
+export const useLinkEmailMutation = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { email: string; password: string }) => {
+      const res = await axiosClient.post("/auth/link/email", data);
+      return res.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};
+
+export const useConnectGoogle = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ idToken }: { idToken: string }) => {
+      await axiosClient.post(`/auth/link/google`, { idToken });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};
+
+export const useDisconnectLinkedAccount = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (data: { id: string }) => {
+      await axiosClient.delete(`/auth/unlink/${data.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};

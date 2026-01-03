@@ -46,11 +46,12 @@ function RouteComponent() {
         {/* Left Column */}
         <div className='md:col-span-1 lg:col-span-1 space-y-6'>
           <SecuritySettings
-            connectedAccounts={userData.connectedAccounts}
             twoFactor={userData.twoFactor}
             isTwoFactorEnabled={userData.isTwoFactorEnabled}
             twoFactorId={userData.twoFactorId}
             isAllowedNewTOTP={userData.isAllowedNewTOTP}
+            authenticate={userData.authenticate}
+            userId={userData.user._id}
           />
         </div>
 

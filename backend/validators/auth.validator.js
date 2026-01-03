@@ -1,9 +1,19 @@
 import { z } from "zod";
 
-export const loginWithEmailValidation = z.object({
+export const emailAndPWDValidation = z.object({
   email: z.email("Invalid email address").trim().toLowerCase(),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+});
+
+export const loginWithEmailValidation = emailAndPWDValidation.extend({
   turnstileToken: z.string("Turnstile Token is required"),
+});
+
+export const verifyConnectEmail = emailAndPWDValidation.extend({
+  otp: z
+    .string()
+    .length(6, "OTP must be exactly 6 digits")
+    .regex(/^\d{6}$/, "OTP must contain only digits"),
 });
 
 export const registerWithEmailValidation = loginWithEmailValidation.extend({
@@ -11,7 +21,7 @@ export const registerWithEmailValidation = loginWithEmailValidation.extend({
 });
 
 export const loginWithGoogleValidation = z.object({
-  idToken: z.string(),
+  idToken: z.string().min(3, "Missing Information try agin."),
 });
 
 export const verfiyOtpValidation = z.object({

@@ -75,7 +75,8 @@ export const queryClient = new QueryClient({
         }
         if (error.code === "ERR_NETWORK") {
           toast.error("Server unreachable.");
-          // navigateTo("/error/500"); // Optional
+
+          navigateTo("/error/500"); // Optional
           return;
         }
         if (error.response?.status === 500) {

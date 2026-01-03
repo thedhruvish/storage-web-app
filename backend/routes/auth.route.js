@@ -14,9 +14,14 @@ import {
   connectWithEmail,
   connectWithGoogle,
   connectWithEmailVerifyOtp,
+  emailAccountVerifyByOtp,
+  connectAccountWithEmail,
+  connectAccountWithGoogle,
+  disConnectAccount,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
+  emailAndPWDValidation,
   loginValidation,
   loginWithEmailValidation,
   loginWithGoogleValidation,
@@ -25,7 +30,7 @@ import {
   reSendOtpValidation,
   twoFaRegisterMethod,
   verfiyOtpValidation,
-  verifiyToken,
+  verifyConnectEmail,
 } from "../validators/auth.validator.js";
 import { validateInput } from "../utils/validateInput.js";
 import { getRequestInfo } from "../middlewares/getRequestInfo.middleware.js";
@@ -37,6 +42,7 @@ import {
   verifyPasskeyChallenge,
   generatePasskeyChallenge,
 } from "../controllers/twoFa.controller.js";
+import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 
 const router = express.Router();
 
@@ -111,4 +117,28 @@ router.post(
 // passkey register verfiy
 router.post("/2fa/register/passkeys", passkeyRegisterVerify);
 
+/**
+ * link account
+ */
+
+router.post(
+  "/link/google",
+  validateInput(loginWithGoogleValidation),
+  connectAccountWithGoogle,
+);
+
+router.post(
+  "/link/email",
+  validateInput(emailAndPWDValidation),
+  connectAccountWithEmail,
+);
+router.post(
+  "/link/email/verify-otp",
+  validateInput(verifyConnectEmail),
+  emailAccountVerifyByOtp,
+);
+//  valid parms
+router.param("id", paramsValidation);
+
+router.delete("/unlink/:id", disConnectAccount);
 export default router;

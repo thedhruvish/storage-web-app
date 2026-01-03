@@ -20,4 +20,8 @@ export const DRIVE_SCOPES = [
 
 export const getDriveClient = (auth) => google.drive({ version: "v3", auth });
 
-export const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+export const googleClient = new OAuth2Client(
+  CLIENT_ID,
+  CLIENT_SECRET,
+  "postmessage",
+);
