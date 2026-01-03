@@ -1,10 +1,13 @@
 import nodemailer from "nodemailer";
 import { randomInt } from "node:crypto";
-import Otp from "../models/Otp.model.js";
 import User from "../models/User.model.js";
-
 import { otpTemplate } from "../constants/otpMailTemplate.js";
 import ApiError from "../utils/ApiError.js";
+import {
+  deleteRedisKey,
+  getRedisValue,
+  setRedisValue,
+} from "./redis.service.js";
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
@@ -25,12 +28,12 @@ export const sendOtpToMail = async (userId) => {
   const user = await User.findById(userId).select({ email: 1 }).lean();
   if (!user) throw new ApiError(404, "User not found");
 
-  // delete exting otp to create by this user
-  await Otp.deleteMany({ userId });
-
   // genrator otp 6 digit
   const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
-  await Otp.create({ userId, otp });
+
+  await setRedisValue(`otp:${userId}`, otp, {
+    expiration: { type: "EX", value: 60 },
+  });
 
   // send to mail
   try {
@@ -47,11 +50,11 @@ export const sendOtpToMail = async (userId) => {
 };
 
 export const verifyMailOTP = async (userId, otp) => {
-  const optDoc = await Otp.findOne({ userId, otp });
+  const key = `otp:${userId}`;
+  const saveOTP = await getRedisValue(key);
 
-  if (!optDoc) {
+  if (!saveOTP || otp == !saveOTP) {
     throw new ApiError(400, "Invalid otp or It Expired");
   }
-  // delete after verfiy otp
-  await optDoc.deleteOne();
+  await deleteRedisKey(key);
 };

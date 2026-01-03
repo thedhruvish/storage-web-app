@@ -1,6 +1,5 @@
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
-import Otp from "../models/Otp.model.js";
 import { sendOtpToMail, verifyMailOTP } from "../services/mail.service.js";
 import {
   createAndCheckLimitSession,
@@ -27,7 +26,7 @@ import {
 import { SESSION_OPTIONS } from "../constants/constant.js";
 
 // register user
-export const registerWithEmail = async (req, res, next) => {
+export const registerWithEmail = async (req, res) => {
   await registerWithEmailService(req.body);
   res.status(201).json(new ApiResponse(201, "User registered successfully"));
 };
@@ -367,13 +366,7 @@ export const connectWithEmail = async (req, res) => {
 export const connectWithEmailVerifyOtp = async (req, res) => {
   const { otp, userId } = req.body;
 
-  const optDoc = await Otp.findOne({ userId, otp });
-
-  if (!optDoc) {
-    return res.status(400).json(new ApiError(400, "Invalid otp or It Expired"));
-  }
-  // delete after verfiy otp
-  await optDoc.deleteOne();
+  await verifyMailOTP(userId, otp);
   res.status(201).json(new ApiResponse(201, "SuccessFully Link Email Account"));
 };
 

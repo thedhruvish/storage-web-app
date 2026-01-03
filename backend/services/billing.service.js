@@ -1,7 +1,10 @@
 import Plan from "../models/Plan.model.js";
 import ApiError from "../utils/ApiError.js";
-import redisClient from "../config/redis-client.js";
-import { countCheckoutUrls } from "./redis.service.js";
+import {
+  countCheckoutUrls,
+  getRedisValue,
+  setRedisValue,
+} from "./redis.service.js";
 import {
   createStripeCheckoutSession,
   createStripeCoupons,
@@ -24,7 +27,7 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
     );
   }
 
-  const cachedUrl = await redisClient.get(`checkoutUrl:${userId}:${planId}`);
+  const cachedUrl = await getRedisValue(`checkoutUrl:${userId}:${planId}`);
   if (cachedUrl) return cachedUrl;
 
   const plan = await Plan.findById(planId);
@@ -40,7 +43,7 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
     },
   });
 
-  await redisClient.set(`checkoutUrl:${userId}:${planId}`, checkout.url, {
+  await setRedisValue(`checkoutUrl:${userId}:${planId}`, checkout.url, {
     expiration: { type: "EX", value: 3600 },
   });
 

@@ -1,8 +1,11 @@
-import redisClient from "../config/redis-client.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
-import { createAndCheckLimitSession } from "./redis.service.js";
+import {
+  createAndCheckLimitSession,
+  getRedisValue,
+  setRedisValue,
+} from "./redis.service.js";
 import ApiError from "../utils/ApiError.js";
 import {
   generateBackupCode,
@@ -39,8 +42,7 @@ export const setup2FA = async (userSession, method) => {
       : [];
 
     const options = await generateRegisterOptionInPasskey(user, passkeys);
-
-    await redisClient.set(`passkeys:${user._id}`, options.challenge, {
+    await setRedisValue(`passkeys:${user._id}`, options.challenge, {
       expiration: { type: "EX", value: 60 },
     });
 
@@ -111,7 +113,7 @@ export const loginWithTOTP = async ({ userId, token }) => {
 export const generateLoginChallenge = async (userId) => {
   const options = await genPasskeyOptions();
 
-  await redisClient.set(`passkeys-login:${userId}`, options.challenge, {
+  await setRedisValue(`passkeys-login:${userId}`, options.challenge, {
     expiration: { type: "EX", value: 60 },
   });
 
@@ -119,7 +121,7 @@ export const generateLoginChallenge = async (userId) => {
 };
 
 export const verifyLoginPasskey = async ({ response, userId }) => {
-  const expectedChallenge = await redisClient.get(`passkeys-login:${userId}`);
+  const expectedChallenge = await getRedisValue(`passkeys-login:${userId}`);
   if (!expectedChallenge) throw new ApiError(400, "Challenge expired");
 
   const user = await User.findById(userId).populate("twoFactorId");
@@ -162,7 +164,7 @@ export const verifyPasskeyRegistration = async (
   userSession,
   { friendlyName, response },
 ) => {
-  const expectedChallenge = await redisClient.get(
+  const expectedChallenge = await getRedisValue(
     `passkeys:${userSession._id.toString()}`,
   );
   if (!expectedChallenge) {
