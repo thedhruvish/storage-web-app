@@ -1,5 +1,12 @@
-
-import { generateLoginChallenge, loginWithTOTP, setup2FA, verifyLoginPasskey, verifyPasskeyRegistration, verifyTOTPSetup } from "../services/twofa.service.js";
+import { SESSION_OPTIONS } from "../constants/constant.js";
+import {
+  generateLoginChallenge,
+  loginWithTOTP,
+  setup2FA,
+  verifyLoginPasskey,
+  verifyPasskeyRegistration,
+  verifyTOTPSetup,
+} from "../services/twofa.service.js";
 import ApiResponse from "../utils/ApiResponse.js";
 
 export const twoFASetup = async (req, res) => {
@@ -19,7 +26,7 @@ export const passkeyRegisterVerify = async (req, res) => {
 
 export const twoFaLoginTotp = async (req, res) => {
   const session = await loginWithTOTP(req.body);
-  res.cookie("sessionId", session.cookie);
+  res.cookie("sessionId", session.cookie.value, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "Login success"));
 };
 
@@ -30,6 +37,6 @@ export const generatePasskeyChallenge = async (req, res) => {
 
 export const verifyPasskeyChallenge = async (req, res) => {
   const session = await verifyLoginPasskey(req.body);
-  res.cookie("sessionId", session.cookie);
+  res.cookie("sessionId", session.cookie.value, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "Login success"));
 };

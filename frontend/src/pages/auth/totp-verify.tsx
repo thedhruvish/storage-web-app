@@ -32,6 +32,9 @@ export function TotpVerify() {
     toast.promise(loginMutation.mutateAsync({ token: code, userId }), {
       loading: "Verifying...",
       success: () => {
+        localStorage.removeItem("userId");
+        localStorage.removeItem("isTotp");
+        localStorage.removeItem("isPasskey");
         navigate({ to: "/app" });
         return "Logged in successfully";
       },

@@ -1,4 +1,4 @@
-export type AuthProvider = "google" | "github" | "password";
+export type AuthProvider = "GOOGLE" | "GITHUB" | "EAMIL";
 
 export interface Session {
   id: string;

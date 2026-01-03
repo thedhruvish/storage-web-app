@@ -66,6 +66,10 @@ function PasskeyPage() {
         userId,
       });
 
+      localStorage.removeItem("userId");
+      localStorage.removeItem("isTotp");
+      localStorage.removeItem("isPasskey");
+
       setStep("success-passkey");
       setTimeout(() => {
         navigate({ to: "/app" });

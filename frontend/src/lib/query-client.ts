@@ -57,13 +57,21 @@ export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error) => {
       if (error instanceof AxiosError) {
-        if (error.response?.status === 403) {
+        if (error.response?.status === 401) {
+          toast.error("Session expired!");
+          useUserStore.getState().clearUser();
+          navigateTo(
+            "/auth/login?redirect=" + encodeURIComponent(window.location.href)
+          );
+        } else if (error.response?.status === 403) {
           toast.error("Session expired!");
           useUserStore.getState().clearUser();
           // Simple browser redirect ensures a clean state reset
           navigateTo(
             "/auth/login?redirect=" + encodeURIComponent(window.location.href)
           );
+        } else if (error.request.status === 429) {
+          navigateTo("/error/429");
         }
         if (error.code === "ERR_NETWORK") {
           toast.error("Server unreachable.");

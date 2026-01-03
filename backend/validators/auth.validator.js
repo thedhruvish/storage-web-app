@@ -26,11 +26,19 @@ export const reSendOtpValidation = z.object({
   userId: z.string("User Id is required"),
 });
 
-export const verifiyToken = reSendOtpValidation.extend({
+export const verifiyToken = z.object({
   token: z
     .string()
     .length(6, "OTP must be exactly 6 digits")
     .regex(/^\d{6}$/, "OTP must contain only digits"),
+});
+
+export const loginValidation = verifiyToken.extend({
+  userId: z.string("User Id is required"),
+});
+
+export const registerTOTPToken = verifiyToken.extend({
+  friendlyName: z.string(),
 });
 
 export const twoFaRegisterMethod = z.object({

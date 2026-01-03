@@ -17,8 +17,10 @@ import {
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
+  loginValidation,
   loginWithEmailValidation,
   loginWithGoogleValidation,
+  registerTOTPToken,
   registerWithEmailValidation,
   reSendOtpValidation,
   twoFaRegisterMethod,
@@ -69,7 +71,7 @@ router.get("/github/callback", callbackGithub);
 router.get("/github/link", connectWithGithub);
 
 // two fa auth login
-router.post("/2fa/login/totp", validateInput(verifiyToken), twoFaLoginTotp);
+router.post("/2fa/login/totp", validateInput(loginValidation), twoFaLoginTotp);
 
 router.post(
   "/2fa/login/passkey-challenge",
@@ -102,7 +104,7 @@ router.post(
 // totp verfiy to register
 router.post(
   "/2fa/register/totp",
-  validateInput(verifiyToken),
+  validateInput(registerTOTPToken),
   totpRegisterVerify,
 );
 

@@ -20,6 +20,7 @@ import {
   exstingAuthIdentity,
   getOneAuthIdentity,
 } from "../services/authIdentity.service.js";
+import { SESSION_OPTIONS } from "../constants/constant.js";
 
 // register user
 export const registerWithEmail = async (req, res, next) => {
@@ -49,12 +50,7 @@ export const loginWithEmail = async (req, res) => {
     );
   }
 
-  res.cookie("sessionId", result.sessionId, {
-    httpOnly: true,
-    secure: true,
-    signed: true,
-    maxAge: 24 * 60 * 60 * 1000,
-  });
+  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
 
   res.status(200).json(
     new ApiResponse(200, "Login successful", {
@@ -155,12 +151,7 @@ export const loginWithGoogle = async (req, res) => {
 
   const sessionId = await createAndCheckLimitSession(userId.toString());
 
-  res.cookie("sessionId", sessionId, {
-    httpOnly: true,
-    secure: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    signed: true,
-  });
+  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
 
   return res.status(200).json(
     new ApiResponse(
@@ -198,8 +189,9 @@ export const callbackGithub = async (req, res) => {
   const query = req.query;
 
   if (!query?.code) {
-
-    return res.redirect(`${process.env.FRONTEND_URL}/auth/github?error=${query?.error}&error_description=${query?.error_description}`);
+    return res.redirect(
+      `${process.env.FRONTEND_URL}/auth/github?error=${query?.error}&error_description=${query?.error_description}`,
+    );
   }
 
   const { providerId, accessToken, name, picture } = await getGithubUserDetails(
@@ -256,12 +248,7 @@ export const callbackGithub = async (req, res) => {
 
     const sessionId = await createAndCheckLimitSession(userId.toString());
 
-    res.cookie("sessionId", sessionId, {
-      httpOnly: true,
-      secure: true,
-      maxAge: 24 * 60 * 60 * 1000,
-      signed: true,
-    });
+    res.cookie("sessionId", sessionId, SESSION_OPTIONS);
     queryParms = `showSetUp2Fa=${showSetUp2Fa}`;
   } catch (error) {
     queryParms = "error=something want wrong Try agin";
@@ -275,12 +262,7 @@ export const callbackGithub = async (req, res) => {
 // login with github for the set cookie
 export const githubCookieSet = async (req, res) => {
   const { sessionId } = req.query;
-  res.cookie("sessionId", sessionId, {
-    httpOnly: true,
-    secure: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    signed: true,
-  });
+  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
   res.redirect(process.env.FRONTEND_URL);
 };
 
@@ -299,12 +281,7 @@ export const verfiyOtp = async (req, res) => {
   // genrate session
   const sessionId = await createAndCheckLimitSession(userId);
 
-  res.cookie("sessionId", sessionId, {
-    httpOnly: true,
-    secure: true,
-    maxAge: 24 * 60 * 60 * 1000,
-    signed: true,
-  });
+  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "User login Successfuly"));
 };
 

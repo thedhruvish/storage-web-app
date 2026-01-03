@@ -283,7 +283,7 @@ export function SecuritySettings({
               id='2fa-toggle'
               checked={isTwoFactorEnabled}
               onCheckedChange={() => {
-                if (twoFactor === null) {
+                if (twoFactor.length === 0) {
                   setIs2FADialogOpen(true);
                 } else {
                   setIsToggle2FAOpen(true);
@@ -447,7 +447,15 @@ export function SecuritySettings({
               Two-factor authentication adds an extra layer of security to your
               account by requiring more than just a password to log in.
             </p>
-            <Button onClick={() => setIsToggle2FAOpen(true)}>
+            <Button
+              onClick={() => {
+                if (twoFactor.length === 0) {
+                  setIs2FADialogOpen(true);
+                } else {
+                  setIsToggle2FAOpen(true);
+                }
+              }}
+            >
               Enable Two-Factor Authentication
             </Button>
           </div>

@@ -4,6 +4,15 @@ import User from "../models/User.model.js";
 import { verifyRegistrationResponse } from "@simplewebauthn/server";
 import { createAndCheckLimitSession } from "./redis.service.js";
 import ApiError from "../utils/ApiError.js";
+import {
+  generateBackupCode,
+  generateRegisterOptionInPasskey,
+  genPasskeyOptions,
+  genTOTPUrl,
+  isValidTotpToken,
+  verifyLoginPasskeyChallenge,
+} from "./twoStep.service.js";
+import { SESSION_OPTIONS } from "../constants/constant.js";
 
 export const setup2FA = async (userSession, method) => {
   const user = await User.findById(userSession._id);
@@ -12,11 +21,14 @@ export const setup2FA = async (userSession, method) => {
   if (method === "totp") {
     const totp = genTOTPUrl(user.email);
 
-    await TwoFa.findByIdAndUpdate(
-      user.twoFactorId,
-      { "totp.secret": totp.secret, isEnabled: true },
-      { upsert: true, new: true },
-    );
+    const twoFaObject = { "totp.secret": totp.secret, isEnabled: true };
+    if (user?.twoFactorId) {
+      await TwoFa.findByIdAndUpdate(user.twoFactor, twoFaObject);
+    } else {
+      const newTwoFa = await TwoFa.create(twoFaObject);
+      user.twoFactorId = newTwoFa._id;
+      await user.save();
+    }
 
     return totp;
   }
@@ -41,10 +53,12 @@ export const verifyTOTPSetup = async (userSession, { token, friendlyName }) => {
     path: "twoFactorId",
     select: "+totp.secret",
   });
-
+  console.log("run");
+  console.log(JSON.stringify(user, null, 2));
+  console.log("end");
   if (
     !isValidTotpToken({
-      secret: user.twoFactorId.totp.secret,
+      secret: user.twoFactorId?.totp.secret,
       token,
     })
   ) {
@@ -71,7 +85,9 @@ export const loginWithTOTP = async ({ userId, token }) => {
     path: "twoFactorId",
     select: "+totp.secret",
   });
-
+  if (!user.twoFactorId) {
+    throw new ApiError(400, "User not found");
+  }
   if (
     !isValidTotpToken({
       secret: user.twoFactorId.totp.secret,
@@ -87,7 +103,7 @@ export const loginWithTOTP = async ({ userId, token }) => {
     cookie: {
       name: "sessionId",
       value: sessionId,
-      options: { httpOnly: true, secure: true },
+      options: SESSION_OPTIONS,
     },
   };
 };
@@ -144,44 +160,63 @@ export const verifyLoginPasskey = async ({ response, userId }) => {
 
 export const verifyPasskeyRegistration = async (
   userSession,
-  { token, friendlyName },
+  { friendlyName, response },
 ) => {
+  const expectedChallenge = await redisClient.get(
+    `passkeys:${userSession._id.toString()}`,
+  );
+  if (!expectedChallenge) {
+    throw new ApiError(401, "2FA setup not initiated. Please Init first");
+  }
+
+  const verification = await verifyRegistrationResponse({
+    expectedChallenge,
+    response: response,
+    expectedOrigin: process.env.FRONTEND_URL,
+  });
+
+  if (!(verification.registrationInfo && verification.verified)) {
+    throw new ApiError(400, "Try Agin", { verified: false });
+  }
+  const { credential } = verification.registrationInfo;
   const user = await User.findById(userSession._id).populate({
     path: "twoFactorId",
-    select: "+totp.secret",
+    select: "recoveryCodes",
   });
-  if (!user || !user.twoFactorId) {
-    return res
-      .status(400)
-      .json(
-        new ApiError(
-          400,
-          "2FA setup not initiated. Please generate a QR code first.",
-        ),
-      );
+
+  const passkeyObj = {
+    credentialID: credential.id,
+    credentialPublicKey: Buffer.from(credential.publicKey),
+    counter: credential.counter,
+    transports: credential.transports,
+    friendlyName: friendlyName,
+  };
+  let plainTextCodes;
+  if (user?.twoFactorId._id) {
+    // is exsting mean they alredy setup the TOTP than just update
+    await TwoFa.findByIdAndUpdate(user.twoFactorId, {
+      $push: {
+        passkeys: passkeyObj,
+      },
+      $set: { isEnabled: true },
+    });
+  } else {
+    const genCode = await generateBackupCode();
+    const newTwoFa = await TwoFa.create({
+      passkeys: passkeyObj,
+      isEnabled: true,
+
+      recoveryCodes: genCode.hashedCodes,
+    });
+    plainTextCodes = genCode.plainTextCodes;
+    user.twoFactorId = newTwoFa._id;
+    await user.save();
   }
-  const isValidTotp = isValidTotpToken({
-    secret: user.twoFactorId.totp.secret,
-    token,
-  });
-  if (!isValidTotp) {
-    return res
-      .status(401)
-      .json(new ApiError(401, "Your Token is expiry or invalid"));
-  }
-  const { hashedCodes, plainTextCodes } = await generateBackupCode();
-  await TwoFa.findByIdAndUpdate(user.twoFactorId._id, {
-    "totp.isVerified": true,
-    isEnabled: true,
-    "totp.friendlyName": friendlyName,
-    recoveryCodes: hashedCodes,
-  });
-  res.status(200).json(
-    new ApiResponse(200, "2FA Enabled Successfully", {
-      verified: true,
-      recoveryCodes: plainTextCodes,
-      message:
-        "Please save these recovery codes safely. You will not see them again.",
-    }),
-  );
+
+  return {
+    verified: true,
+    plainTextCodes,
+    message:
+      "Please save these recovery codes safely. You will not see them again.",
+  };
 };

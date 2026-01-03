@@ -6,13 +6,15 @@ export const checkAuth = async (req, res, next) => {
   const { sessionId } = req.signedCookies;
   // check valid id
   if (!sessionId) {
-    return res.status(401).json(new ApiError(401, "Unauthorized"));
+    res.clearCookie("session");
+    return res.status(401).json(new ApiError(401, "Unauthorized 1"));
   }
 
   const userId = await getRedisValue(`session:${sessionId}`);
 
   if (!userId) {
-    return res.status(401).json(new ApiError(401, "Unauthorized"));
+    res.clearCookie("session");
+    return res.status(401).json(new ApiError(401, "Unauthorized 2"));
   }
 
   let user = await getRedisValue(`user:${userId}`);
