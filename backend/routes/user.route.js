@@ -8,7 +8,10 @@ import {
   listAllSubscription,
   toggleSubscriptionStatus,
   updatePaymentMethodDetails,
+  dangerZoneControll,
 } from "../controllers/account.controller.js";
+import { validateInput } from "../utils/validateInput.js";
+import { dangerZoneValidator } from "../validators/auth.validator.js";
 
 const router = express.Router();
 
@@ -32,5 +35,12 @@ router.get("/update-payment-details", updatePaymentMethodDetails);
 router.put("/subscriptions/:id/toggle", toggleSubscriptionStatus);
 
 router.get("/subscriptions/:id/history", getUserSubscriptionHistory);
+
+// Deactivate Account  /  Wipe Data  / Permanently remove  account.
+router.post(
+  "/danger-zone",
+  validateInput(dangerZoneValidator),
+  dangerZoneControll,
+);
 
 export default router;

@@ -7,7 +7,11 @@ import {
   getSettingInfoService,
   deleteAuthMethodService,
   toggleTwoFaService,
+  deactivateAccount,
+  wipeAllData,
+  deleteAccount,
 } from "../services/account.service.js";
+import ApiError from "../utils/ApiError.js";
 
 // subscriptions
 export const listAllSubscription = async (req, res) => {
@@ -68,4 +72,20 @@ export const toggleTwoFaAuth = async (req, res) => {
   await toggleTwoFaService(req.params.id);
 
   res.status(200).json(new ApiResponse(200, "successfully Toggle 2 fa auth"));
+};
+
+// Danger zone
+export const dangerZoneControll = async (req, res) => {
+  const { method } = req.body;
+  const userId = req.user._id;
+  if (method === "deactivate") {
+    await deactivateAccount({ userId });
+  } else if (method === "wipe") {
+    await wipeAllData({ userId });
+  } else if (method === "delete") {
+    await deleteAccount({ userId });
+  } else {
+    return res.status(400).json(new ApiError(400, "Select Valid Option"));
+  }
+  res.status(200).json(new ApiResponse(200, "successfully Complete"));
 };

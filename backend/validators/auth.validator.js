@@ -56,3 +56,9 @@ export const twoFaRegisterMethod = z.object({
     error: "invalid method type",
   }),
 });
+
+export const dangerZoneValidator = z.object({
+  method: z.enum(["deactivate", "wipe", "delete"], {
+    error: "invalid method type",
+  }),
+});

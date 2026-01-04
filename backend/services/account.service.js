@@ -1,10 +1,15 @@
+import mongoose from "mongoose";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
+import Directory from "../models/Directory.model.js";
+import Document from "../models/Document.model.js";
 import SessionHistory from "../models/SessionHistory.model.js";
 import Subscription from "../models/Subscription.model.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
 import ApiError from "../utils/ApiError.js";
+import { deleteAllUserSessions } from "./redis.service.js";
+import { bulkDeleteS3Objects } from "./s3.service.js";
 import {
   createCustomerPortalSession,
   pauseStripeSubscription,
@@ -170,4 +175,68 @@ export const toggleTwoFaService = async (twoFaId) => {
       },
     },
   ]);
+};
+
+export const deactivateAccount = async ({ userId }) => {
+  await deleteAllUserSessions(userId);
+  await User.findByIdAndUpdate(userId, { isDeleted: true });
+};
+
+export const wipeAllData = async ({ userId }) => {
+  const session = await mongoose.startSession();
+  let s3ObjectsToDelete = [];
+
+  try {
+    await session.withTransaction(() => {
+      return Document.find({ userId })
+        .select("_id extension")
+        .session(session)
+        .lean()
+        .then((documents) => {
+          s3ObjectsToDelete = documents.map((file) => ({
+            Key: `${file._id}${file.extension}`,
+          }));
+
+          return Promise.all([
+            Directory.deleteMany(
+              { userId, parentDirId: { $ne: null } },
+              { session },
+            ),
+
+            Document.deleteMany({ userId }, { session }),
+
+            Directory.findOneAndUpdate(
+              { userId, parentDirId: null },
+              { "metaData.size": 0 },
+              { session },
+            ),
+          ]);
+        });
+    });
+
+    // ✅ External side-effect AFTER transaction commits
+    if (s3ObjectsToDelete.length > 0) {
+      await bulkDeleteS3Objects(s3ObjectsToDelete);
+    }
+  } catch (error) {
+    throw new ApiError(400, error.message);
+  } finally {
+    session.endSession();
+  }
+};
+
+export const deleteAccount = async ({ userId }) => {
+  const session = await mongoose.startSession();
+  try {
+    await session.withTransaction(async () => {
+      await Promise.all([
+        deactivateAccount({ userId }),
+        wipeAllData({ userId }),
+      ]);
+    });
+  } catch (error) {
+    throw new ApiError(400, "Error: to Delete Account");
+  } finally {
+    session.endSession();
+  }
 };

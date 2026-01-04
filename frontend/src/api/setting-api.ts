@@ -108,3 +108,14 @@ export const useToggleTwoFactor = () => {
     },
   });
 };
+
+export const useDangerZone = () => {
+  return useMutation({
+    mutationFn: async (method: string) => {
+      await axiosClient.post(`/user/danger-zone`, { method });
+    },
+    onSuccess: () => {
+      window.location.reload();
+    },
+  });
+};
