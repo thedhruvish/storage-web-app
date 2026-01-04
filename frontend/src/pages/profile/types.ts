@@ -71,5 +71,5 @@ export interface UserProfile {
   name: string;
   email: string;
   avatarUrl?: string;
-  isPremium: boolean; // To trigger the rounded ring
+  isPremium: boolean;
 }

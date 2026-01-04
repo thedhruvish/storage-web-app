@@ -1,4 +1,3 @@
-
 function GIcon() {
   return (
     <svg className='h-6 w-6' viewBox='0 0 24 24'>
