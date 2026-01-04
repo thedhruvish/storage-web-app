@@ -25,7 +25,7 @@ export const passkeyRegisterVerify = async (req, res) => {
 };
 
 export const twoFaLoginTotp = async (req, res) => {
-  const session = await loginWithTOTP(req.body);
+  const session = await loginWithTOTP(req);
   res.cookie("sessionId", session.cookie.value, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "Login success"));
 };
@@ -36,7 +36,7 @@ export const generatePasskeyChallenge = async (req, res) => {
 };
 
 export const verifyPasskeyChallenge = async (req, res) => {
-  const session = await verifyLoginPasskey(req.body);
+  const session = await verifyLoginPasskey(req);
   res.cookie("sessionId", session.cookie.value, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "Login success"));
 };

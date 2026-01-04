@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import { sendOtpToMail, verifyMailOTP } from "../services/mail.service.js";
 import {
   createAndCheckLimitSession,
+  deleteAllUserSessions,
   deleteRedisKey,
 } from "../services/redis.service.js";
 import {
@@ -33,7 +34,7 @@ export const registerWithEmail = async (req, res) => {
 
 // login user
 export const loginWithEmail = async (req, res) => {
-  const result = await loginWithEmailService(req.body);
+  const result = await loginWithEmailService(req);
 
   if (result.step === "2FA") {
     return res.status(200).json(
@@ -52,7 +53,7 @@ export const loginWithEmail = async (req, res) => {
       }),
     );
   }
-
+  console.log(result);
   res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
 
   res.status(200).json(
@@ -90,7 +91,7 @@ export const logout = async (req, res) => {
 
 // logout all devices
 export const logoutAllDevices = async (req, res) => {
-  await createAndCheckLimitSession(req.user._id, 0);
+  await deleteAllUserSessions(req.user._id);
   res
     .status(200)
     .json(new ApiResponse(200, "User logout for all devices Successfuly"));
@@ -152,7 +153,10 @@ export const loginWithGoogle = async (req, res) => {
     }
   }
 
-  const sessionId = await createAndCheckLimitSession(userId.toString());
+  const sessionId = await createAndCheckLimitSession({
+    req,
+    userId: userId.toString(),
+  });
 
   res.cookie("sessionId", sessionId, SESSION_OPTIONS);
 
@@ -249,7 +253,10 @@ export const callbackGithub = async (req, res) => {
       }
     }
 
-    const sessionId = await createAndCheckLimitSession(userId.toString());
+    const sessionId = await createAndCheckLimitSession({
+      userId: userId.toString(),
+      req,
+    });
 
     res.cookie("sessionId", sessionId, SESSION_OPTIONS);
     queryParms = `showSetUp2Fa=${showSetUp2Fa}`;
@@ -275,7 +282,7 @@ export const verfiyOtp = async (req, res) => {
 
   await verifyMailOTP(userId, otp);
   // genrate session
-  const sessionId = await createAndCheckLimitSession(userId);
+  const sessionId = await createAndCheckLimitSession({ userId, req });
 
   res.cookie("sessionId", sessionId, SESSION_OPTIONS);
   res.status(200).json(new ApiResponse(200, "User login Successfuly"));

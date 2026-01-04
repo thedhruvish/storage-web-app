@@ -1,9 +1,9 @@
 import Plan from "../models/Plan.model.js";
 import ApiError from "../utils/ApiError.js";
 import {
-  countCheckoutUrls,
+  countUserCheckoutUrls,
+  createCheckoutUrl,
   getRedisValue,
-  setRedisValue,
 } from "./redis.service.js";
 import {
   createStripeCheckoutSession,
@@ -19,7 +19,7 @@ import {
 export const generateCheckoutUrl = async ({ planId, user }) => {
   const userId = user._id.toString();
 
-  const count = await countCheckoutUrls(`checkoutUrl:${userId}:*`);
+  const count = await countUserCheckoutUrls(userId);
   if (count >= 5) {
     throw new ApiError(
       400,
@@ -27,7 +27,8 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
     );
   }
 
-  const cachedUrl = await getRedisValue(`checkoutUrl:${userId}:${planId}`);
+  const cacheKey = `checkoutUrl:${userId}:${planId}`;
+  const cachedUrl = await getRedisValue(cacheKey);
   if (cachedUrl) return cachedUrl;
 
   const plan = await Plan.findById(planId);
@@ -42,10 +43,7 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
       userId,
     },
   });
-
-  await setRedisValue(`checkoutUrl:${userId}:${planId}`, checkout.url, {
-    expiration: { type: "EX", value: 3600 },
-  });
+  await createCheckoutUrl(userId, planId, checkout.url);
 
   return checkout.url;
 };

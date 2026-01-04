@@ -50,9 +50,13 @@ export const updatePaymentMethodDetails = async (req, res) => {
 
 // settings
 export const settingInfo = async (req, res) => {
+  const { sessionId } = req.signedCookies;
+
   const info = await getSettingInfoService(req.user._id);
 
-  res.status(200).json(new ApiResponse(200, "Get Setting info", info));
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Get Setting info", { ...info, sessionId }));
 };
 
 // auth methods

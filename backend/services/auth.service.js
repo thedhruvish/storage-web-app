@@ -41,11 +41,8 @@ export const registerWithEmailService = async ({
   );
 };
 
-export const loginWithEmailService = async ({
-  email,
-  password,
-  turnstileToken,
-}) => {
+export const loginWithEmailService = async (req) => {
+  const { email, password, turnstileToken } = req.body;
   await validTurnstileToken(turnstileToken);
 
   const authIdentity = await getOneAuthIdentity({
@@ -78,9 +75,10 @@ export const loginWithEmailService = async ({
     return { step: "OTP", userId: authIdentity.userId._id };
   }
 
-  const sessionId = await createAndCheckLimitSession(
-    authIdentity.userId._id.toString(),
-  );
+  const sessionId = await createAndCheckLimitSession({
+    userId: authIdentity.userId._id.toString(),
+    req,
+  });
 
   return {
     step: "LOGIN",

@@ -4,16 +4,18 @@ import { getRedisValue, setRedisValue } from "../services/redis.service.js";
 
 export const checkAuth = async (req, res, next) => {
   const { sessionId } = req.signedCookies;
+
   // check valid id
   if (!sessionId) {
-    res.clearCookie("session");
+    console.log("not defind id");
+    res.clearCookie("sessionId");
     return res.status(401).json(new ApiError(401, "Unauthorized 1"));
   }
 
   const userId = await getRedisValue(`session:${sessionId}`);
 
   if (!userId) {
-    res.clearCookie("session");
+    res.clearCookie("sessionId");
     return res.status(401).json(new ApiError(401, "Unauthorized 2"));
   }
 
@@ -32,6 +34,9 @@ export const checkAuth = async (req, res, next) => {
         role: user.role,
         maxStorageBytes: user.maxStorageBytes,
       }),
+      {
+        expiration: { type: "EX", value: 3600 },
+      },
     );
   }
   req.user = {

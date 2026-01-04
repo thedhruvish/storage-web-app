@@ -1,5 +1,5 @@
 import User from "../models/User.model.js";
-import { createAndCheckLimitSession } from "../services/redis.service.js";
+import { deleteAllUserSessions } from "../services/redis.service.js";
 
 export const getAllUsersService = async () => {
   return await User.find({});
@@ -10,7 +10,7 @@ export const changeRole = async ({ userId, role }) => {
 };
 
 export const logoutAllDevicesService = async (userId) => {
-  await createAndCheckLimitSession(userId, 0);
+  await deleteAllUserSessions(userId, 0);
 };
 
 export const softDeleteOrRecoverUserService = async ({ userId, isDeleted }) => {

@@ -82,7 +82,8 @@ export const verifyTOTPSetup = async (userSession, { token, friendlyName }) => {
   };
 };
 
-export const loginWithTOTP = async ({ userId, token }) => {
+export const loginWithTOTP = async (req) => {
+  const { userId, token } = req.body;
   const user = await User.findById(userId).populate({
     path: "twoFactorId",
     select: "+totp.secret",
@@ -99,7 +100,10 @@ export const loginWithTOTP = async ({ userId, token }) => {
     throw new ApiError(401, "Invalid OTP");
   }
 
-  const sessionId = await createAndCheckLimitSession(user.id);
+  const sessionId = await createAndCheckLimitSession({
+    req,
+    userId: user._id.toString(),
+  });
 
   return {
     cookie: {
@@ -120,7 +124,8 @@ export const generateLoginChallenge = async (userId) => {
   return options;
 };
 
-export const verifyLoginPasskey = async ({ response, userId }) => {
+export const verifyLoginPasskey = async (req) => {
+  const { response, userId } = req.body;
   const expectedChallenge = await getRedisValue(`passkeys-login:${userId}`);
   if (!expectedChallenge) throw new ApiError(400, "Challenge expired");
 
@@ -149,7 +154,10 @@ export const verifyLoginPasskey = async ({ response, userId }) => {
     },
   );
 
-  const sessionId = await createAndCheckLimitSession(user.id);
+  const sessionId = await createAndCheckLimitSession({
+    userId: user.id,
+    req,
+  });
 
   return {
     cookie: {

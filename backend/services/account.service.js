@@ -1,5 +1,6 @@
 import { LOGIN_PROVIDER } from "../constants/constant.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
+import SessionHistory from "../models/SessionHistory.model.js";
 import Subscription from "../models/Subscription.model.js";
 import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
@@ -62,11 +63,29 @@ export const generateCustomerPortalService = async (userId) => {
 
 // settings
 export const getSettingInfoService = async (userId) => {
-  const userInfo = await User.findById(userId).populate("twoFactorId");
-  const authenticate = await AuthIdentity.find({ userId: userInfo._id }).select(
-    "-userId -createdAt -updatedAt -__v",
+  const userInfoPromise = User.findById(userId).populate("twoFactorId");
+
+  const authenticatePromise = AuthIdentity.find({
+    userId,
+  }).select("-userId -createdAt -updatedAt -__v");
+
+  const sessionHistoryPromise = SessionHistory.find({
+    userId,
+  }).select("-userId -updatedAt -__v");
+
+  const isPremiumPromise = Subscription.exists({
+    userId,
+    status: "active",
+  });
+
+  const [authenticate, sessionHistory, userInfo, isPremium] = await Promise.all(
+    [
+      authenticatePromise,
+      sessionHistoryPromise,
+      userInfoPromise,
+      isPremiumPromise,
+    ],
   );
-  if (!userInfo) throw new ApiError(404, "User not found");
 
   let passkey = [];
   let isAllowedNewTOTP = true;
@@ -88,11 +107,6 @@ export const getSettingInfoService = async (userId) => {
     isAllowedNewTOTP = false;
   }
 
-  const isPremium = await Subscription.exists({
-    userId,
-    status: "active",
-  });
-
   const connectedAccounts = LOGIN_PROVIDER.map((method) => ({
     provider: method,
     email:
@@ -108,6 +122,7 @@ export const getSettingInfoService = async (userId) => {
   return {
     twoFactor: passkey,
     authenticate,
+    sessionHistory,
     twoFactorId: userInfo?.twoFactorId?._id,
     connectedAccounts,
     isTwoFactorEnabled: userInfo?.twoFactorId?.isEnabled,

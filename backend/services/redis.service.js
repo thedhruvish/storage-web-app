@@ -1,77 +1,115 @@
 import redisClient from "../config/redis-client.js";
-import crypto from "crypto";
+import SessionHistory from "../models/SessionHistory.model.js";
+import { getDeviceInfoFromRequest } from "../utils/deviceInfo.js";
+import { getLocationInfo } from "../utils/locationInfo.js";
 
-export const createAndCheckLimitSession = async (userId, limitDevices = 3) => {
-  const sessionUUID = crypto.randomUUID();
-  const sessionKey = `session:${sessionUUID}`;
+export const createAndCheckLimitSession = async ({
+  userId,
+  req,
+  limitDevices = 3,
+}) => {
+  const deviceInfo = getDeviceInfoFromRequest(req);
+  const locationInfo = await getLocationInfo(deviceInfo.ipAddress);
+  const zsetKey = `user:sessions:${userId}`;
+  const now = Date.now();
+  const SESSION_TTL = 24 * 60 * 60;
+  console.log(JSON.stringify(deviceInfo, null, 2));
+  const newSession = await SessionHistory.create({
+    userId,
+    isActive: true,
+    location: locationInfo,
+    ipAddress: deviceInfo.ipAddress,
+    device: {
+      browser: deviceInfo.device.browser,
+      os: deviceInfo.device.os,
+      type: deviceInfo.device.type,
+    },
+    userAgent: deviceInfo.userAgent,
+  });
 
-  let cursor = "0";
-  let userSessions = [];
+  const sessionId = newSession._id.toString();
+  const sessionKey = `session:${sessionId}`;
 
-  // Scan only session:* keys
-  do {
-    const { cursor: nextCursor, keys } = await redisClient.scan(cursor, {
-      MATCH: "session:*",
-      COUNT: 100,
-    });
-    cursor = nextCursor;
+  // create a new session
+  await redisClient
+    .multi()
+    .zAdd(zsetKey, {
+      score: now,
+      value: sessionId,
+    })
+    .set(sessionKey, userId, {
+      expiration: {
+        type: "EX",
+        value: SESSION_TTL,
+      },
+    })
+    .expire(zsetKey, SESSION_TTL)
+    .exec();
 
-    for (const key of keys) {
-      const value = await redisClient.get(key);
-      if (value === userId) {
-        if (limitDevices === 0) {
-          await redisClient.del(key);
-        } else {
-          userSessions.push(key);
-        }
-      }
-    }
-  } while (cursor !== "0");
+  // count session
+  const sessionCount = await redisClient.zCard(zsetKey);
+  let sessionToRemove = [];
 
-  if (userSessions.length >= limitDevices) {
-    // Remove the oldest session
-    const keyToRemove = userSessions[0];
-    await redisClient.del(keyToRemove);
+  // get the delete session keys
+  if (sessionCount === 0) {
+    sessionToRemove = await redisClient.zRange(zsetKey, 0, -2);
+  } else {
+    const excess = sessionCount - limitDevices;
+    sessionToRemove = await redisClient.zRange(zsetKey, 0, excess - 1);
   }
 
-  await redisClient.set(sessionKey, userId, { EX: 24 * 60 * 60 });
+  // delete older sesion key
+  if (sessionToRemove.length > 0) {
+    const cleanup = redisClient.multi();
 
-  return sessionUUID;
+    cleanup.zRem(zsetKey, ...sessionToRemove);
+    sessionToRemove.forEach((id) => cleanup.del(`session:${id}`));
+    await cleanup.exec();
+
+    SessionHistory.updateMany(
+      { _id: { $in: sessionToRemove } },
+      { $set: { isActive: false } },
+    ).catch(console.error);
+  }
+  return sessionId;
 };
 
-export const deleteAllUserSessions = async (userId) => {
-  let cursor = "0";
+export const deleteAllUserSessions = async (
+  userId,
+  keepSessionId = undefined,
+) => {
+  const zsetKey = `user:sessions:${userId}`;
+  const sessionIds = await redisClient.zRange(zsetKey, 0, -1);
 
-  do {
-    const { cursor: nextCursor, keys } = await redisClient.scan(cursor, {
-      MATCH: "session:*",
-      COUNT: 100,
-    });
-    cursor = nextCursor;
+  const toRemove = sessionIds.filter((id) => id !== keepSessionId);
+  if (!toRemove.length) return;
 
-    for (const key of keys) {
-      const value = await redisClient.get(key);
-      if (value === userId) {
-        await redisClient.del(key);
-      }
-    }
-  } while (cursor !== "0");
+  const multi = redisClient.multi();
+  multi.zRem(zsetKey, ...toRemove);
+  toRemove.forEach((id) => multi.del(`session:${id}`));
+  await multi.exec();
+
+  SessionHistory.updateMany(
+    { _id: { $in: toRemove } },
+    { $set: { isActive: false } },
+  ).catch(console.error);
 };
 
-export const countCheckoutUrls = async (MATCH) => {
-  let cursor = "0";
-  let total = 0;
-  do {
-    const { cursor: nextCursor, keys } = await redisClient.scan(cursor, {
-      MATCH,
-      COUNT: 100,
-    });
+export const countUserCheckoutUrls = async (userId) => {
+  return Number(await redisClient.get(`checkout:url:count:${userId}`)) || 0;
+};
 
-    total += keys.length;
-    cursor = nextCursor;
-  } while (cursor !== "0");
+export const createCheckoutUrl = async (userId, planId, url) => {
+  const key = `checkoutUrl:${userId}:${planId}`;
 
-  return total;
+  const exists = await redisClient.exists(key);
+  if (exists) return;
+
+  await redisClient
+    .multi()
+    .set(key, url, { expiration: { type: "EX", value: 3600 } })
+    .incr("checkout:url:count")
+    .exec();
 };
 
 export const deleteRedisKey = async (key) => {
