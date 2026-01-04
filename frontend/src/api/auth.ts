@@ -174,3 +174,15 @@ export const useDisconnectLinkedAccount = () => {
     },
   });
 };
+
+export const useDeleteSession = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id?: string) => {
+      await axiosClient.delete(`/auth/session/${id ? id : ""}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
+    },
+  });
+};

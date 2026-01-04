@@ -8,11 +8,6 @@ import {
   deleteAuthMethodService,
   toggleTwoFaService,
 } from "../services/account.service.js";
-import {
-  accConnectEmail,
-  accConnectGoogle,
-  verifyAccConnectOtp,
-} from "../services/auth.service.js";
 
 // subscriptions
 export const listAllSubscription = async (req, res) => {

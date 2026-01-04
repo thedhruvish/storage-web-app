@@ -67,7 +67,7 @@ export const getSettingInfoService = async (userId) => {
 
   const authenticatePromise = AuthIdentity.find({
     userId,
-  }).select("-userId -createdAt -updatedAt -__v");
+  }).select("-userId -createdAt -updatedAt -__v -userAgent");
 
   const sessionHistoryPromise = SessionHistory.find({
     userId,

@@ -4,7 +4,6 @@ import { BackupData } from "@/pages/profile/backup-data";
 import { DangerZone } from "@/pages/profile/danger-zone";
 import { ProfileHeader } from "@/pages/profile/profile-header";
 import { SecuritySettings } from "@/pages/profile/security-settings";
-import type { Session } from "@/pages/profile/types";
 import { useGetInfoOnSetting } from "@/api/setting-api";
 
 export const Route = createFileRoute("/app/setting/profile")({
@@ -14,30 +13,13 @@ export const Route = createFileRoute("/app/setting/profile")({
 function RouteComponent() {
   const { data, isPending } = useGetInfoOnSetting();
 
-  const sessions: Session[] = [
-    {
-      id: "1",
-      deviceType: "desktop",
-      location: "San Francisco, US",
-      browserOS: "Chrome on macOS",
-      isCurrent: true,
-      lastActive: "Now",
-    },
-    {
-      id: "2",
-      deviceType: "mobile",
-      location: "San Francisco, US",
-      browserOS: "Safari on iPhone 15",
-      isCurrent: false,
-      lastActive: "2 hours ago",
-    },
-  ];
-
   if (isPending) {
     return <div>Loading...</div>;
   }
 
   const userData = data?.data.data;
+
+  // userData.sessionHistory[]
   return (
     <div className='flex flex-col gap-6 p-4 md:p-8 w-full max-w-7xl mx-auto'>
       <ProfileHeader user={userData?.user} />
@@ -51,13 +33,15 @@ function RouteComponent() {
             twoFactorId={userData.twoFactorId}
             isAllowedNewTOTP={userData.isAllowedNewTOTP}
             authenticate={userData.authenticate}
-            userId={userData.user._id}
           />
         </div>
 
         {/* Right Column */}
         <div className='md:col-span-1 lg:col-span-2 space-y-6'>
-          <ActiveSessions sessions={sessions} />
+          <ActiveSessions
+            sessions={userData?.sessionHistory}
+            activeSessionId={userData.sessionId}
+          />
           <BackupData />
           <DangerZone />
         </div>

@@ -5,6 +5,7 @@ import {
   createAndCheckLimitSession,
   deleteAllUserSessions,
   deleteRedisKey,
+  deleteSingleUserSession,
 } from "../services/redis.service.js";
 import {
   accConnectEmail,
@@ -80,7 +81,10 @@ export const getCureentUser = async (req, res) => {
 // logout user
 export const logout = async (req, res) => {
   const { sessionId } = req.signedCookies;
-  await deleteRedisKey(`session:${sessionId}`);
+  await deleteSingleUserSession({
+    userId,
+    sessionId,
+  });
   res.clearCookie("sessionId", {
     httpOnly: true,
     secure: true,
@@ -400,5 +404,21 @@ export const emailAccountVerifyByOtp = async (req, res) => {
 
 export const disConnectAccount = async (req, res) => {
   await disConnectLinkAccount(req.params.id);
-  res.status(201).json(new ApiResponse(200, "Account UnLink Successfully"));
+  res.status(200).json(new ApiResponse(200, "Account UnLink Successfully"));
+};
+
+export const deleteSession = async (req, res) => {
+  const sessionId = req.params?.id;
+  const userId = req.user._id.toString();
+  if (sessionId) {
+    await deleteSingleUserSession({
+      userId,
+      sessionId,
+    });
+  } else {
+    const { sessionId } = req.signedCookies;
+
+    await deleteAllUserSessions(userId, sessionId);
+  }
+  res.status(200).json(new ApiResponse(200, "Success Logout"));
 };

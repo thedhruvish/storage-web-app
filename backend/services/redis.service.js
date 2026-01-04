@@ -10,10 +10,12 @@ export const createAndCheckLimitSession = async ({
 }) => {
   const deviceInfo = getDeviceInfoFromRequest(req);
   const locationInfo = await getLocationInfo(deviceInfo.ipAddress);
+
   const zsetKey = `user:sessions:${userId}`;
   const now = Date.now();
   const SESSION_TTL = 24 * 60 * 60;
-  console.log(JSON.stringify(deviceInfo, null, 2));
+
+  // Create DB session
   const newSession = await SessionHistory.create({
     userId,
     isActive: true,
@@ -30,47 +32,42 @@ export const createAndCheckLimitSession = async ({
   const sessionId = newSession._id.toString();
   const sessionKey = `session:${sessionId}`;
 
-  // create a new session
+  // Save in Redis
   await redisClient
     .multi()
-    .zAdd(zsetKey, {
-      score: now,
-      value: sessionId,
-    })
+    .zAdd(zsetKey, { score: now, value: sessionId })
     .set(sessionKey, userId, {
-      expiration: {
-        type: "EX",
-        value: SESSION_TTL,
-      },
+      expiration: { type: "EX", value: SESSION_TTL },
     })
     .expire(zsetKey, SESSION_TTL)
     .exec();
 
-  // count session
+  // Count sessions
   const sessionCount = await redisClient.zCard(zsetKey);
-  let sessionToRemove = [];
 
-  // get the delete session keys
-  if (sessionCount === 0) {
-    sessionToRemove = await redisClient.zRange(zsetKey, 0, -2);
-  } else {
+  // 🚨 Only remove if limit exceeded
+  if (sessionCount > limitDevices) {
     const excess = sessionCount - limitDevices;
-    sessionToRemove = await redisClient.zRange(zsetKey, 0, excess - 1);
+
+    // Get oldest sessions
+    const sessionsToRemove = await redisClient.zRange(zsetKey, 0, excess - 1);
+
+    if (sessionsToRemove.length) {
+      const cleanup = redisClient.multi();
+
+      cleanup.zRem(zsetKey, ...sessionsToRemove);
+      sessionsToRemove.forEach((id) => cleanup.del(`session:${id}`));
+
+      await cleanup.exec();
+
+      // Mark DB sessions inactive
+      SessionHistory.updateMany(
+        { _id: { $in: sessionsToRemove } },
+        { $set: { isActive: false } },
+      ).catch(console.error);
+    }
   }
 
-  // delete older sesion key
-  if (sessionToRemove.length > 0) {
-    const cleanup = redisClient.multi();
-
-    cleanup.zRem(zsetKey, ...sessionToRemove);
-    sessionToRemove.forEach((id) => cleanup.del(`session:${id}`));
-    await cleanup.exec();
-
-    SessionHistory.updateMany(
-      { _id: { $in: sessionToRemove } },
-      { $set: { isActive: false } },
-    ).catch(console.error);
-  }
   return sessionId;
 };
 
@@ -93,6 +90,19 @@ export const deleteAllUserSessions = async (
     { _id: { $in: toRemove } },
     { $set: { isActive: false } },
   ).catch(console.error);
+};
+
+export const deleteSingleUserSession = async ({ userId, sessionId }) => {
+  const zsetKey = `user:sessions:${userId}`;
+  const sessionKey = `session:${sessionId}`;
+
+  // remove from redis
+  await redisClient.multi().zRem(zsetKey, sessionId).del(sessionKey).exec();
+
+  // mark session inactive in DB
+  await SessionHistory.findByIdAndUpdate(sessionId, {
+    $set: { isActive: false },
+  }).catch(console.error);
 };
 
 export const countUserCheckoutUrls = async (userId) => {

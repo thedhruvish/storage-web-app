@@ -18,6 +18,7 @@ import {
   connectAccountWithEmail,
   connectAccountWithGoogle,
   disConnectAccount,
+  deleteSession,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
@@ -139,6 +140,8 @@ router.post(
 );
 //  valid parms
 router.param("id", paramsValidation);
+
+router.delete("/session/{:id}", deleteSession);
 
 router.delete("/unlink/:id", disConnectAccount);
 export default router;

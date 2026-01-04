@@ -1,12 +1,26 @@
 export type AuthProvider = "GOOGLE" | "GITHUB" | "EAMIL";
 
+export interface SessionLocation {
+  city: string | null;
+  regionName: string | null;
+  countryName: string | null;
+  countryCode: string | null;
+}
+
+export interface SessionDevice {
+  browser: string;
+  os: string;
+  type: string;
+}
+
 export interface Session {
-  id: string;
-  deviceType: "mobile" | "desktop" | "tablet";
-  location: string;
-  browserOS: string;
-  isCurrent: boolean;
-  lastActive: string;
+  location: SessionLocation;
+  _id: string;
+  device: SessionDevice;
+  ipAddress: string;
+  isActive: boolean;
+  lastActiveAt: string;
+  createdAt: string;
 }
 
 export type AuthMethodType = "totp" | "passkey";
@@ -45,12 +59,6 @@ export interface ConnectedAccount {
   email: string;
   lastUsed?: string;
 }
-// {
-//               "_id": "6957db3d9a7d1d3db8f2793c",
-//               "provider": "EAMIL",
-//               "providerEmail": "admin@gmail.com",
-//               "providerId": "admin@gmail.com"
-//           },
 
 export interface Authenticate {
   _id?: string;

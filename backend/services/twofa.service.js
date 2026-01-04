@@ -55,9 +55,7 @@ export const verifyTOTPSetup = async (userSession, { token, friendlyName }) => {
     path: "twoFactorId",
     select: "+totp.secret",
   });
-  console.log("run");
-  console.log(JSON.stringify(user, null, 2));
-  console.log("end");
+
   if (
     !isValidTotpToken({
       secret: user.twoFactorId?.totp.secret,

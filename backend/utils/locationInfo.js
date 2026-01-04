@@ -8,7 +8,7 @@ export const getLocationInfo = async (ip) => {
   try {
     const response = await fetch(url, options);
     const result = await response.json();
-    console.log(result);
+
     return {
       city: result.city,
       regionName: result.region_name,

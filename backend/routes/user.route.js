@@ -17,9 +17,9 @@ router.get("/settings/info", settingInfo);
 
 router.param("twoFactorId", paramsValidation);
 
-router.delete("/settings/:twofactor/:credentialOrName", deleteAuthMethod);
-
 router.param("id", paramsValidation);
+
+router.delete("/settings/:twofactor/:credentialOrName", deleteAuthMethod);
 
 router.put("/settings/2fa/:id/toggle", toggleTwoFaAuth);
 
