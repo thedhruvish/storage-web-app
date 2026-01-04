@@ -13,6 +13,7 @@ import { sendOtpToMail, verifyMailOTP } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
+import { authenticator } from "otplib";
 
 export const registerWithEmailService = async ({
   name,
@@ -49,7 +50,7 @@ export const loginWithEmailService = async (req) => {
     providerEmail: email,
     provider: LOGIN_PROVIDER[0],
   });
-  console.log(authIdentity);
+
   if (!authIdentity) throw new ApiError(401, "Invalidss email or password");
   if (authIdentity.userId.isDeleted)
     throw new ApiError(409, "Account deleted. Contact admin");
@@ -67,6 +68,14 @@ export const loginWithEmailService = async (req) => {
         userId: authIdentity.userId._id,
       },
     };
+  }
+  if (authIdentity.userId.metaData?.showSetUp2Fa) {
+    User.updateOne(
+      { _id: authIdentity.userId._id },
+      {
+        "metaData.showSetUp2Fa": false,
+      },
+    ).catch(console.log);
   }
 
   // OTP flow

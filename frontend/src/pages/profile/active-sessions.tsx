@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useDeleteSession } from "@/api/auth";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { SectionHeader } from "./section-header";
 import type { Session } from "./types";
@@ -79,66 +80,68 @@ export function ActiveSessions({
       />
 
       <div className='rounded-xl border bg-card shadow-sm overflow-hidden'>
-        <div className='divide-y'>
-          {sessions.map((session) => {
-            const isCurrent = session._id === activeSessionId;
-            const showDelete = session.isActive && !isCurrent;
+        <ScrollArea className='h-[320px] rounded-t-xl'>
+          <div className='divide-y'>
+            {sessions.map((session) => {
+              const isCurrent = session._id === activeSessionId;
+              const showDelete = session.isActive && !isCurrent;
 
-            return (
-              <div
-                key={session._id}
-                className='flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-4'
-              >
-                <div className='flex items-start gap-4'>
-                  <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground mt-1 sm:mt-0'>
-                    {getIcon(session.device.type || "desktop")}
-                  </div>
-                  <div className='space-y-1'>
-                    <p className='font-medium flex flex-wrap items-center gap-2'>
-                      {session.device.browser} on {session.device.os}
-                      {isCurrent ? (
-                        <span className='text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider'>
-                          Current Session
-                        </span>
-                      ) : session.isActive ? (
-                        <span className='text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider'>
-                          Active
-                        </span>
-                      ) : null}
-                    </p>
-                    <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground'>
-                      <div className='flex items-center gap-1'>
-                        <Globe className='h-3 w-3' />
-                        {session.location.city || session.location.regionName
-                          ? `${session.location.city ?? ""}${session.location.city && session.location.regionName ? ", " : ""}${session.location.regionName ?? ""}`
-                          : session.ipAddress}
-                      </div>
-                      <div className='flex items-center gap-1'>
-                        <Clock className='h-3 w-3' />
-                        {session.isActive
-                          ? "Active now"
-                          : `Last active ${dayjs(session.lastActiveAt).fromNow()}`}
+              return (
+                <div
+                  key={session._id}
+                  className='flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 gap-4'
+                >
+                  <div className='flex items-start gap-4'>
+                    <div className='flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-secondary text-secondary-foreground mt-1 sm:mt-0'>
+                      {getIcon(session.device.type || "desktop")}
+                    </div>
+                    <div className='space-y-1'>
+                      <p className='font-medium flex flex-wrap items-center gap-2'>
+                        {session.device.browser} on {session.device.os}
+                        {isCurrent ? (
+                          <span className='text-[10px] bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider'>
+                            Current Session
+                          </span>
+                        ) : session.isActive ? (
+                          <span className='text-[10px] bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider'>
+                            Active
+                          </span>
+                        ) : null}
+                      </p>
+                      <div className='flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground'>
+                        <div className='flex items-center gap-1'>
+                          <Globe className='h-3 w-3' />
+                          {session.location.city || session.location.regionName
+                            ? `${session.location.city ?? ""}${session.location.city && session.location.regionName ? ", " : ""}${session.location.regionName ?? ""}`
+                            : session.ipAddress}
+                        </div>
+                        <div className='flex items-center gap-1'>
+                          <Clock className='h-3 w-3' />
+                          {session.isActive
+                            ? "Active now"
+                            : `Last active ${dayjs(session.lastActiveAt).fromNow()}`}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
 
-                {showDelete && (
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 self-end sm:self-center'
-                    title='Revoke Session'
-                    onClick={() => deleteSessionHandler(session._id)}
-                  >
-                    <X className='h-4 w-4' />
-                    <span className='sr-only'>Revoke session</span>
-                  </Button>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {showDelete && (
+                    <Button
+                      variant='ghost'
+                      size='icon'
+                      className='h-8 w-8 text-muted-foreground hover:text-destructive shrink-0 self-end sm:self-center'
+                      title='Revoke Session'
+                      onClick={() => deleteSessionHandler(session._id)}
+                    >
+                      <X className='h-4 w-4' />
+                      <span className='sr-only'>Revoke session</span>
+                    </Button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </ScrollArea>
 
         <div className='p-4 bg-muted/30 border-t'>
           <Button

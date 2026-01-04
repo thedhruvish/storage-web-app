@@ -81,6 +81,7 @@ export const getCureentUser = async (req, res) => {
 // logout user
 export const logout = async (req, res) => {
   const { sessionId } = req.signedCookies;
+  const userId = req.user._id.toString();
   await deleteSingleUserSession({
     userId,
     sessionId,

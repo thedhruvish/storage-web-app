@@ -67,11 +67,13 @@ export const getSettingInfoService = async (userId) => {
 
   const authenticatePromise = AuthIdentity.find({
     userId,
-  }).select("-userId -createdAt -updatedAt -__v -userAgent");
+  }).select("-userId -createdAt -updatedAt -__v ");
 
   const sessionHistoryPromise = SessionHistory.find({
     userId,
-  }).select("-userId -updatedAt -__v");
+  })
+    .select("-userId -updatedAt -__v -userAgent")
+    .sort({ createdAt: -1 });
 
   const isPremiumPromise = Subscription.exists({
     userId,
