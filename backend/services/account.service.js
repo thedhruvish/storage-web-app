@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
+import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
@@ -194,7 +195,7 @@ export const wipeAllData = async ({ userId }) => {
         .lean()
         .then((documents) => {
           s3ObjectsToDelete = documents.map((file) => ({
-            Key: `${file._id}${file.extension}`,
+            Key: `${DIRECTORY_UPLOAD_FOLDER}${file._id}${file.extension}`,
           }));
 
           return Promise.all([

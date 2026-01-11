@@ -82,7 +82,8 @@ export const completeUpload = async (documentId) => {
  * Cancel upload
  */
 export const cancelUpload = async (documentId) => {
-  await Document.findByIdAndDelete(documentId);
+  const doc = await Document.findByIdAndDelete(documentId);
+  await deleteS3Object(`${doc._id}${doc.extension}`);
 };
 
 /**

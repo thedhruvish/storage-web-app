@@ -10,16 +10,21 @@ import { generateCloudfrontSignedUrl } from "./cloudforntCdn.service.js";
 import { s3Client } from "../lib/s3.client.js";
 import {
   BUCKET_NAME,
+  DIRECTORY_UPLOAD_FOLDER,
   PRESIGNED_URL_EXPIRATION,
 } from "../constants/s3.constants.js";
 
 const privateKey = process.env.PRIVATE_KEY;
 
-export const generatePresignedUrl = async (fileName, ContentType) => {
+export const generatePresignedUrl = async (
+  fileName,
+  ContentType,
+  parentDir = DIRECTORY_UPLOAD_FOLDER,
+) => {
   try {
     const command = new PutObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: encodeURIComponent(fileName),
+      Key: `${parentDir}${encodeURIComponent(fileName)}`,
       ContentType,
     });
     const url = await getSignedUrl(s3Client, command, {
@@ -32,11 +37,15 @@ export const generatePresignedUrl = async (fileName, ContentType) => {
 };
 
 // verfiy uploaded object
-export const verifyUploadedObject = async (fileName, fileSize) => {
+export const verifyUploadedObject = async (
+  fileName,
+  fileSize,
+  parentDir = DIRECTORY_UPLOAD_FOLDER,
+) => {
   try {
     const headCommand = new HeadObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: encodeURIComponent(fileName),
+      Key: `${parentDir}${encodeURIComponent(fileName)}`,
     });
     const headData = await s3Client.send(headCommand);
     return headData.ContentLength === fileSize;
@@ -50,15 +59,17 @@ export const getSignedUrlForGetObject = async (
   key,
   fileName,
   isDownload = false,
+  parentDir = DIRECTORY_UPLOAD_FOLDER,
 ) => {
   try {
     let url = null;
+    const keyObject = `${parentDir}${encodeURIComponent(key)}`
     if (privateKey) {
-      url = generateCloudfrontSignedUrl(key, fileName, isDownload);
+      url = generateCloudfrontSignedUrl(keyObject, fileName, isDownload, parentDir);
     } else {
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,
-        Key: encodeURIComponent(key),
+        Key: keyObject,
         ResponseContentDisposition: `${isDownload ? "attachment;" : "inline;"} filename="${fileName}"`,
       });
       url = await getSignedUrl(s3Client, command, {
@@ -72,11 +83,14 @@ export const getSignedUrlForGetObject = async (
 };
 
 // Delete object from S3
-export const deleteS3Object = async (fileName) => {
+export const deleteS3Object = async (
+  fileName,
+  parentDir = DIRECTORY_UPLOAD_FOLDER,
+) => {
   try {
     const command = new DeleteObjectCommand({
       Bucket: BUCKET_NAME,
-      Key: fileName,
+      Key: `${parentDir}${fileName}`,
     });
     await s3Client.send(command);
     return true;

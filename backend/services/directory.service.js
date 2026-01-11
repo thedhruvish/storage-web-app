@@ -1,3 +1,4 @@
+import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
@@ -127,7 +128,7 @@ export const deleteDirectory = async (directoryId) => {
   await Promise.all([
     bulkDeleteS3Objects(
       documents.map((file) => ({
-        Key: `${file._id}${file.extension}`,
+        Key: `${DIRECTORY_UPLOAD_FOLDER}${file._id}${file.extension}`,
       })),
     ),
     Document.deleteMany({ _id: { $in: documents.map((d) => d._id) } }),
