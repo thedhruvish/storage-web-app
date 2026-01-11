@@ -1,14 +1,21 @@
+import type { FileItem } from "@/pages/directory/types";
 import { useAppearance } from "@/store/appearance-store";
 import { useDialogStore } from "@/store/dialogs-store";
+import { useDirectoryStore } from "@/store/directory-store";
 import {
+  Download,
   Filter,
   FolderPlus,
   Grid3X3,
   Import,
   List,
+  Pencil,
   Plus,
+  Share,
   SortAsc,
+  Trash2,
   Upload,
+  X,
 } from "lucide-react";
 import { checkConnectedGoogle } from "@/api/import-data-api";
 import { useDrivePicker } from "@/hooks/use-drive-picker";
@@ -31,11 +38,14 @@ import {
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";
+  allFiles: FileItem[];
 }
 
-export function FileToolbar({ viewMode }: FileToolbarProps) {
+export function FileToolbar({ viewMode, allFiles }: FileToolbarProps) {
+  const { selectedFiles, clearSelection } = useDirectoryStore();
+  const selectedItems = allFiles.filter((f) => selectedFiles.has(f._id));
   const { openPicker, pickerOpened, pickerRef, accessToken } = useDrivePicker();
-  const { setOpen } = useDialogStore();
+  const { setOpen, setCurrentItem } = useDialogStore();
   const { setAppearance } = useAppearance();
 
   const { isUploadDisabled, storageTooltipMessage } = useStorageStatus();
@@ -54,6 +64,79 @@ export function FileToolbar({ viewMode }: FileToolbarProps) {
       setOpen("importFile");
     }
   };
+
+  const handleAction = (action: string) => {
+    if (!selectedItems.length) return;
+    const file = selectedItems[0];
+    setCurrentItem({ ...file, type: file.extension ? "file" : "folder" });
+    setOpen(action as any);
+  };
+
+  const handleDownload = () => {
+    selectedItems.forEach((file) => {
+      if (file.extension) {
+        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}?action=download`;
+      }
+    });
+  };
+
+  if (selectedItems.length > 0) {
+    return (
+      <div className='flex items-center justify-between gap-2 border-b p-4 bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-200'>
+        <div className='flex items-center gap-4'>
+          <Button
+            variant='ghost'
+            size='icon'
+            className='h-8 w-8'
+            onClick={clearSelection}
+          >
+            <X className='h-4 w-4' />
+          </Button>
+          <span className='font-medium text-sm'>
+            {selectedItems.length} selected
+          </span>
+        </div>
+
+        <div className='flex items-center gap-2'>
+          {selectedItems.length === 1 && (
+            <>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => handleAction("share")}
+              >
+                <Share className='mr-2 h-4 w-4' />
+                Share
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                onClick={() => handleAction("rename")}
+              >
+                <Pencil className='mr-2 h-4 w-4' />
+                Rename
+              </Button>
+            </>
+          )}
+
+          <Button variant='ghost' size='sm' onClick={handleDownload}>
+            <Download className='mr-2 h-4 w-4' />
+            Download
+          </Button>
+
+          <Button
+            variant='ghost'
+            size='sm'
+            className='text-destructive hover:bg-destructive/10'
+            onClick={() => handleAction("delete")}
+          >
+            <Trash2 className='mr-2 h-4 w-4' />
+            Delete
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>

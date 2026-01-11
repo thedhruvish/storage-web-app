@@ -1,6 +1,6 @@
 import { formatDistanceToNow } from "date-fns";
-import { useNavigate } from "@tanstack/react-router";
 import { useDialogStore } from "@/store/dialogs-store";
+import { useDirectoryStore } from "@/store/directory-store";
 import { motion } from "framer-motion";
 import {
   Archive,
@@ -74,9 +74,14 @@ const getFileIcon = (documentType: string, file: FileItem) => {
   }
 };
 
-export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
-  const navigate = useNavigate();
+export function FileGrid({
+  files,
+  viewMode,
+  documentType,
+  onFileDoubleClick,
+}: FileGridProps) {
   const { setOpen, setCurrentItem } = useDialogStore();
+  const { selectedFiles, toggleSelection } = useDirectoryStore();
   const starredMutation = usestarredToggle();
 
   const handleOpenDialog = (
@@ -169,35 +174,18 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
           <ContextMenu key={file._id}>
             <ContextMenuTrigger>
               <div
-                className='group hover:bg-accent relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors'
+                className={`group relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors ${
+                  selectedFiles.has(file._id)
+                    ? "bg-primary/10 border-primary"
+                    : "hover:bg-accent border-transparent"
+                }`}
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (documentType === "folder") {
-                    navigate({
-                      to: `/app/directory/$directoryId`,
-                      params: { directoryId: file._id },
-                    });
-                  }
+                  toggleSelection(file._id, e.ctrlKey || e.metaKey, e.shiftKey);
                 }}
-                onDoubleClick={() => {
-                  if (documentType !== "folder") {
-                    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
-                  }
-                }}
+                onDoubleClick={() => onFileDoubleClick(file)}
               >
-                <div
-                  onClick={() => {
-                    if (documentType === "folder") {
-                      navigate({
-                        to: `/app/directory/$directoryId`,
-                        params: { directoryId: file._id },
-                      });
-                    } else {
-                      window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
-                    }
-                  }}
-                  className='flex w-full flex-col items-center'
-                >
+                <div className='flex w-full flex-col items-center'>
                   <div className='relative'>
                     {getFileIcon(documentType, file)}
                     {file.isStarred && (
@@ -249,7 +237,18 @@ export function FileGrid({ files, viewMode, documentType }: FileGridProps) {
       {files.map((file) => (
         <ContextMenu key={file._id}>
           <ContextMenuTrigger>
-            <div className='hover:bg-accent group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors'>
+            <div
+              className={`group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors ${
+                selectedFiles.has(file._id)
+                  ? "bg-primary/10"
+                  : "hover:bg-accent"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleSelection(file._id, e.ctrlKey || e.metaKey, e.shiftKey);
+              }}
+              onDoubleClick={() => onFileDoubleClick(file)}
+            >
               <div className='col-span-6 flex items-center gap-3'>
                 <div className='relative'>
                   {getFileIcon(documentType, file)}

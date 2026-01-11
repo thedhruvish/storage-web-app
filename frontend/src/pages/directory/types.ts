@@ -19,5 +19,5 @@ export interface FileGridProps {
   documentType: "folder" | "file";
 
   viewMode: "grid" | "list";
-  onFileClick?: (file: FileItem) => void;
+  onFileDoubleClick: (file: FileItem) => void;
 }

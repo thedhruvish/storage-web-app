@@ -1,10 +1,14 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { AxiosError } from "axios";
 import { useParams } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { FileGrid } from "@/pages/directory/components/file-grid";
 import { FileToolbar } from "@/pages/directory/components/file-toolbar";
+import type { FileItem } from "@/pages/directory/types";
 import { useAppearance } from "@/store/appearance-store";
 import { useBreadCrumStore } from "@/store/breadCrum-store";
+import { useDialogStore } from "@/store/dialogs-store";
+import { useDirectoryStore } from "@/store/directory-store";
 import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { UploadCloud } from "lucide-react";
@@ -25,6 +29,9 @@ export default function Home({
 }) {
   const { appearance } = useAppearance();
   const { setStatus, setPath, setCurrentItem } = useBreadCrumStore();
+  const navigate = useNavigate();
+  const { selectedFiles, clearSelection } = useDirectoryStore();
+  const { setOpen, setCurrentItem: setDialogCurrentItem } = useDialogStore();
   const params = useParams({ strict: false });
   const directoryId =
     (params as { directoryId?: string }).directoryId || propDirectoryId;
@@ -54,6 +61,7 @@ export default function Home({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     noClick: true,
+    noKeyboard: true,
   });
 
   // Handle Side Effects (Breadcrumbs)
@@ -73,19 +81,107 @@ export default function Home({
     }
   }, [isLoading, isError, isSuccess, data, setPath, setCurrentItem, setStatus]);
 
-  // Extract data safely
   const { directories, documents } = data?.data || {};
   const isEmpty = !directories?.length && !documents?.length;
+
+  const allFiles = useMemo(
+    () => [...(directories || []), ...(documents || [])],
+    [directories, documents]
+  );
+
+  const handleFileDoubleClick = useCallback(
+    (file: FileItem) => {
+      if (file.extension) {
+        // It's a file
+        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
+      } else {
+        // It's a folder
+        navigate({
+          to: `/app/directory/$directoryId`,
+          params: { directoryId: file._id },
+        });
+      }
+    },
+    [navigate]
+  );
+
+  const handleBackgroundClick = useCallback(() => {
+    // Clear selection
+    clearSelection();
+  }, [clearSelection]);
+
+  // Keyboard Shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // F2 - Rename (Single selection)
+      if (e.key === "F2") {
+        if (selectedFiles.size === 1) {
+          e.preventDefault();
+          const fileId = Array.from(selectedFiles)[0];
+          const file = allFiles.find((f) => f._id === fileId);
+          if (file) {
+            setDialogCurrentItem({
+              ...file,
+              type: file.extension ? "file" : "folder",
+            });
+            setOpen("rename");
+          }
+        }
+      }
+
+      // Delete (Any selection)
+      if (e.key === "Delete") {
+        if (selectedFiles.size > 0) {
+          e.preventDefault();
+          // We set the first item as current, but the dialog should ideally handle the selection store
+          const fileId = Array.from(selectedFiles)[0];
+          const file = allFiles.find((f) => f._id === fileId);
+          if (file) {
+            setDialogCurrentItem({
+              ...file,
+              type: file.extension ? "file" : "folder",
+            });
+            setOpen("delete");
+          }
+        }
+      }
+
+      // Enter - Open/Navigate (Single selection)
+      if (e.key === "Enter") {
+        if (selectedFiles.size === 1) {
+          e.preventDefault();
+          const fileId = Array.from(selectedFiles)[0];
+          const file = allFiles.find((f) => f._id === fileId);
+          if (file) {
+            handleFileDoubleClick(file);
+          }
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    selectedFiles,
+    allFiles,
+    setDialogCurrentItem,
+    setOpen,
+    handleFileDoubleClick,
+  ]);
 
   return (
     <div
       {...getRootProps()}
+      onClick={handleBackgroundClick}
       className='bg-background flex h-full flex-col outline-none overflow-hidden'
     >
       <input {...getInputProps()} />
 
       <div className='flex-none z-10'>
-        <FileToolbar viewMode={appearance.directoryLayout} />
+        <FileToolbar
+          viewMode={appearance.directoryLayout}
+          allFiles={allFiles}
+        />
       </div>
 
       <div className='flex-1 relative overflow-y-auto'>
@@ -130,6 +226,7 @@ export default function Home({
                     files={directories}
                     documentType='folder'
                     viewMode={appearance.directoryLayout}
+                    onFileDoubleClick={handleFileDoubleClick}
                   />
                 )}
 
@@ -142,6 +239,7 @@ export default function Home({
                     files={documents}
                     documentType='file'
                     viewMode={appearance.directoryLayout}
+                    onFileDoubleClick={handleFileDoubleClick}
                   />
                 )}
               </div>
