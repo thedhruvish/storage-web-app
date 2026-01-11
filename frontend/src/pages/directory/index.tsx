@@ -1,4 +1,5 @@
 import { useCallback, useEffect } from "react";
+import { AxiosError } from "axios";
 import { useParams } from "@tanstack/react-router";
 import { FileGrid } from "@/pages/directory/components/file-grid";
 import { FileToolbar } from "@/pages/directory/components/file-toolbar";
@@ -13,6 +14,7 @@ import { useGetAllDirectoryList } from "@/api/directory-api";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Separator } from "@/components/ui/separator";
 import { FileManagerSkeleton } from "@/components/file-manager-skeleton";
+import Error404 from "@/components/status-code/404";
 import { UploadProgressIndicator } from "@/components/upload-progress-indicator";
 import { HomePageContextMenu } from "./components/home-page-context-menu";
 
@@ -28,7 +30,8 @@ export default function Home({
     (params as { directoryId?: string }).directoryId || propDirectoryId;
 
   // Destructure for cleaner access
-  const { data, isLoading, isError, isSuccess } =
+  // Destructure for cleaner access
+  const { data, isLoading, isError, isSuccess, error } =
     useGetAllDirectoryList(directoryId);
 
   const { user } = useUser();
@@ -102,9 +105,13 @@ export default function Home({
             <FileManagerSkeleton />
           </div>
         ) : isError ? (
-          <div className='flex h-full items-center justify-center text-destructive animate-in fade-in'>
-            <p>Error loading directory content.</p>
-          </div>
+          (error as AxiosError)?.response?.status === 404 ? (
+            <Error404 errorTitle='Directory Not Found' />
+          ) : (
+            <div className='flex h-full items-center justify-center text-destructive animate-in fade-in'>
+              <p>Error loading directory content.</p>
+            </div>
+          )
         ) : isEmpty ? (
           <div className='flex h-full flex-col items-center justify-center animate-in fade-in zoom-in-95 duration-300'>
             <div className='bg-muted rounded-full p-6 mb-4'>

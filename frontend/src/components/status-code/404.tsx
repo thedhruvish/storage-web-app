@@ -70,7 +70,7 @@ export default function Error404({
               <li className='flex items-center'>
                 <span className='h-2 w-2 bg-blue-500 rounded-full mr-2'></span>
                 <Link
-                  to={"/directory"}
+                  to={"/app/directory"}
                   className='text-blue-600 hover:underline'
                 >
                   My Files

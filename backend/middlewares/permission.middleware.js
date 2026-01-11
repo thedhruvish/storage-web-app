@@ -63,7 +63,7 @@ export const permissionMiddleware = (action, isDirectory = true) => {
 
     // check if permission array are the empty
     if (directory.permission.length === 0) {
-      return res.status(403).json(new ApiError(403, "Unauthorized"));
+      return res.status(404).json(new ApiError(404, "Unauthorized"));
     }
 
     // get the dir document and permission
@@ -77,10 +77,10 @@ export const permissionMiddleware = (action, isDirectory = true) => {
     }
 
     return res
-      .status(403)
+      .status(404)
       .json(
         new ApiError(
-          403,
+          404,
           "Unauthorized to access this resource Or not allowed This action",
         ),
       );
