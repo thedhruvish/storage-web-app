@@ -61,9 +61,9 @@ export const useCreateDirectory = (directoryId?: string) => {
 // get permission users list
 export const useGetDirectoryPermissionUsers = (directoryId?: string) => {
   return useQuery({
-    queryKey: [directoryId, "permission", "directory"],
+    queryKey: ["permission", directoryId, "directory"],
     queryFn: async ({ queryKey }) => {
-      const [id] = queryKey;
+      const [_, id] = queryKey;
       const response = await axiosClient.get(`/permission/${id}/directory`);
       return response.data;
     },
@@ -82,10 +82,14 @@ export const useAddDirectoryPermission = () => {
     }: {
       dirId: string;
       data: { email: string; role?: string };
-    }) => axiosClient.post(`/permission/${dirId}/directory`, data),
+    }) => {
+      if (!dirId) throw new Error("Directory ID is required");
+      if (!data.email) throw new Error("Email is required");
+      return axiosClient.post(`/permission/${dirId}/directory`, data);
+    },
     onSuccess(_, { dirId }) {
       queryClient.invalidateQueries({
-        queryKey: [dirId, "permission", "directory"],
+        queryKey: ["permission", dirId, "directory"],
       });
     },
   });
@@ -107,7 +111,7 @@ export const useChangeDirectoryPermission = () => {
     }) => axiosClient.put(`/permission/${dirId}/directory`, data),
     onSuccess(_, { dirId }) {
       queryClient.invalidateQueries({
-        queryKey: [dirId, "permission", "directory"],
+        queryKey: ["permission", dirId, "directory"],
       });
     },
   });
@@ -125,8 +129,23 @@ export const useRemoveDirectoryPermission = () => {
       data: { userId: string };
     }) => axiosClient.delete(`/permission/${dirId}/directory`, { data }),
     onSuccess(_, { dirId }) {
+      console.log("log run permision", dirId);
       queryClient.invalidateQueries({
-        queryKey: [dirId, "permission", "directory"],
+        queryKey: ["permission", dirId, "directory"],
+      });
+    },
+  });
+};
+
+// delete share link
+export const useDeleteDirectoryShareLink = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ dirId }: { dirId: string }) =>
+      axiosClient.delete(`/permission/share/${dirId}`),
+    onSuccess(_, { dirId }) {
+      queryClient.invalidateQueries({
+        queryKey: ["permission", dirId, "directory"],
       });
     },
   });

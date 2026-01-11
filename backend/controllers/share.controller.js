@@ -6,6 +6,7 @@ import {
   removeDirectoryPermissionService,
   createShareLinkService,
   getShareLinkService,
+  deleteShareLinkService,
 } from "../services/share.service.js";
 
 // get directory permission users
@@ -77,7 +78,14 @@ export const createShareLink = async (req, res) => {
 
 // access via share link
 export const getShareLink = async (req, res) => {
-  const data = await getShareLinkService(req.params.id);
+  const data = await getShareLinkService(req.params.myId);
 
-  res.status(200).json(new ApiResponse(200, "Share Directory data send", data));
+  return res
+    .status(200)
+    .json(new ApiResponse(200, "Share Directory data send", data));
+};
+
+export const deleteShareLink = async (req, res) => {
+  await deleteShareLinkService(req.params.id);
+  return res.status(200).json(new ApiResponse(200, "Success delete"));
 };

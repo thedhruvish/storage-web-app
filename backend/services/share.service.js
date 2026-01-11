@@ -103,3 +103,7 @@ export const getShareLinkService = async (link) => {
 
   return { documents };
 };
+
+export const deleteShareLinkService = async (directoryId) => {
+  await ShareLink.deleteOne({ directoryId });
+};

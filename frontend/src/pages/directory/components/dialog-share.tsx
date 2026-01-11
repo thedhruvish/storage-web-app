@@ -18,6 +18,7 @@ import {
   useAddDirectoryPermission,
   useChangeDirectoryPermission,
   useCreateDirectoryShareShortLink,
+  useDeleteDirectoryShareLink,
   useGetDirectoryPermissionUsers,
   useRemoveDirectoryPermission,
 } from "@/api/directory-api";
@@ -51,6 +52,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
+import { Spinner } from "@/components/ui/spinner";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 const permissionOptions = ["manager", "editor", "viewer"] as const;
 
@@ -87,24 +90,19 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const addDirectoryMutation = useAddDirectoryPermission();
   const removeDirectoryMutation = useRemoveDirectoryPermission();
   const changeDirectoryPermission = useChangeDirectoryPermission();
+
   const createDirectoryShareLinkMutation = useCreateDirectoryShareShortLink();
+  const deleteDirectoryShareLink = useDeleteDirectoryShareLink();
 
   const [shareLink, setShareLink] = React.useState("");
 
   const [copied, setCopied] = React.useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = React.useState(false);
 
   const [invitedUsers, setInvitedUsers] = React.useState<
     Array<InvitedUserType> | []
   >([]);
   const BASE_URL = `${import.meta.env.VITE_BASE_URL}`;
-
-  React.useEffect(() => {
-    if (getDirectoryQuery.isSuccess) {
-      setShareLink(getDirectoryQuery.data.data?.shareLink?.link || "");
-      setInvitedUsers(getDirectoryQuery.data.data.directory.permission);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [getDirectoryQuery.isSuccess]);
 
   const form = useForm<ShareFormValues>({
     resolver: zodResolver(shareFormSchema),
@@ -116,10 +114,22 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   });
 
   const { linkAccess } = form.watch();
-  // copy link
+  React.useEffect(() => {
+    if (getDirectoryQuery.isSuccess && getDirectoryQuery.data) {
+      const existingLink = getDirectoryQuery.data.data?.shareLink?.link;
+
+      setShareLink(existingLink || "");
+      setInvitedUsers(getDirectoryQuery.data.data.directory.permission);
+
+      if (existingLink) {
+        form.setValue("linkAccess", "public");
+      }
+    }
+  }, [getDirectoryQuery.isSuccess, getDirectoryQuery.data, form]);
+
   const copyToClipboard = () => {
     if (linkAccess === "restricted") {
-      navigator.clipboard.writeText(`${BASE_URL}/directory/${item?._id}`);
+      navigator.clipboard.writeText(`${BASE_URL}/app/directory/${item?._id}`);
     } else {
       navigator.clipboard.writeText(`${BASE_URL}/share/${shareLink}`);
     }
@@ -129,20 +139,21 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   // on submit the share user
   const onSubmit = (values: ShareFormValues) => {
     if (!item || !values.inviteEmails) return;
-
-    addDirectoryMutation.mutate(
-      {
+    toast.promise(
+      addDirectoryMutation.mutateAsync({
         dirId: item._id,
         data: {
           email: values.inviteEmails,
           role: values.userPermission,
         },
-      },
+      }),
       {
-        onSuccess: () => {
+        loading: "Inviting...",
+        success: () => {
           form.reset();
-          toast.success("Invitation sent");
+          return "Invitation sent";
         },
+        error: "Failed to invite",
       }
     );
   };
@@ -180,13 +191,39 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
 
   // close the dialog
   const closeAll = () => {
-    closeDialog();
     setShareLink("");
     form.reset();
   };
+
+  const handleDeleteShareLink = () => {
+    if (!item?._id) return;
+    deleteDirectoryShareLink.mutate(
+      { dirId: item._id },
+      {
+        onSuccess: () => {
+          toast.success("Link deleted successfully");
+          setConfirmDeleteOpen(false);
+          closeAll();
+          onOpenChange(false);
+        },
+        onError: (error) => {
+          toast.error(error.message);
+        },
+      }
+    );
+  };
   // share public link create
   const onDoneButton = () => {
-    if (!item?._id || !shareLink || linkAccess !== "public") {
+    if (!item?._id) return;
+
+    // Check if we are switching to restricted from an existing public link
+    const existingLink = getDirectoryQuery.data?.data?.shareLink?.link;
+    if (existingLink && linkAccess === "restricted") {
+      setConfirmDeleteOpen(true);
+      return;
+    }
+
+    if (!shareLink || linkAccess !== "public") {
       closeAll();
       return;
     }
@@ -262,8 +299,16 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
                             {...field}
                           />
                           <Button type='submit'>
-                            <Mail className='mr-2 h-4 w-4' />
-                            Invite
+                            {addDirectoryMutation.isPending ? (
+                              <>
+                                <Spinner /> Inviting...
+                              </>
+                            ) : (
+                              <>
+                                <Mail className='mr-2 h-4 w-4' />
+                                Invite
+                              </>
+                            )}
                           </Button>
                         </div>
                       </FormControl>
@@ -361,7 +406,6 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
                     )}
                   </Badge>
                 </div>
-
                 <div className='space-y-3'>
                   <div className='flex gap-2'>
                     <Select
@@ -395,7 +439,6 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
 
                   <div className='flex gap-2'>
                     {linkAccess !== "public" ? (
-                      // FULL read-only for restricted links
                       <Input
                         value={`${BASE_URL}/directory/${item._id}`}
                         readOnly
@@ -403,38 +446,51 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
                         className='flex-1'
                       />
                     ) : (
-                      <div className='border-input flex flex-1 overflow-hidden rounded-md border'>
-                        {/* Read-only prefix */}
-                        <input
-                          type='text'
-                          value={`${BASE_URL}/share/`}
-                          readOnly
-                          className='bg-muted text-muted-foreground w-auto border-0 px-3 py-2 text-sm outline-none'
-                        />
+                      <div className='border-input ring-offset-background focus-within:ring-ring flex h-10 w-full items-center rounded-md border bg-background text-sm focus-within:ring-2 focus-within:ring-offset-2'>
+                        <div className='text-muted-foreground flex h-full items-center border-r px-3 bg-muted/50 rounded-l-md shrink-0'>
+                          {BASE_URL}/share/
+                        </div>
 
-                        {/* Editable suffix */}
                         <input
                           type='text'
                           value={shareLink}
                           onChange={(e) => setShareLink(e.target.value)}
-                          className='flex-1 border-0 px-3 py-2 text-sm outline-none'
+                          placeholder='link-name'
+                          className='flex-1 bg-transparent px-3 py-2 outline-none placeholder:text-muted-foreground min-w-0 w-full'
                         />
+
+                        <div className='flex items-center pr-1'>
+                          <Button
+                            type='button'
+                            onClick={copyToClipboard}
+                            variant='ghost'
+                            size='icon'
+                            className='h-8 w-8 hover:bg-muted text-muted-foreground'
+                          >
+                            {copied ? (
+                              <Check className='h-4 w-4' />
+                            ) : (
+                              <Copy className='h-4 w-4' />
+                            )}
+                          </Button>
+                        </div>
                       </div>
                     )}
 
-                    {/* Copy button */}
-                    <Button
-                      type='button'
-                      onClick={copyToClipboard}
-                      variant='outline'
-                      size='icon'
-                    >
-                      {copied ? (
-                        <Check className='h-4 w-4' />
-                      ) : (
-                        <Copy className='h-4 w-4' />
-                      )}
-                    </Button>
+                    {linkAccess !== "public" && (
+                      <Button
+                        type='button'
+                        onClick={copyToClipboard}
+                        variant='outline'
+                        size='icon'
+                      >
+                        {copied ? (
+                          <Check className='h-4 w-4' />
+                        ) : (
+                          <Copy className='h-4 w-4' />
+                        )}
+                      </Button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -445,12 +501,29 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
                 Cancel
               </Button>
               <Button type='button' onClick={onDoneButton}>
-                Done
+                {createDirectoryShareLinkMutation.isPending ? (
+                  <>
+                    <Spinner /> Processing...
+                  </>
+                ) : (
+                  "Done"
+                )}
               </Button>
             </div>
           </form>
         </Form>
       </DialogContent>
+
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onOpenChange={setConfirmDeleteOpen}
+        title='Remove link access?'
+        desc='This will remove the public link and prevent anyone with the link from accessing this file.'
+        handleConfirm={handleDeleteShareLink}
+        isLoading={deleteDirectoryShareLink.isPending}
+        confirmText='Remove'
+        destructive
+      />
     </Dialog>
   );
 }

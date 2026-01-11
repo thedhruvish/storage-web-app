@@ -3,6 +3,7 @@ import {
   addDirectoryPermision,
   changeDirectoryPermision,
   createShareLink,
+  deleteShareLink,
   getDirectoryPermissionUsers,
   getShareLink,
   removeDirectoryPermision,
@@ -20,7 +21,7 @@ import { checkAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 // public route to get the document
-router.route("/share/:id").get(getShareLink);
+router.route("/share/:myId").get(getShareLink);
 
 // check auth
 router.use(checkAuth, permissionMiddleware("write"));
@@ -30,7 +31,8 @@ router.param("id", paramsValidation);
 
 router
   .route("/share/:id")
-  .post(validateInput(createShareLinkValidation), createShareLink);
+  .post(validateInput(createShareLinkValidation), createShareLink)
+  .delete(deleteShareLink);
 
 // permission on dir
 router
