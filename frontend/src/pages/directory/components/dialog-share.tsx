@@ -84,7 +84,7 @@ interface ShareDialogProps {
 }
 
 export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
-  const { currentItem: item, closeDialog } = useDialogStore();
+  const { currentItem: item } = useDialogStore();
 
   const getDirectoryQuery = useGetDirectoryPermissionUsers(item?._id);
   const addDirectoryMutation = useAddDirectoryPermission();
@@ -193,6 +193,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
   const closeAll = () => {
     setShareLink("");
     form.reset();
+    onOpenChange(false);
   };
 
   const handleDeleteShareLink = () => {
@@ -204,7 +205,6 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
           toast.success("Link deleted successfully");
           setConfirmDeleteOpen(false);
           closeAll();
-          onOpenChange(false);
         },
         onError: (error) => {
           toast.error(error.message);
@@ -245,9 +245,7 @@ export function ShareDialog({ open, onOpenChange }: ShareDialogProps) {
       {
         onSuccess: () => {
           toast.success(`you link is this ${shareLink}`);
-          closeDialog();
-          setShareLink("");
-          form.reset();
+          closeAll();
         },
         onError(error) {
           toast.error(error.message);
