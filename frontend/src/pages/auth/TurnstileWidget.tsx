@@ -16,7 +16,7 @@ export function TurnstileWidget({
   const turnstile = useTurnstile();
   return (
     <Turnstile
-      sitekey={import.meta.env.VITE_TURNSTILE_SITE_KEY}
+      sitekey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
       fixedSize={true}
       retry={"auto"}
       theme={theme == "dark" ? "dark" : "light"}

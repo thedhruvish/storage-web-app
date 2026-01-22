@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useDialogStore } from "@/store/dialogs-store";
 import { useDirectoryStore } from "@/store/directory-store";
@@ -30,48 +31,85 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
+import { Skeleton } from "@/components/ui/skeleton";
 import type { FileGridProps, FileItem } from "../types";
 import FileDropdownMenu from "./file-dropdown-menu";
 
 const getFileIcon = (documentType: string, file: FileItem) => {
   if (documentType === "folder") {
-    return <Folder className='h-8 w-8 text-blue-500' />;
+    return <Folder className='h-18 w-18 text-blue-500' />;
   }
   if (!file.extension) {
-    return <File className='h-8 w-8 text-gray-600' />;
+    return <File className='h-18 w-18 text-gray-600' />;
   }
   const iconType = getFileIconName(file.extension);
   switch (iconType) {
     case "document":
     case "word":
-      return <FileText className='h-8 w-8 text-blue-600' />;
+      return <FileText className='h-18 w-18 text-blue-600' />;
     case "pdf":
-      return <FileText className='h-8 w-8 text-red-600' />;
+      return <FileText className='h-18 w-18 text-red-600' />;
     case "image":
-      return <ImageIcon className='h-8 w-8 text-green-600' />;
+      return <ImageIcon className='h-18 w-18 text-green-600' />;
     case "vector":
-      return <ImageIcon className='h-8 w-8 text-emerald-600' />;
+      return <ImageIcon className='h-18 w-18 text-emerald-600' />;
     case "video":
-      return <Video className='h-8 w-8 text-orange-600' />;
+      return <Video className='h-18 w-18 text-orange-600' />;
     case "audio":
-      return <Music className='h-8 w-8 text-purple-600' />;
+      return <Music className='h-18 w-18 text-purple-600' />;
     case "archive":
-      return <Archive className='h-8 w-8 text-yellow-600' />;
+      return <Archive className='h-18 w-18 text-yellow-600' />;
     case "spreadsheet":
-      return <FileText className='h-8 w-8 text-lime-600' />;
+      return <FileText className='h-18 w-18 text-lime-600' />;
     case "presentation":
-      return <FileText className='h-8 w-8 text-amber-600' />;
+      return <FileText className='h-18 w-18 text-amber-600' />;
     case "font":
-      return <FileText className='h-8 w-8 text-pink-600' />;
+      return <FileText className='h-18 w-18 text-pink-600' />;
     case "executable":
-      return <File className='h-8 w-8 text-zinc-600' />;
+      return <File className='h-18 w-18 text-zinc-600' />;
     case "database":
-      return <File className='h-8 w-8 text-teal-600' />;
+      return <File className='h-18 w-18 text-teal-600' />;
     case "code":
-      return <Code className='h-8 w-8 text-indigo-600' />;
+      return <Code className='h-18 w-18 text-indigo-600' />;
     default:
-      return <File className='h-8 w-8 text-gray-600' />;
+      return <File className='h-18 w-18 text-gray-600' />;
   }
+};
+
+const Picture = ({
+  file,
+  documentType,
+}: {
+  file: FileItem;
+  documentType: string;
+}) => {
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+
+  if (file.previewUrl && !hasError) {
+    return (
+      <div className='h-[100px] w-[100px] overflow-hidden rounded-md relative'>
+        {isLoading && <Skeleton className='h-full w-full absolute inset-0' />}
+        <img
+          src={file.previewUrl}
+          alt={file.name}
+          className={`object-cover w-full h-full rounded  ${
+            isLoading ? "opacity-0" : "opacity-100"
+          } transition-opacity duration-300`}
+          onLoad={() => setIsLoading(false)}
+          onError={() => {
+            setHasError(true);
+            setIsLoading(false);
+          }}
+        />
+      </div>
+    );
+  }
+  return (
+    <div className='flex items-center justify-center bg-accent/50 rounded-md h-[100px] w-[100px]'>
+      {getFileIcon(documentType, file)}
+    </div>
+  );
 };
 
 export function FileGrid({
@@ -159,7 +197,7 @@ export function FileGrid({
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem
-        className='cursor-pointer text-destructive hover:!bg-destructive/10'
+        className='cursor-pointer text-destructive hover:bg-destructive/10!'
         onClick={() => handleOpenDialog("delete", file)}
       >
         <Trash2 className='mr-2 h-4 w-4' /> Delete
@@ -174,7 +212,8 @@ export function FileGrid({
           <ContextMenu key={file._id}>
             <ContextMenuTrigger>
               <div
-                className={`group relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors ${
+                title={file.name}
+                className={`group relative flex cursor-pointer flex-col items-center rounded-lg border p-3 transition-colors select-none ${
                   selectedFiles.has(file._id)
                     ? "bg-primary/10 border-primary"
                     : "hover:bg-accent border-transparent"
@@ -187,7 +226,7 @@ export function FileGrid({
               >
                 <div className='flex w-full flex-col items-center'>
                   <div className='relative'>
-                    {getFileIcon(documentType, file)}
+                    <Picture file={file} documentType={documentType} />
                     {file.isStarred && (
                       <motion.div
                         initial={{ scale: 0, opacity: 0 }}
@@ -238,7 +277,7 @@ export function FileGrid({
         <ContextMenu key={file._id}>
           <ContextMenuTrigger>
             <div
-              className={`group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors ${
+              className={`group grid cursor-pointer grid-cols-12 gap-4 rounded-lg px-4 py-2 transition-colors select-none ${
                 selectedFiles.has(file._id)
                   ? "bg-primary/10"
                   : "hover:bg-accent"

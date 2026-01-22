@@ -12,6 +12,7 @@ export interface FileItem {
   updatedAt?: string;
   isStarred?: boolean;
   extension?: string;
+  previewUrl?: string;
 }
 
 export interface FileGridProps {

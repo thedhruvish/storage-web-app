@@ -1,8 +1,11 @@
-import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
+import {
+  DIRECTORY_PREVIEW_FOLDER,
+  IMAGE_EXTS,
+} from "../constants/s3.constants.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
-import { bulkDeleteS3Objects } from "./s3.service.js";
+import { bulkDeleteS3Objects, getSignedUrlForGetObject } from "./s3.service.js";
 
 /**
  * Get directory with children
@@ -27,10 +30,25 @@ export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
     Document.find({ parentDirId: directory._id, ...filter }),
   ]);
 
+  const documentsWithPreviewUrl = await Promise.all(
+    documents.map(async (doc) => {
+      if (!IMAGE_EXTS.includes(doc.extension)) {
+        return doc;
+      }
+      const previewUrl = await getSignedUrlForGetObject(
+        `${doc._id}.avif`,
+        doc.name,
+        false,
+        DIRECTORY_PREVIEW_FOLDER,
+      );
+      return { ...doc.toObject(), previewUrl };
+    }),
+  );
+
   return {
     path: directory,
     directories,
-    documents,
+    documents: documentsWithPreviewUrl,
   };
 };
 

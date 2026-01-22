@@ -60,6 +60,7 @@ export const getSignedUrlForGetObject = async (
   fileName,
   isDownload = false,
   parentDir = DIRECTORY_UPLOAD_FOLDER,
+  
 ) => {
   try {
     let url = null;
