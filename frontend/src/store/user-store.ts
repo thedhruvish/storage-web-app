@@ -6,6 +6,7 @@ export type User = {
   name: string;
   email: string;
   profile: string;
+  rootDirId: string;
   role: string;
   totalUsedBytes: number;
   maxStorageBytes: number;

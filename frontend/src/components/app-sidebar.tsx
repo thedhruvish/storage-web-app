@@ -6,6 +6,7 @@ import {
   Clock,
   Command,
   HardDrive,
+  Home,
   Plane,
   Plus,
   Star,
@@ -121,23 +122,36 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
+                  <Link to='/app/home' className='flex items-center gap-3'>
+                    <Home className='h-4 w-4' />
+                    <span>Home</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
                   <Link to='/app/directory' className='flex items-center gap-3'>
                     <HardDrive className='h-4 w-4' />
                     <span>My Drive</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to='/' className='flex items-center gap-3'>
+                  <Link
+                    to='/app/shared-with-me'
+                    className='flex items-center gap-3'
+                  >
                     <Users className='h-4 w-4' />
                     <span>Shared with me</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to='/' className='flex items-center gap-3'>
+                  <Link to='/app/recent' className='flex items-center gap-3'>
                     <Clock className='h-4 w-4' />
                     <span>Recent</span>
                   </Link>
@@ -145,15 +159,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to='/' className='flex items-center gap-3'>
+                  <Link to='/app/starred' className='flex items-center gap-3'>
                     <Star className='h-4 w-4' />
                     <span>Starred</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
-                  <Link to='/' className='flex items-center gap-3'>
+                  <Link to='/app/trash' className='flex items-center gap-3'>
                     <Trash2 className='h-4 w-4' />
                     <span>Trash</span>
                   </Link>

@@ -8,12 +8,14 @@ import {
 } from "../services/directory.service.js";
 
 export const getDirectory = async (req, res) => {
+  const isStarred =
+    req.query.isStarred !== undefined
+      ? req.query.isStarred === "true"
+      : undefined;
+
   const result = await getDirectoryWithContent({
     directoryId: req.params.id || req.user.rootDirId,
-    isStarred:
-      req.query.isStarred !== undefined
-        ? req.query.isStarred === "true"
-        : undefined,
+    isStarred,
   });
 
   res.status(200).json(new ApiResponse(200, "Directories list", result));

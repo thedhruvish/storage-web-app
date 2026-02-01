@@ -2,12 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDialogStore } from "@/store/dialogs-store";
 import axiosClient from "./axios-client";
 
-export const useGetAllDirectoryList = (directoryId: string = "") => {
+export const useGetAllDirectoryList = (
+  directoryId: string = "",
+  filter = {
+    isStarred: false,
+  }
+) => {
   return useQuery({
-    queryKey: ["directorys", directoryId],
+    queryKey: ["directorys", directoryId, filter],
     queryFn: async ({ queryKey }) => {
       const [, id] = queryKey;
-      const response = await axiosClient.get(`/directory/${id || ""}`);
+      const response = await axiosClient.get(
+        `/directory/${id || ""}?isStarred=${filter.isStarred}`
+      );
       return response.data;
     },
   });
