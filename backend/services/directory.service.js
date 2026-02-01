@@ -7,11 +7,16 @@ import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
 import { bulkDeleteS3Objects, getSignedUrlForGetObject } from "./s3.service.js";
+import { addToRecent, removeFromRecent } from "./recent.service.js";
 
 /**
  * Get directory with children
  */
-export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
+export const getDirectoryWithContent = async ({
+  directoryId,
+  isStarred,
+  userId,
+}) => {
   const directory = await Directory.findById(directoryId).populate({
     path: "path",
     select: "name _id",
@@ -27,6 +32,7 @@ export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
   }
 
   const [directories, documents] = await Promise.all([
+    addToRecent(userId, directoryId, "directory"),
     Directory.find({ parentDirId: directory._id, ...filter }),
     Document.find({ parentDirId: directory._id, ...filter }),
   ]);

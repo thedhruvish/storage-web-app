@@ -11,6 +11,7 @@ import {
   getAllTrash,
   getSharedWithMe,
 } from "../services/directory.service.js";
+import { removeFromRecent } from "../services/recent.service.js";
 
 export const getDirectory = async (req, res) => {
   const isStarred =
@@ -24,6 +25,7 @@ export const getDirectory = async (req, res) => {
     directoryId: req.params.id || req.user.rootDirId,
     isStarred,
     isTrash,
+    userId: req.user._id,
   });
 
   res.status(200).json(new ApiResponse(200, "Directories list", result));
@@ -41,7 +43,7 @@ export const createDirectoryController = async (req, res) => {
 
 export const updateDirectoryById = async (req, res) => {
   await renameDirectory(req.params.id, req.body.name);
-
+  await removeFromRecent(req.user._id, req.params.id, "directory");
   res.status(200).json(new ApiResponse(200, "Directory updated successfully"));
 };
 
@@ -55,13 +57,13 @@ export const starredToggleDirectory = async (req, res) => {
 
 export const softDeleteDirectoryById = async (req, res) => {
   await softDeleteDirectory(req.params.id);
-
+  await removeFromRecent(req.user._id, req.params.id, "directory");
   res.status(200).json(new ApiResponse(200, "Directory deleted successfully"));
 };
 
 export const hardDeleteDirectoryById = async (req, res) => {
   await hardDeleteDirectory(req.params.id);
-
+  await removeFromRecent(req.user._id, req.params.id, "directory");
   res.status(200).json(new ApiResponse(200, "Directory deleted successfully"));
 };
 export const getTrashController = async (req, res) => {
