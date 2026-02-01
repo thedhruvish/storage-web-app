@@ -9,6 +9,7 @@ import {
   emptyTrashController,
   restoreDirectoryById,
   getTrashController,
+  getSharedWithMeController,
 } from "../controllers/directory.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
@@ -20,6 +21,12 @@ const router = express.Router();
 router.delete("/trash", permissionMiddleware("delete"), emptyTrashController);
 
 router.get("/trash", permissionMiddleware("read"), getTrashController);
+
+router.get(
+  "/shared-with-me",
+  permissionMiddleware("read"),
+  getSharedWithMeController,
+);
 // check the id are the valid or not
 router.param("id", paramsValidation);
 

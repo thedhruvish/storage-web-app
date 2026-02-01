@@ -258,3 +258,13 @@ export const useHardDelete = () => {
     },
   });
 };
+
+export const useGetSharedWithMe = () => {
+  return useQuery({
+    queryKey: ["shared-with-me"],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/directory/shared-with-me`);
+      return response.data;
+    },
+  });
+};

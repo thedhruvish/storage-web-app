@@ -9,6 +9,7 @@ import {
   emptyTrash,
   restoreDirectory,
   getAllTrash,
+  getSharedWithMe,
 } from "../services/directory.service.js";
 
 export const getDirectory = async (req, res) => {
@@ -79,4 +80,10 @@ export const restoreDirectoryById = async (req, res) => {
   await restoreDirectory(req.params.id);
 
   res.status(200).json(new ApiResponse(200, "Directory restored successfully"));
+};
+
+export const getSharedWithMeController = async (req, res) => {
+  const result = await getSharedWithMe(req.user._id);
+
+  res.status(200).json(new ApiResponse(200, "Shared files list", result));
 };

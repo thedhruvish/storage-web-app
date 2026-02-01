@@ -283,3 +283,12 @@ export const restoreDirectory = async (directoryId) => {
     ),
   ]);
 };
+
+export const getSharedWithMe = async (userId) => {
+  const directories = await Directory.find({
+    "permission.userId": userId,
+    trashAt: null,
+  }).sort({ createdAt: -1 });
+
+  return { directories, documents: [] };
+};

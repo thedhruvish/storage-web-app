@@ -6,7 +6,6 @@ import {
   Clock,
   Command,
   HardDrive,
-  Home,
   Plane,
   Plus,
   Star,
@@ -120,14 +119,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <SidebarGroupContent>
             <SidebarGroupLabel>My Drive</SidebarGroupLabel>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild>
-                  <Link to='/app/home' className='flex items-center gap-3'>
-                    <Home className='h-4 w-4' />
-                    <span>Home</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild>
                   <Link to='/app/directory' className='flex items-center gap-3'>
