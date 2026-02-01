@@ -4,7 +4,11 @@ import {
   createDirectory,
   renameDirectory,
   toggleStarDirectory,
-  deleteDirectory,
+  hardDeleteDirectory,
+  softDeleteDirectory,
+  emptyTrash,
+  restoreDirectory,
+  getAllTrash,
 } from "../services/directory.service.js";
 
 export const getDirectory = async (req, res) => {
@@ -12,10 +16,13 @@ export const getDirectory = async (req, res) => {
     req.query.isStarred !== undefined
       ? req.query.isStarred === "true"
       : undefined;
+  const isTrash =
+    req.query.isTrash !== undefined ? req.query.isTrash === "true" : undefined;
 
   const result = await getDirectoryWithContent({
     directoryId: req.params.id || req.user.rootDirId,
     isStarred,
+    isTrash,
   });
 
   res.status(200).json(new ApiResponse(200, "Directories list", result));
@@ -45,8 +52,31 @@ export const starredToggleDirectory = async (req, res) => {
     .json(new ApiResponse(200, "Directory star toggled successfully"));
 };
 
-export const deleteDirectoryById = async (req, res) => {
-  await deleteDirectory(req.params.id);
+export const softDeleteDirectoryById = async (req, res) => {
+  await softDeleteDirectory(req.params.id);
 
   res.status(200).json(new ApiResponse(200, "Directory deleted successfully"));
+};
+
+export const hardDeleteDirectoryById = async (req, res) => {
+  await hardDeleteDirectory(req.params.id);
+
+  res.status(200).json(new ApiResponse(200, "Directory deleted successfully"));
+};
+export const getTrashController = async (req, res) => {
+  const result = await getAllTrash(req.user._id);
+
+  res.status(200).json(new ApiResponse(200, "Trash list", result));
+};
+
+export const emptyTrashController = async (req, res) => {
+  await emptyTrash(req.user._id);
+
+  res.status(200).json(new ApiResponse(200, "Trash emptied successfully"));
+};
+
+export const restoreDirectoryById = async (req, res) => {
+  await restoreDirectory(req.params.id);
+
+  res.status(200).json(new ApiResponse(200, "Directory restored successfully"));
 };

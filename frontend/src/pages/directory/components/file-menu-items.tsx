@@ -3,17 +3,18 @@ import {
   Download,
   FolderPen,
   InfoIcon,
+  RotateCcw,
   Share,
   Star,
   StarOff,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useRestore, usestarredToggle } from "@/api/directory-api";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { usestarredToggle } from "../../../api/directory-api";
 import type { FileItem } from "../types";
 
 interface Props {
@@ -53,6 +54,39 @@ export default function FileMenuItems({ file, fileType }: Props) {
       }
     );
   };
+
+  const { restore } = useRestoreMenu(file);
+
+  if (file.trashAt) {
+    return (
+      <>
+        {file.extension && (
+          <DropdownMenuItem
+            onClick={filedownload}
+            className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+          >
+            <Download className='mr-2 h-4 w-4' />
+            Download
+          </DropdownMenuItem>
+        )}
+        <DropdownMenuItem
+          onClick={restore}
+          className='cursor-pointer hover:bg-accent hover:text-accent-foreground'
+        >
+          <RotateCcw className='mr-2 h-4 w-4' />
+          Restore
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem
+          className='cursor-pointer text-destructive hover:bg-destructive/10'
+          onClick={() => openDialog("delete")}
+        >
+          <Trash2 className='mr-2 h-4 w-4' />
+          Delete Forever
+        </DropdownMenuItem>
+      </>
+    );
+  }
 
   return (
     <>
@@ -114,3 +148,25 @@ export default function FileMenuItems({ file, fileType }: Props) {
     </>
   );
 }
+
+const useRestoreMenu = (file: FileItem) => {
+  const restoreMutation = useRestore();
+
+  const restore = () => {
+    restoreMutation.mutate(
+      {
+        id: file._id,
+        type: file.extension ? "document" : "directory",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Item restored successfully");
+        },
+        onError: () => {
+          toast.error("Failed to restore item");
+        },
+      }
+    );
+  };
+  return { restore };
+};

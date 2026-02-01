@@ -3,8 +3,10 @@ import {
   cancelUploadController,
   checkUploadedObject,
   createPresigned,
-  deleteDocumentById,
   getDocumentById,
+  hardDeleteDocumentById,
+  softDeleteDocumentById,
+  restoreDocumentById,
   starredToggleDocument,
   updateDocumentById,
 } from "../controllers/document.controller.js";
@@ -51,6 +53,13 @@ router
     permissionMiddleware("write", false),
     updateDocumentById,
   )
-  .delete(permissionMiddleware("delete", false), deleteDocumentById);
+  .delete(permissionMiddleware("delete", false), softDeleteDocumentById);
+
+router.delete(
+  "/:id/hard",
+  permissionMiddleware("delete", false),
+  hardDeleteDocumentById,
+);
+router.put("/:id/restore", permissionMiddleware("delete"), restoreDocumentById);
 
 export default router;

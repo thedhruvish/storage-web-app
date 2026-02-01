@@ -1,10 +1,14 @@
 import express from "express";
 import {
   createDirectoryController,
-  deleteDirectoryById,
   getDirectory,
+  hardDeleteDirectoryById,
+  softDeleteDirectoryById,
   starredToggleDirectory,
   updateDirectoryById,
+  emptyTrashController,
+  restoreDirectoryById,
+  getTrashController,
 } from "../controllers/directory.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
@@ -12,6 +16,10 @@ import { validateInput } from "../utils/validateInput.js";
 import { nameValidation } from "../validators/comman.validator.js";
 
 const router = express.Router();
+
+router.delete("/trash", permissionMiddleware("delete"), emptyTrashController);
+
+router.get("/trash", permissionMiddleware("read"), getTrashController);
 // check the id are the valid or not
 router.param("id", paramsValidation);
 
@@ -40,6 +48,18 @@ router
     permissionMiddleware("update"),
     updateDirectoryById,
   )
-  .delete(permissionMiddleware("delete"), deleteDirectoryById);
+  .delete(permissionMiddleware("delete"), softDeleteDirectoryById);
+
+router.delete(
+  "/:id/hard",
+  permissionMiddleware("delete"),
+  hardDeleteDirectoryById,
+);
+
+router.put(
+  "/:id/restore",
+  permissionMiddleware("delete"),
+  restoreDirectoryById,
+);
 
 export default router;

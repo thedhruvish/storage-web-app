@@ -1,5 +1,6 @@
 import {
   DIRECTORY_PREVIEW_FOLDER,
+  DIRECTORY_UPLOAD_FOLDER,
   IMAGE_EXTS,
 } from "../constants/s3.constants.js";
 import Directory from "../models/Directory.model.js";
@@ -20,7 +21,7 @@ export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
     throw new ApiError(404, "Directory not found");
   }
 
-  const filter = {};
+  const filter = { trashAt: null };
   if (isStarred !== undefined) {
     filter.isStarred = isStarred;
   }
@@ -50,6 +51,36 @@ export const getDirectoryWithContent = async ({ directoryId, isStarred }) => {
     directories,
     documents: documentsWithPreviewUrl,
   };
+};
+
+/**
+ * get all Trash files
+ */
+
+export const getAllTrash = async (userId) => {
+  //
+  const directories = await Directory.find({
+    userId,
+    trashAt: { $ne: null },
+  })
+    .select({
+      _id: 1,
+      name: 1,
+      trashAt: 1,
+    })
+    .sort({ trashAt: -1 });
+  const documents = await Document.find({
+    userId,
+    trashAt: { $ne: null },
+  })
+    .select({
+      _id: 1,
+      name: 1,
+      trashAt: 1,
+      extension: 1,
+    })
+    .sort({ trashAt: -1 });
+  return { directories, documents };
 };
 
 /**
@@ -124,7 +155,7 @@ const collectRecursive = async (parentDirId) => {
 /**
  * Delete directory recursively
  */
-export const deleteDirectory = async (directoryId) => {
+export const softDeleteDirectory = async (directoryId) => {
   const directory = await Directory.findById(directoryId).select({
     metaData: 1,
     parentDirId: 1,
@@ -134,15 +165,37 @@ export const deleteDirectory = async (directoryId) => {
     throw new ApiError(404, "Directory not found");
   }
 
-  await updateParentDirectorySize(
-    directory.parentDirId,
-    -directory.metaData.size,
-  );
+  const { documents, directories } = await collectRecursive(directoryId);
+
+  directories.push({ _id: directoryId });
+
+  await Promise.all([
+    Document.updateMany(
+      { _id: { $in: documents.map((d) => d._id) } },
+      { trashAt: new Date() },
+    ),
+    Directory.updateMany(
+      { _id: { $in: directories.map((d) => d._id) } },
+      { trashAt: new Date() },
+    ),
+  ]);
+};
+
+export const hardDeleteDirectory = async (directoryId) => {
+  const directory = await Directory.findById(directoryId);
+
+  if (!directory) {
+    throw new ApiError(404, "Directory not found");
+  }
 
   const { documents, directories } = await collectRecursive(directoryId);
 
   directories.push({ _id: directoryId });
 
+  await updateParentDirectorySize(
+    directory.parentDirId,
+    -directory.metaData.size,
+  );
   await Promise.all([
     bulkDeleteS3Objects(
       documents.map((file) => ({
@@ -189,4 +242,44 @@ export const updateParentDirectorySize = async (dirId, size) => {
 
 export const singleFindDirectory = async (dirId, select) => {
   return Directory.findById(dirId, select);
+};
+
+export const emptyTrash = async (userId) => {
+  const [directories, documents] = await Promise.all([
+    Directory.find({ userId, trashAt: { $ne: null } }),
+    Document.find({ userId, trashAt: { $ne: null } }),
+  ]);
+
+  await Promise.all([
+    bulkDeleteS3Objects(
+      documents.map((file) => ({
+        Key: `${DIRECTORY_UPLOAD_FOLDER}${file._id}${file.extension}`,
+      })),
+    ),
+    Document.deleteMany({ _id: { $in: documents.map((d) => d._id) } }),
+    Directory.deleteMany({ _id: { $in: directories.map((d) => d._id) } }),
+  ]);
+};
+
+export const restoreDirectory = async (directoryId) => {
+  const directory = await Directory.findById(directoryId);
+
+  if (!directory) {
+    throw new ApiError(404, "Directory not found");
+  }
+
+  const { documents, directories } = await collectRecursive(directoryId);
+
+  directories.push({ _id: directoryId });
+
+  await Promise.all([
+    Document.updateMany(
+      { _id: { $in: documents.map((d) => d._id) } },
+      { trashAt: null },
+    ),
+    Directory.updateMany(
+      { _id: { $in: directories.map((d) => d._id) } },
+      { trashAt: null },
+    ),
+  ]);
 };

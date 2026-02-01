@@ -26,7 +26,11 @@ interface DirectoryContentProps {
   error: Error | null;
   allowedUpload?: boolean;
   emptyMessage?: string;
-  directoryId?: string; // Needed for upload and navigation
+  directoryId?: string;
+  onFileDoubleClick?: (file: FileItem) => void;
+  enableContextMenu?: boolean;
+  extraToolbarActions?: React.ReactNode;
+  isTrash?: boolean;
 }
 
 export function DirectoryContent({
@@ -37,6 +41,10 @@ export function DirectoryContent({
   allowedUpload = false,
   emptyMessage = "This folder is empty",
   directoryId = "",
+  onFileDoubleClick,
+  enableContextMenu = true,
+  extraToolbarActions,
+  isTrash,
 }: DirectoryContentProps) {
   const { appearance } = useAppearance();
   const navigate = useNavigate();
@@ -79,7 +87,7 @@ export function DirectoryContent({
   });
 
   // --- Navigation & Interactions ---
-  const handleFileDoubleClick = useCallback(
+  const handleFileDoubleClickDefault = useCallback(
     (file: FileItem) => {
       if (file.extension) {
         // It's a file
@@ -95,12 +103,17 @@ export function DirectoryContent({
     [navigate]
   );
 
+  const handleFileDoubleClick =
+    onFileDoubleClick || handleFileDoubleClickDefault;
+
   const handleBackgroundClick = useCallback(() => {
     clearSelection();
   }, [clearSelection]);
 
   // --- Keyboard Shortcuts ---
   useEffect(() => {
+    if (isTrash) return; // Disable shortcuts in trash mode
+
     const handleKeyDown = (e: KeyboardEvent) => {
       // F2 - Rename (Single selection)
       if (e.key === "F2") {
@@ -155,7 +168,35 @@ export function DirectoryContent({
     setDialogCurrentItem,
     setOpen,
     handleFileDoubleClick,
+    isTrash,
   ]);
+
+  const content = (
+    <div className='p-4 pb-20 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300'>
+      {files.directories && files.directories.length > 0 && (
+        <FileGrid
+          files={files.directories}
+          documentType='folder'
+          viewMode={appearance.directoryLayout}
+          onFileDoubleClick={handleFileDoubleClick}
+        />
+      )}
+
+      {files.directories &&
+        files.directories.length > 0 &&
+        files.documents &&
+        files.documents.length > 0 && <Separator className='bg-border' />}
+
+      {files.documents && files.documents.length > 0 && (
+        <FileGrid
+          files={files.documents}
+          documentType='file'
+          viewMode={appearance.directoryLayout}
+          onFileDoubleClick={handleFileDoubleClick}
+        />
+      )}
+    </div>
+  );
 
   return (
     <div
@@ -170,6 +211,8 @@ export function DirectoryContent({
           viewMode={appearance.directoryLayout}
           allFiles={allFiles}
           hideActions={!allowedUpload}
+          extraActions={extraToolbarActions}
+          isTrash={isTrash}
         />
       </div>
 
@@ -206,38 +249,13 @@ export function DirectoryContent({
               {emptyMessage}
             </div>
           </div>
-        ) : (
+        ) : enableContextMenu ? (
           <ContextMenu>
-            <ContextMenuTrigger asChild>
-              <div className='p-4 pb-20 space-y-4 animate-in fade-in slide-in-from-bottom-2 duration-300'>
-                {files.directories && files.directories.length > 0 && (
-                  <FileGrid
-                    files={files.directories}
-                    documentType='folder'
-                    viewMode={appearance.directoryLayout}
-                    onFileDoubleClick={handleFileDoubleClick}
-                  />
-                )}
-
-                {files.directories &&
-                  files.directories.length > 0 &&
-                  files.documents &&
-                  files.documents.length > 0 && (
-                    <Separator className='bg-border' />
-                  )}
-
-                {files.documents && files.documents.length > 0 && (
-                  <FileGrid
-                    files={files.documents}
-                    documentType='file'
-                    viewMode={appearance.directoryLayout}
-                    onFileDoubleClick={handleFileDoubleClick}
-                  />
-                )}
-              </div>
-            </ContextMenuTrigger>
+            <ContextMenuTrigger asChild>{content}</ContextMenuTrigger>
             {allowedUpload && <HomePageContextMenu />}
           </ContextMenu>
+        ) : (
+          content
         )}
       </div>
 

@@ -4,7 +4,7 @@ import axiosClient from "./axios-client";
 
 export const useGetAllDirectoryList = (
   directoryId: string = "",
-  filter = {
+  filter: Record<string, any> = {
     isStarred: false,
   }
 ) => {
@@ -15,6 +15,16 @@ export const useGetAllDirectoryList = (
       const response = await axiosClient.get(
         `/directory/${id || ""}?isStarred=${filter.isStarred}`
       );
+      return response.data;
+    },
+  });
+};
+
+export const useGetAllTrash = () => {
+  return useQuery({
+    queryKey: ["trash"],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/directory/trash`);
       return response.data;
     },
   });
@@ -185,6 +195,65 @@ export const usestarredToggle = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["directorys"], // Invalidate the updated directory
+      });
+    },
+  });
+};
+export const useEmptyTrash = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => axiosClient.delete(`/directory/trash`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};
+
+export const useRestore = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      type,
+    }: {
+      id: string;
+      type: "directory" | "document";
+    }) => axiosClient.put(`/${type}/${id}/restore`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};
+
+export const useHardDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      type,
+    }: {
+      id: string;
+      type: "directory" | "document";
+    }) => axiosClient.delete(`/${type}/${id}/hard`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
       });
     },
   });

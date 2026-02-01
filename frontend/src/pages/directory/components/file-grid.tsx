@@ -14,6 +14,7 @@ import {
   ImageIcon,
   InfoIcon,
   Music,
+  RotateCcw,
   Share,
   Star,
   StarOff,
@@ -21,7 +22,7 @@ import {
   Video,
 } from "lucide-react";
 import { toast } from "sonner";
-import { usestarredToggle } from "@/api/directory-api";
+import { usestarredToggle, useRestore } from "@/api/directory-api";
 import { getFileIconName } from "@/utils/file-icon-helper";
 import { truncateFileName } from "@/utils/truncateFileName";
 import {
@@ -154,56 +155,104 @@ export function FileGrid({
     );
   };
 
-  const renderContextMenuItems = (file: FileItem) => (
-    <>
-      {file.extension && (
-        <ContextMenuItem
-          onClick={() => handleFileDownload(file)}
-          className='cursor-pointer'
-        >
-          <Download className='mr-2 h-4 w-4' /> Download
-        </ContextMenuItem>
-      )}
-      <ContextMenuItem
-        onClick={() => handleOpenDialog("details", file)}
-        className='cursor-pointer'
-      >
-        <InfoIcon className='mr-2 h-4 w-4' /> Details
-      </ContextMenuItem>
-      <ContextMenuItem
-        onClick={() => handleOpenDialog("rename", file)}
-        className='cursor-pointer'
-      >
-        <FolderPen className='mr-2 h-4 w-4' /> Rename
-      </ContextMenuItem>
-      {documentType === "folder" && (
-        <ContextMenuItem
-          onClick={() => handleOpenDialog("share", file)}
-          className='cursor-pointer'
-        >
-          <Share className='mr-2 h-4 w-4' /> Share
-        </ContextMenuItem>
-      )}
-      <ContextMenuItem
-        onClick={() => handleStarredToggle(file)}
-        className='cursor-pointer flex items-center'
-      >
-        {file.isStarred ? (
-          <StarOff className='mr-2 h-4 w-4 text-gray-500' />
-        ) : (
-          <Star className='mr-2 h-4 w-4 fill-yellow-500 text-yellow-500' />
+  const restoreMutation = useRestore();
+
+  const handleRestore = (file: FileItem) => {
+    restoreMutation.mutate(
+      {
+        id: file._id,
+        type: file.extension ? "document" : "directory",
+      },
+      {
+        onSuccess: () => {
+          toast.success("Item restored successfully");
+        },
+        onError: () => {
+          toast.error("Failed to restore item");
+        },
+      }
+    );
+  };
+
+  const renderContextMenuItems = (file: FileItem) => {
+    if (file.trashAt) {
+      return (
+        <>
+          {file.extension && (
+            <ContextMenuItem
+              onClick={() => handleFileDownload(file)}
+              className='cursor-pointer'
+            >
+              <Download className='mr-2 h-4 w-4' /> Download
+            </ContextMenuItem>
+          )}
+          <ContextMenuItem
+            onClick={() => handleRestore(file)}
+            className='cursor-pointer'
+          >
+            <RotateCcw className='mr-2 h-4 w-4' /> Restore
+          </ContextMenuItem>
+          <ContextMenuSeparator />
+          <ContextMenuItem
+            className='cursor-pointer text-destructive hover:bg-destructive/10!'
+            onClick={() => handleOpenDialog("delete", file)}
+          >
+            <Trash2 className='mr-2 h-4 w-4' /> Delete Forever
+          </ContextMenuItem>
+        </>
+      );
+    }
+    return (
+      <>
+        {file.extension && (
+          <ContextMenuItem
+            onClick={() => handleFileDownload(file)}
+            className='cursor-pointer'
+          >
+            <Download className='mr-2 h-4 w-4' /> Download
+          </ContextMenuItem>
         )}
-        <span>{file.isStarred ? "Unstar" : "Star"}</span>
-      </ContextMenuItem>
-      <ContextMenuSeparator />
-      <ContextMenuItem
-        className='cursor-pointer text-destructive hover:bg-destructive/10!'
-        onClick={() => handleOpenDialog("delete", file)}
-      >
-        <Trash2 className='mr-2 h-4 w-4' /> Delete
-      </ContextMenuItem>
-    </>
-  );
+        <ContextMenuItem
+          onClick={() => handleOpenDialog("details", file)}
+          className='cursor-pointer'
+        >
+          <InfoIcon className='mr-2 h-4 w-4' /> Details
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => handleOpenDialog("rename", file)}
+          className='cursor-pointer'
+        >
+          <FolderPen className='mr-2 h-4 w-4' /> Rename
+        </ContextMenuItem>
+        {documentType === "folder" && (
+          <ContextMenuItem
+            onClick={() => handleOpenDialog("share", file)}
+            className='cursor-pointer'
+          >
+            <Share className='mr-2 h-4 w-4' /> Share
+          </ContextMenuItem>
+        )}
+        <ContextMenuItem
+          onClick={() => handleStarredToggle(file)}
+          className='cursor-pointer flex items-center'
+        >
+          {file.isStarred ? (
+            <StarOff className='mr-2 h-4 w-4 text-gray-500' />
+          ) : (
+            <Star className='mr-2 h-4 w-4 fill-yellow-500 text-yellow-500' />
+          )}
+          <span>{file.isStarred ? "Unstar" : "Star"}</span>
+        </ContextMenuItem>
+        <ContextMenuSeparator />
+        <ContextMenuItem
+          className='cursor-pointer text-destructive hover:bg-destructive/10!'
+          onClick={() => handleOpenDialog("delete", file)}
+        >
+          <Trash2 className='mr-2 h-4 w-4' /> Delete
+        </ContextMenuItem>
+      </>
+    );
+  };
 
   if (viewMode === "grid") {
     return (

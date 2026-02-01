@@ -129,9 +129,9 @@ export const toggleStarDocument = async (documentId) => {
 };
 
 /**
- * Delete document
+ *  Hard delete document
  */
-export const deleteDocument = async (documentId) => {
+export const hardDeleteDocument = async (documentId) => {
   const document = await Document.findByIdAndDelete(documentId);
   if (!document) {
     throw new ApiError(404, "Document not found");
@@ -141,4 +141,27 @@ export const deleteDocument = async (documentId) => {
     deleteS3Object(`${document.id}${document.extension}`),
     updateParentDirectorySize(document.parentDirId, -document.metaData.size),
   ]);
+};
+
+/**
+ *  Soft delete document
+ */
+export const softDeleteDocument = async (documentId) => {
+  const document = await Document.findById(documentId);
+  if (!document) {
+    throw new ApiError(404, "Document not found");
+  }
+
+  document.trashAt = Date.now();
+  await document.save();
+};
+
+export const restoreDocument = async (documentId) => {
+  const document = await Document.findById(documentId);
+  if (!document) {
+    throw new ApiError(404, "Document not found");
+  }
+
+  document.trashAt = null;
+  await document.save();
 };

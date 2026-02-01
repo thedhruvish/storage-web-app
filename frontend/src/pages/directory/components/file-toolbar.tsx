@@ -11,12 +11,15 @@ import {
   List,
   Pencil,
   Plus,
+  RotateCcw,
   Share,
   SortAsc,
   Trash2,
   Upload,
   X,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useHardDelete, useRestore } from "@/api/directory-api";
 import { checkConnectedGoogle } from "@/api/import-data-api";
 import { useDrivePicker } from "@/hooks/use-drive-picker";
 import { useFileUploader } from "@/hooks/use-file-uploader";
@@ -40,12 +43,16 @@ interface FileToolbarProps {
   viewMode: "grid" | "list";
   allFiles: FileItem[];
   hideActions?: boolean;
+  extraActions?: React.ReactNode;
+  isTrash?: boolean;
 }
 
 export function FileToolbar({
   viewMode,
   allFiles,
   hideActions = false,
+  extraActions,
+  isTrash = false,
 }: FileToolbarProps) {
   const { selectedFiles, clearSelection } = useDirectoryStore();
   const selectedItems = allFiles.filter((f) => selectedFiles.has(f._id));
@@ -85,7 +92,76 @@ export function FileToolbar({
     });
   };
 
+  /* import RotateCcw, toast, useRestore, useHardDelete */
+
+  const restoreMutation = useRestore();
+  const hardDeleteMutation = useHardDelete();
+
+  const handleRestoreSelected = () => {
+    selectedItems.forEach((file) => {
+      restoreMutation.mutate(
+        {
+          id: file._id,
+          type: file.extension ? "document" : "directory",
+        },
+        {
+          onSuccess: () => {
+            toast.success("Restored"); // frequent toasts annoying?
+          },
+        }
+      );
+    });
+    toast.success("Restore started");
+    clearSelection();
+  };
+
+  const handleDeleteForeverSelected = async () => {
+    selectedItems.forEach((file) => {
+      hardDeleteMutation.mutate({
+        id: file._id,
+        type: file.extension ? "document" : "directory",
+      });
+    });
+    toast.success("Deleting started");
+    clearSelection();
+  };
+
   if (selectedItems.length > 0) {
+    if (isTrash) {
+      return (
+        <div className='flex items-center justify-between gap-2 border-b p-4 bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-200'>
+          <div className='flex items-center gap-4'>
+            <Button
+              variant='ghost'
+              size='icon'
+              className='h-8 w-8'
+              onClick={clearSelection}
+            >
+              <X className='h-4 w-4' />
+            </Button>
+            <span className='font-medium text-sm'>
+              {selectedItems.length} selected
+            </span>
+          </div>
+          <div className='flex items-center gap-2'>
+            <Button variant='ghost' size='sm' onClick={handleRestoreSelected}>
+              <RotateCcw className='mr-2 h-4 w-4' />
+              Restore
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='text-destructive hover:bg-destructive/10'
+              onClick={handleDeleteForeverSelected}
+            >
+              <Trash2 className='mr-2 h-4 w-4' />
+              Delete Forever
+            </Button>
+            {extraActions}
+          </div>
+        </div>
+      );
+    }
     return (
       <div className='flex items-center justify-between gap-2 border-b p-4 bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-200'>
         <div className='flex items-center gap-4'>
@@ -164,6 +240,7 @@ export function FileToolbar({
 
       <div className='flex flex-wrap items-center justify-between gap-2 border-b p-4 '>
         <div className='flex flex-wrap items-center gap-2'>
+          {extraActions}
           {!hideActions && (
             <>
               <div className='flex sm:hidden cursor-not-allowed'>
