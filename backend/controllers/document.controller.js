@@ -6,8 +6,11 @@ import {
   getDocumentSignedUrl,
   renameDocument,
   toggleStarDocument,
-  deleteDocument,
+  hardDeleteDocument,
+  softDeleteDocument,
+  restoreDocument,
 } from "../services/document.service.js";
+import { removeFromRecent } from "../services/recent.service.js";
 
 export const createPresigned = async (req, res) => {
   const result = await createPresignedDocument({
@@ -39,12 +42,14 @@ export const getDocumentById = async (req, res) => {
   const url = await getDocumentSignedUrl(
     req.params.id,
     req.query.action === "download",
+    req.user?._id,
   );
   res.redirect(url);
 };
 
 export const updateDocumentById = async (req, res) => {
   const doc = await renameDocument(req.params.id, req.body.name);
+  await removeFromRecent(req.user._id, req.params.id, "document");
   res
     .status(200)
     .json(new ApiResponse(200, "Document updated successfully", doc));
@@ -57,7 +62,19 @@ export const starredToggleDocument = async (req, res) => {
     .json(new ApiResponse(200, "Document star toggled successfully"));
 };
 
-export const deleteDocumentById = async (req, res) => {
-  await deleteDocument(req.params.id);
+export const softDeleteDocumentById = async (req, res) => {
+  await softDeleteDocument(req.params.id);
+  await removeFromRecent(req.user._id, req.params.id, "document");
   res.status(200).json(new ApiResponse(200, "Document deleted successfully"));
+};
+
+export const hardDeleteDocumentById = async (req, res) => {
+  await hardDeleteDocument(req.params.id);
+  await removeFromRecent(req.user._id, req.params.id, "document");
+  res.status(200).json(new ApiResponse(200, "Document deleted successfully"));
+};
+
+export const restoreDocumentById = async (req, res) => {
+  await restoreDocument(req.params.id);
+  res.status(200).json(new ApiResponse(200, "Document restored successfully"));
 };

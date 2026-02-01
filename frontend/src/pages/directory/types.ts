@@ -13,6 +13,7 @@ export interface FileItem {
   isStarred?: boolean;
   extension?: string;
   previewUrl?: string;
+  trashAt?: string | null;
 }
 
 export interface FileGridProps {

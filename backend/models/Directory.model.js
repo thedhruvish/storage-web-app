@@ -44,6 +44,9 @@ const directorySchema = new Schema(
     metaData: {
       type: Object,
     },
+    trashAt: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

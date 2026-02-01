@@ -30,6 +30,9 @@ const documentSchema = new Schema(
     metaData: {
       type: Object,
     },
+    trashAt: {
+      type: Date,
+    },
   },
   { timestamps: true },
 );

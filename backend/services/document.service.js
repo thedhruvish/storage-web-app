@@ -9,6 +9,7 @@ import {
   verifyUploadedObject,
 } from "./s3.service.js";
 import { updateParentDirectorySize } from "./directory.service.js";
+import { addToRecent } from "./recent.service.js";
 
 /**
  * Create document + generate presigned URL
@@ -89,11 +90,18 @@ export const cancelUpload = async (documentId) => {
 /**
  * Get signed URL for view/download
  */
-export const getDocumentSignedUrl = async (documentId, isDownload) => {
+export const getDocumentSignedUrl = async (
+  documentId,
+  isDownload,
+  userId,
+) => {
   const document = await Document.findById(documentId);
   if (!document) {
     throw new ApiError(404, "Document not found");
   }
+
+
+  await addToRecent(userId, documentId, "document");
 
   return getSignedUrlForGetObject(
     `${document.id}${document.extension}`,
@@ -129,9 +137,9 @@ export const toggleStarDocument = async (documentId) => {
 };
 
 /**
- * Delete document
+ *  Hard delete document
  */
-export const deleteDocument = async (documentId) => {
+export const hardDeleteDocument = async (documentId) => {
   const document = await Document.findByIdAndDelete(documentId);
   if (!document) {
     throw new ApiError(404, "Document not found");
@@ -141,4 +149,27 @@ export const deleteDocument = async (documentId) => {
     deleteS3Object(`${document.id}${document.extension}`),
     updateParentDirectorySize(document.parentDirId, -document.metaData.size),
   ]);
+};
+
+/**
+ *  Soft delete document
+ */
+export const softDeleteDocument = async (documentId) => {
+  const document = await Document.findById(documentId);
+  if (!document) {
+    throw new ApiError(404, "Document not found");
+  }
+
+  document.trashAt = Date.now();
+  await document.save();
+};
+
+export const restoreDocument = async (documentId) => {
+  const document = await Document.findById(documentId);
+  if (!document) {
+    throw new ApiError(404, "Document not found");
+  }
+
+  document.trashAt = null;
+  await document.save();
 };

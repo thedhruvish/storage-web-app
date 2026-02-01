@@ -2,12 +2,29 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useDialogStore } from "@/store/dialogs-store";
 import axiosClient from "./axios-client";
 
-export const useGetAllDirectoryList = (directoryId: string = "") => {
+export const useGetAllDirectoryList = (
+  directoryId: string = "",
+  filter: Record<string, any> = {
+    isStarred: false,
+  }
+) => {
   return useQuery({
-    queryKey: ["directorys", directoryId],
+    queryKey: ["directorys", directoryId, filter],
     queryFn: async ({ queryKey }) => {
       const [, id] = queryKey;
-      const response = await axiosClient.get(`/directory/${id || ""}`);
+      const response = await axiosClient.get(
+        `/directory/${id || ""}?isStarred=${filter.isStarred}`
+      );
+      return response.data;
+    },
+  });
+};
+
+export const useGetAllTrash = () => {
+  return useQuery({
+    queryKey: ["trash"],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/directory/trash`);
       return response.data;
     },
   });
@@ -179,6 +196,75 @@ export const usestarredToggle = () => {
       queryClient.invalidateQueries({
         queryKey: ["directorys"], // Invalidate the updated directory
       });
+    },
+  });
+};
+export const useEmptyTrash = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => axiosClient.delete(`/directory/trash`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};
+
+export const useRestore = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      type,
+    }: {
+      id: string;
+      type: "directory" | "document";
+    }) => axiosClient.put(`/${type}/${id}/restore`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};
+
+export const useHardDelete = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      type,
+    }: {
+      id: string;
+      type: "directory" | "document";
+    }) => axiosClient.delete(`/${type}/${id}/hard`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};
+
+export const useGetSharedWithMe = () => {
+  return useQuery({
+    queryKey: ["shared-with-me"],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/directory/shared-with-me`);
+      return response.data;
     },
   });
 };
