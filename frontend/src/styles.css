@@ -4,13 +4,59 @@
 
 @custom-variant dark (&:is(.dark *));
 
-body {
-  @apply m-0;
-  font-family:
-    -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu",
-    "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* --- BASE LAYER --- */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground m-0;
+    font-family:
+      -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+      "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* Smooth color transition for theme toggling */
+    transition-property:
+      background-color, color, border-color, text-decoration-color, fill, stroke;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 300ms;
+  }
+
+  /* Custom Text Selection */
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  /* Smooth transitions for interactive elements */
+  a,
+  button,
+  [role="button"],
+  input,
+  textarea,
+  select {
+    @apply transition-colors duration-200 ease-in-out;
+  }
+
+  button,
+  [role="button"] {
+    @apply focus-visible:ring-ring focus-visible:ring-offset-background focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none;
+  }
+
+  /* Custom Scrollbar (Linear Style) */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border/50 hover:bg-border rounded-full transition-colors;
+  }
 }
 
 code {
@@ -127,9 +173,9 @@ code {
 }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+}
+* {
+  @apply border-border outline-ring/50;
   body {
     @apply bg-background text-foreground;
   }
@@ -147,4 +193,59 @@ code {
 }
 .animate-scale-in {
   animation: scaleIn 0.4s ease-out forwards;
+}
+
+/* Shimmer Effect for Buttons (Linear style micro-interaction) */
+@keyframes shimmer {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    to right,
+    transparent 0%,
+    oklch(1 0 0 / 0.1) 50%,
+    transparent 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+/* Floating Animation */
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Pulse Glow */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 15px -3px rgba(var(--primary), 0.3);
+  }
+  50% {
+    box-shadow: 0 0 25px -3px rgba(var(--primary), 0.6);
+  }
+}
+.animate-pulse-glow {
+  animation: pulse-glow 3s infinite;
+}
+
+* {
+  -webkit-tap-highlight-color: transparent;
 }
