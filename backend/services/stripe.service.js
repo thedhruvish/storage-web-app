@@ -164,3 +164,22 @@ export const createCustomerPortalSession = async (id) => {
 
   return session;
 };
+
+export const createStripePrice = async ({
+  productId,
+  unit_amount,
+  interval,
+  metadata,
+}) => {
+  const price = await stripe.prices.create({
+    product: productId,
+    currency: "USD",
+    unit_amount: unit_amount * 100,
+    recurring: {
+      interval: interval,
+      interval_count: 1,
+    },
+    metadata,
+  });
+  return price;
+};

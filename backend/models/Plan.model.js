@@ -6,27 +6,28 @@ const planSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    priceINR: {
+    monthlyPriceINR: {
       type: Number,
       required: true,
     },
-    description: {
-      type: String,
-      required: true,
-    },
-    productId: {
-      type: String,
-    },
-    default_price_id: {
-      type: String,
-      required: true,
-    },
-    interval: {
-      type: String,
-      enum: ["month", "year"],
-    },
-    priceUSD: {
+    monthlyPriceUSD: {
       type: Number,
+      required: true,
+    },
+    monthlyPriceId: {
+      type: String,
+      required: true,
+    },
+    yearlyPriceINR: {
+      type: Number,
+      required: true,
+    },
+    yearlyPriceUSD: {
+      type: Number,
+      required: true,
+    },
+    yearlyPriceId: {
+      type: String,
       required: true,
     },
     totalBytes: {

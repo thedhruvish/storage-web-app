@@ -3,6 +3,7 @@ import ApiResponse from "../utils/ApiResponse.js";
 import Plan from "../models/Plan.model.js";
 import {
   createStripeProduct,
+  createStripePrice,
   disableStripeProduct,
 } from "../services/stripe.service.js";
 
@@ -16,41 +17,61 @@ export const createPlan = async (req, res) => {
   const {
     title,
     description,
-    priceINR,
-    priceUSD,
-    interval,
+    monthlyPriceINR,
+    monthlyPriceUSD,
+    yearlyPriceINR,
+    yearlyPriceUSD,
     totalBytes,
     isActive,
   } = req.body;
 
   const planId = new mongoose.Types.ObjectId();
-  // this is the helper func that create a stripe product
+
+  // Create Stripe Product with Monthly Price as default
   const stripeProductPlan = await createStripeProduct({
     title,
     isActive,
     description,
-    priceUSD,
-    interval,
+    priceUSD: monthlyPriceUSD,
+    interval: "month",
     metadata: {
       totalBytes,
       planId: planId.toString(),
     },
   });
 
-  // plan save on the db
+  // Create Yearly Price in Stripe
+  const stripeYearlyPrice = await createStripePrice({
+    productId: stripeProductPlan.id,
+    unit_amount: yearlyPriceUSD,
+    interval: "year",
+    metadata: {
+      totalBytes,
+      planId: planId.toString(),
+    },
+  });
+
+  // Plan save on the db
   await Plan.create({
     _id: planId,
     title,
-    priceINR,
     description,
-    interval,
-    priceUSD,
     totalBytes,
     isActive,
     createBy: req.user._id,
     productId: stripeProductPlan.id,
-    default_price_id: stripeProductPlan.default_price,
+
+    // Monthly
+    monthlyPriceINR,
+    monthlyPriceUSD,
+    monthlyPriceId: stripeProductPlan.default_price, // The product creation returns the ID, not object usually, assuming existing service returns object with default_price string or ref.
+
+    // Yearly
+    yearlyPriceINR,
+    yearlyPriceUSD,
+    yearlyPriceId: stripeYearlyPrice.id,
   });
+
   res.status(201).json(new ApiResponse(201, "Plan create Successfuly"));
 };
 
