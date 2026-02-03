@@ -8,6 +8,7 @@ import {
   createPromoCodeService,
   togglePromoCodeService,
 } from "../services/billing.service.js";
+import { createRazorpaySubscription } from "../services/razorpay.service.js";
 
 // checkout
 export const genratorStripeCheckoutUrl = async (req, res) => {
@@ -17,6 +18,20 @@ export const genratorStripeCheckoutUrl = async (req, res) => {
   });
 
   res.status(201).json(new ApiResponse(201, "checkout url created", { url }));
+};
+
+export const genratorRazorpayCheckout = async (req, res) => {
+  const { billing, id } = req.body;
+
+  const subscription = await createRazorpaySubscription({
+    planId: id,
+    billing,
+    user: req.user,
+  });
+  console.log(subscription);
+  res
+    .status(201)
+    .json(new ApiResponse(201, "checkout url created", subscription.id));
 };
 
 // coupons

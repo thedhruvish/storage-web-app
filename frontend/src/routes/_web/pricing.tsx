@@ -2,7 +2,7 @@ import z from "zod";
 import { createFileRoute } from "@tanstack/react-router";
 import { useUser } from "@/store/user-store";
 import { DollarSign, IndianRupee } from "lucide-react";
-import { useCheckoutStripe, useGetAllPlansPublic } from "@/api/checkout-api";
+import { useCheckout, useGetAllPlansPublic } from "@/api/checkout-api";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
 import { PricingCard } from "@/components/pricing-card";
@@ -27,7 +27,7 @@ export default function PricingPage() {
   const { user } = useUser();
   const navigate = Route.useNavigate();
 
-  const { mutate: checkoutStripeMutate } = useCheckoutStripe();
+  const { mutate: checkoutMutate } = useCheckout();
 
   const checkoutStripeHandler = (id: string, price: number) => {
     if (!user) {
@@ -36,12 +36,24 @@ export default function PricingPage() {
     }
     // Only allow checkout if price is greater than 0
     if (price > 0) {
-      checkoutStripeMutate(id, {
-        onSuccess(data) {
-          localStorage.setItem("payment_status", "INIT");
-          window.open(data, "_blank");
+      checkoutMutate(
+        {
+          id,
+          billing: isYearly ? "yearly" : "monthly",
+          provider: currency === "INR" ? "razorpay" : "stripe",
         },
-      });
+        {
+          onSuccess(data) {
+            localStorage.setItem("payment_status", "INIT");
+            if (currency === "USD") {
+              window.open(data, "_blank");
+            } else {
+              console.log(data);
+            }
+            // window.open(data, "_blank");
+          },
+        }
+      );
     }
   };
 
@@ -161,16 +173,16 @@ export default function PricingPage() {
         {/* Pricing Cards */}
         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 justify-center'>
           {/* Map over the plans provided */}
-          {plansData?.map((plan) => (
+          {plansData?.map((plan: any) => (
             <PricingCard
               key={plan._id}
               plan={plan}
               currency={currency}
               cycle={isYearly ? "yearly" : "monthly"}
               isPopular={plan.title.toLowerCase() !== "basic"}
-              onSubscribe={(stripeId) =>
+              onSubscribe={(planId) =>
                 checkoutStripeHandler(
-                  stripeId,
+                  planId,
                   currency === "USD"
                     ? plan[isYearly ? "yearly" : "monthly"].priceUSD
                     : plan[isYearly ? "yearly" : "monthly"].priceINR

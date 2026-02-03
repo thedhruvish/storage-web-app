@@ -1,4 +1,31 @@
 import { razorpay } from "../lib/razorpay.client.js";
+import { getPlanByIdService } from "./billing.service.js";
+
+// create order
+export const createRazorpaySubscription = async ({ planId, user, billing }) => {
+  const plan = await getPlanByIdService(planId);
+
+  const razorpayPlanId =
+    billing === "yearly" ? plan.yearly.razorpayId : plan.monthly.razorpayId;
+
+  const subscription = await razorpay.subscriptions.create({
+    plan_id: razorpayPlanId,
+    total_count: 100,
+    customer_notify: 1,
+    notify_info: {
+      notify_email: user.email,
+      notify_phone: user?.phone,
+    },
+    quantity: 1,
+    notes: {
+      userId: user._id,
+      planId: planId,
+      billing,
+    },
+  });
+
+  return subscription;
+};
 
 // Create a plan
 export const createRazorpayPlan = async ({
@@ -20,21 +47,6 @@ export const createRazorpayPlan = async ({
     notes,
   });
   return plan;
-};
-
-// Create a subscription
-export const createRazorpaySubscription = async ({
-  planId,
-  total_count = 120,
-  customerNotify = 1,
-}) => {
-  const subscription = await razorpay.subscriptions.create({
-    plan_id: planId,
-    total_count,
-    customer_notify: customerNotify,
-    quantity: 1,
-  });
-  return subscription;
 };
 
 // Cancel a subscription

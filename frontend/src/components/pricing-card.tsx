@@ -23,7 +23,7 @@ interface PricingCardProps {
   currency: "USD" | "INR";
   cycle: "monthly" | "yearly";
   isPopular?: boolean;
-  onSubscribe: (stripeId: string) => void;
+  onSubscribe: (id: string) => void;
 }
 
 export function PricingCard({
@@ -40,7 +40,7 @@ export function PricingCard({
     currency === "USD" ? plan[cycle].priceUSD : plan[cycle].priceINR;
 
   const currencySymbol = currency === "USD" ? "$" : "₹";
-  const stripeId = plan[cycle].stripeId;
+  const id = plan._id;
 
   return (
     <motion.div
@@ -88,7 +88,7 @@ export function PricingCard({
       </p>
 
       <ul className='space-y-4 mb-8 flex-1 text-sm'>
-        {plan.fetures.map((feature, i) => (
+        {plan?.fetures?.map((feature, i) => (
           <li key={i} className='flex gap-3'>
             <CheckCircle2
               className={cn(
@@ -102,7 +102,7 @@ export function PricingCard({
       </ul>
 
       <button
-        onClick={() => onSubscribe(stripeId)}
+        onClick={() => onSubscribe(id)}
         className={cn(
           "w-full py-3 rounded-lg font-medium transition-colors",
           isPopular

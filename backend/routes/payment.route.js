@@ -3,6 +3,7 @@ import {
   createCoupons,
   createPromoCode,
   deleteCoupons,
+  genratorRazorpayCheckout,
   genratorStripeCheckoutUrl,
   getAllCoupons,
   getAllPromoCode,
@@ -10,9 +11,9 @@ import {
 } from "../controllers/billing.controller.js";
 import { validateInput } from "../utils/validateInput.js";
 import {
+  billingValidation,
   createCouponsValidation,
   createPromoCodeValidation,
-  idValidation,
   togglePromoCodeValidation,
 } from "../validators/payment.validator.js";
 import { checkOwnerAndAdmin } from "../middlewares/permission.middleware.js";
@@ -22,8 +23,14 @@ const router = express.Router();
 //  only auth access
 router.post(
   "/stripe-checkout",
-  validateInput(idValidation),
+  validateInput(billingValidation),
   genratorStripeCheckoutUrl,
+);
+
+router.post(
+  "/razorpay-checkout",
+  validateInput(billingValidation),
+  genratorRazorpayCheckout,
 );
 
 // admin access those routes
