@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
-import type { BackendPlan } from "@/pages/other/PricingCard";
+import type { BackendPlan } from "@/pages/other/a";
 import axiosClient from "./axios-client";
 
 export const useGetAllPlansPublic = () => {
@@ -9,7 +9,7 @@ export const useGetAllPlansPublic = () => {
       const response = await axiosClient.get<{
         data: { plans: BackendPlan[] };
       }>("/plan/pricing");
-      return response.data.data.plans;
+      return response.data.data;
     },
   });
 };

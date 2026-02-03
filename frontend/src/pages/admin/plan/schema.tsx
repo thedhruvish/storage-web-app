@@ -15,6 +15,24 @@ export const planCreateValidation = z.object({
 
 export type PlanFormValues = z.infer<typeof planCreateValidation>;
 
-export type Plan = z.infer<typeof planCreateValidation> & {
+export type Plan = {
   _id: string;
+  title: string;
+  description: string;
+  totalBytes: number;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+  monthly: {
+    priceINR: number;
+    priceUSD: number;
+    stripeId: string;
+    razorpayId: string;
+  };
+  yearly: {
+    priceINR: number;
+    priceUSD: number;
+    stripeId: string;
+    razorpayId: string;
+  };
 };
