@@ -32,9 +32,9 @@ export const getDirectoryWithContent = async ({
   }
 
   const [directories, documents] = await Promise.all([
-    addToRecent(userId, directoryId, "directory"),
     Directory.find({ parentDirId: directory._id, ...filter }),
     Document.find({ parentDirId: directory._id, ...filter }),
+    addToRecent(userId, directoryId, "directory"),
   ]);
 
   const documentsWithPreviewUrl = await Promise.all(

@@ -5,7 +5,7 @@ import axiosClient from "./axios-client";
 export const useGetAllDirectoryList = (
   directoryId: string = "",
   filter: Record<string, any> = {
-    isStarred: false,
+    isStarred: undefined,
   }
 ) => {
   return useQuery({
@@ -13,7 +13,7 @@ export const useGetAllDirectoryList = (
     queryFn: async ({ queryKey }) => {
       const [, id] = queryKey;
       const response = await axiosClient.get(
-        `/directory/${id || ""}?isStarred=${filter.isStarred}`
+        `/directory/${id || ""}?${filter.isStarred ? "isStarred=true" : ""}`
       );
       return response.data;
     },

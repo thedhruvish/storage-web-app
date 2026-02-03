@@ -73,10 +73,10 @@ export const getCureentUser = async (req, res) => {
   res.status(200).json(
     new ApiResponse(200, "User login Successfuly", {
       ...req.user,
-      totalUsedBytes: directory.metaData.size,
+      totalUsedBytes: directory?.metaData?.size,
     }),
   );
-};
+};  
 
 // logout user
 export const logout = async (req, res) => {
