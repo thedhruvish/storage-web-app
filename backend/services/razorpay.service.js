@@ -1,3 +1,4 @@
+import crypto from "crypto";
 import { razorpay } from "../lib/razorpay.client.js";
 import { getPlanByIdService } from "./billing.service.js";
 
@@ -73,4 +74,17 @@ export const resumeRazorpaySubscription = async (subscriptionId) => {
     status: "active",
   });
   return subscription;
+};
+
+export const verifyRazorpaySignature = (
+  paymentId,
+  subscriptionId,
+  signature,
+) => {
+  const generated_signature = crypto
+    .createHmac("sha256", process.env.RAZORPAY_KEY_SECRET)
+    .update(paymentId + "|" + subscriptionId)
+    .digest("hex");
+
+  return generated_signature === signature;
 };

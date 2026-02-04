@@ -45,19 +45,12 @@ function fireConfetti() {
 
 function RouteComponent() {
   useEffect(() => {
-    // 1. Check if the payment flow was initiated
     if (localStorage.getItem("payment_status") === "INIT") {
-      // Fire confetti!
       fireConfetti();
 
-      // 2. Send the "SUCCESS" message to the original tab
       localStorage.setItem("payment_status", "SUCCESS");
 
-      // 3. Attempt to close this tab after a short delay
-      //    (to let the user see the message and confetti)
-      setTimeout(() => {
-        window.close();
-      }, 3000); // 2.5-second delay
+      localStorage.removeItem("payment_status");
     }
   }, []);
 
@@ -72,13 +65,19 @@ function RouteComponent() {
             Payment Successful!
           </CardTitle>
           <CardDescription className='text-base'>
-            Your payment has been processed. This tab will close automatically.
+            Your payment has been processed successfully.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className='flex flex-col gap-4'>
           <p className='text-sm text-muted-foreground'>
-            If this tab does not close, you can safely close it yourself.
+            You now have access to premium features.
           </p>
+          <a
+            href='/'
+            className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2'
+          >
+            Go to Dashboard
+          </a>
         </CardContent>
       </Card>
     </div>

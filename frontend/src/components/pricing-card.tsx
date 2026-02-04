@@ -22,6 +22,7 @@ interface PricingCardProps {
   plan: Plan;
   currency: "USD" | "INR";
   cycle: "monthly" | "yearly";
+  disabled?: boolean;
   isPopular?: boolean;
   onSubscribe: (id: string) => void;
 }
@@ -30,6 +31,7 @@ export function PricingCard({
   plan,
   currency,
   cycle,
+  disabled,
   isPopular,
   onSubscribe,
 }: PricingCardProps) {
@@ -103,6 +105,7 @@ export function PricingCard({
 
       <button
         onClick={() => onSubscribe(id)}
+        disabled={disabled}
         className={cn(
           "w-full py-3 rounded-lg font-medium transition-colors",
           isPopular
@@ -110,7 +113,11 @@ export function PricingCard({
             : "border hover:bg-secondary"
         )}
       >
-        {price === 0 ? "Get Started Free" : "Subscribe Now"}
+        {disabled
+          ? "Processing..."
+          : price === 0
+            ? "Get Started Free"
+            : "Subscribe Now"}
       </button>
     </motion.div>
   );

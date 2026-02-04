@@ -8,6 +8,7 @@ import {
   getAllCoupons,
   getAllPromoCode,
   togglePromoCode,
+  verifyRazorpayPayment,
 } from "../controllers/billing.controller.js";
 import { validateInput } from "../utils/validateInput.js";
 import {
@@ -32,6 +33,8 @@ router.post(
   validateInput(billingValidation),
   genratorRazorpayCheckout,
 );
+
+router.post("/razorpay-verify", verifyRazorpayPayment);
 
 // admin access those routes
 router.use(checkOwnerAndAdmin());

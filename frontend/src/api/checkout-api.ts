@@ -26,7 +26,7 @@ export const useCheckout = () => {
         id,
         billing,
       });
-      return response.data.data.url;
+      return response.data.data;
     },
   });
 };

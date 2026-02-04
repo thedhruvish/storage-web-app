@@ -1,7 +1,10 @@
+import { useState } from "react";
 import z from "zod";
 import { createFileRoute } from "@tanstack/react-router";
+import { loadRazorpay, razorpayOption } from "@/pages/web/home/razorpay-helper";
 import { useUser } from "@/store/user-store";
 import { DollarSign, IndianRupee } from "lucide-react";
+import { toast } from "sonner";
 import { useCheckout, useGetAllPlansPublic } from "@/api/checkout-api";
 import { cn } from "@/lib/utils";
 import { Spinner } from "@/components/ui/spinner";
@@ -16,7 +19,7 @@ export const Route = createFileRoute("/_web/pricing")({
   component: PricingPage,
 });
 
-export default function PricingPage() {
+function PricingPage() {
   const {
     data: plansData,
 
@@ -26,10 +29,11 @@ export default function PricingPage() {
   const { isYearly, currency } = Route.useSearch();
   const { user } = useUser();
   const navigate = Route.useNavigate();
+  const [razorpayLoading, setRazorpayLoading] = useState(false);
 
-  const { mutate: checkoutMutate } = useCheckout();
+  const { mutate: checkoutMutate, isPending: checkoutPending } = useCheckout();
 
-  const checkoutStripeHandler = (id: string, price: number) => {
+  const checkoutStripeHandler = (id: string, price: number, plan: any) => {
     if (!user) {
       navigate({ to: "/auth/login" });
       return;
@@ -43,14 +47,53 @@ export default function PricingPage() {
           provider: currency === "INR" ? "razorpay" : "stripe",
         },
         {
-          onSuccess(data) {
+          async onSuccess(data) {
             localStorage.setItem("payment_status", "INIT");
             if (currency === "USD") {
-              window.open(data, "_blank");
+              window.open(data.url, "_blank");
             } else {
+              setRazorpayLoading(true);
               console.log(data);
+              const isLoaded = await loadRazorpay();
+              if (!isLoaded) {
+                toast.error("Razorpay SDK failed to load");
+                return;
+              }
+              const options = razorpayOption(
+                data,
+                plan.title,
+                () => {
+                  setRazorpayLoading(false);
+                  toast.info("Payment cancelled");
+                },
+                (response) => {
+                  setRazorpayLoading(false);
+                  navigate({
+                    to: "/payment-procces",
+                    search: {
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_subscription_id:
+                        response.razorpay_subscription_id,
+                      razorpay_signature: response.razorpay_signature,
+                    },
+                  });
+                }
+              );
+              const rzp = new window.Razorpay(options);
+              rzp.open();
+              rzp.on("payment.failed", function (response: any) {
+                console.log(response);
+                toast.error("Payment Failed");
+                setRazorpayLoading(false);
+              });
             }
+
             // window.open(data, "_blank");
+          },
+          onError() {
+            toast.error("Error", {
+              description: "Failed to create checkout session.",
+            });
           },
         }
       );
@@ -177,6 +220,7 @@ export default function PricingPage() {
             <PricingCard
               key={plan._id}
               plan={plan}
+              disabled={checkoutPending || razorpayLoading}
               currency={currency}
               cycle={isYearly ? "yearly" : "monthly"}
               isPopular={plan.title.toLowerCase() !== "basic"}
@@ -185,7 +229,8 @@ export default function PricingPage() {
                   planId,
                   currency === "USD"
                     ? plan[isYearly ? "yearly" : "monthly"].priceUSD
-                    : plan[isYearly ? "yearly" : "monthly"].priceINR
+                    : plan[isYearly ? "yearly" : "monthly"].priceINR,
+                  plan
                 )
               }
             />
