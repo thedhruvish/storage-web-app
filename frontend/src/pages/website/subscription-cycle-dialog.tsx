@@ -51,6 +51,25 @@ export function SubscriptionCycleDialog({
           </DialogClose>
         </DialogHeader>
 
+        <div className='mb-6 grid grid-cols-2 gap-4 rounded-lg border p-4'>
+          <div>
+            <p className='text-sm font-medium text-muted-foreground'>
+              Subscription ID
+            </p>
+            <p className='font-mono text-sm'>
+              {subscription?.paymentType === "stripe"
+                ? subscription?.stripeSubscriptionId
+                : subscription?.razorpaySubscriptionId || "N/A"}
+            </p>
+          </div>
+          <div>
+            <p className='text-sm font-medium text-muted-foreground'>
+              Payment Method
+            </p>
+            <p className='text-sm capitalize'>{subscription?.paymentType}</p>
+          </div>
+        </div>
+
         {/* --- Cycle Details Table --- */}
         <div className='max-h-[60vh] overflow-y-auto'>
           <Table>

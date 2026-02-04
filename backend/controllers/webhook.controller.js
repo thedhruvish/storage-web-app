@@ -68,7 +68,7 @@ export const razorpayWebhookHandler = async (req, res) => {
   });
 
   res.status(200).json({ status: "ok" });
-
+  console.log(event)
   switch (event) {
     case "subscription.activated":
       // subscription activated

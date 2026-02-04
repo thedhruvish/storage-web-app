@@ -47,6 +47,7 @@ const getStatusVariant = (
 ): "default" | "destructive" | "secondary" | "outline" => {
   switch (status) {
     case "active":
+    case "partial_active":
       return "default";
     case "cancelled":
       return "destructive";
@@ -61,6 +62,25 @@ const getStatusVariant = (
     default:
       return "secondary";
   }
+};
+
+const getSubscriptionDetails = (sub: ApiSubscription) => {
+  const startDate = new Date(sub.startDate);
+  const endDate = new Date(sub.endDate);
+  const diffTime = Math.abs(endDate.getTime() - startDate.getTime());
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+  const isYearly = diffDays > 40; // Rough check, monthly is ~30, yearly ~365
+
+  // Fallback to monthly if checking fails or something odd
+  const interval = isYearly ? "year" : "month";
+  const planDetails = isYearly ? sub.planId.yearly : sub.planId.monthly;
+
+  const isStripe = sub.paymentType === "stripe";
+  const price = isStripe ? planDetails.priceUSD : planDetails.priceINR;
+  const currency = (isStripe ? "USD" : "INR") as "USD" | "INR";
+
+  return { price, currency, interval, isStripe, planDetails };
 };
 
 export function BillingSettingsPage() {
@@ -107,7 +127,10 @@ export function BillingSettingsPage() {
     const start = new Date(sub.startDate);
     const end = new Date(sub.endDate);
     const isWithinDateRange = today >= start && today <= end;
-    const isActiveStatus = sub.status === "active" || sub.status === "past_due";
+    const isActiveStatus =
+      sub.status === "active" ||
+      sub.status === "past_due" ||
+      sub.status === "partial_active";
     return isActiveStatus && isWithinDateRange;
   });
 
@@ -163,17 +186,16 @@ export function BillingSettingsPage() {
         <CardContent>
           {currentSubscription ? (
             (() => {
-              const isStripe = currentSubscription.paymentType === "stripe";
-              const price = isStripe
-                ? currentSubscription.planId.priceUSD
-                : currentSubscription.planId.priceINR;
-              const currency = isStripe ? "USD" : "INR";
+              const { price, currency, interval, isStripe } =
+                getSubscriptionDetails(currentSubscription);
 
               const isFailed =
                 currentSubscription.status === "failed" ||
                 currentSubscription.status === "past_due";
 
-              const isActive = currentSubscription.status === "active";
+              const isActive =
+                currentSubscription.status === "active" ||
+                currentSubscription.status === "partial_active";
 
               return (
                 <>
@@ -233,7 +255,7 @@ export function BillingSettingsPage() {
                         {formatCurrency(price, currency, {
                           amountInSmallestUnit: false,
                         })}{" "}
-                        / {currentSubscription.planId.interval}
+                        / {interval}
                       </p>
 
                       <div className='space-y-2 pt-4'>
@@ -257,6 +279,17 @@ export function BillingSettingsPage() {
                             {formatDate(currentSubscription.endDate)}
                           </strong>
                         </div>
+                        <div className='flex items-center text-sm'>
+                          <Package className='mr-2 h-4 w-4 text-muted-foreground' />
+                          <span className='text-muted-foreground'>
+                            Subscription Id:
+                          </span>
+                          <strong className='ml-1.5'>
+                            {isStripe
+                              ? currentSubscription.stripeSubscriptionId
+                              : currentSubscription.razorpaySubscriptionId}
+                          </strong>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -274,8 +307,8 @@ export function BillingSettingsPage() {
                 <Link
                   to='/pricing'
                   search={{
-                    billing: "month",
-                    currency: "usd",
+                    isYearly: false,
+                    currency: "USD",
                   }}
                 >
                   View Plans
@@ -351,16 +384,26 @@ export function BillingSettingsPage() {
                     sub.paymentType === "stripe" &&
                     sub.stripeSubscriptionCycle?.length > 0;
 
+                  const { price, currency, interval } =
+                    getSubscriptionDetails(sub);
+
                   return (
                     <TableRow
                       key={sub._id}
-                      onClick={() => hasCycleData && setSelectedSub(sub)}
-                      className={hasCycleData ? "cursor-pointer" : ""}
+                      onClick={() =>
+                        (hasCycleData || sub.paymentType === "razorpay") &&
+                        setSelectedSub(sub)
+                      }
+                      className={
+                        hasCycleData || sub.paymentType === "razorpay"
+                          ? "cursor-pointer"
+                          : ""
+                      }
                     >
                       <TableCell className='font-medium'>
                         {sub.planId.title}{" "}
                         <span className='capitalize text-muted-foreground'>
-                          ({sub.planId.interval})
+                          ({interval})
                         </span>
                       </TableCell>
                       <TableCell>
@@ -378,18 +421,14 @@ export function BillingSettingsPage() {
                         {sub.paymentType}
                       </TableCell>
                       <TableCell>
-                        {formatCurrency(
-                          sub.paymentType === "stripe"
-                            ? sub.planId.priceUSD
-                            : sub.planId.priceINR,
-                          sub.paymentType === "stripe" ? "USD" : "INR",
-                          { amountInSmallestUnit: false }
-                        )}
+                        {formatCurrency(price, currency, {
+                          amountInSmallestUnit: false,
+                        })}
                       </TableCell>
                       <TableCell className='font-mono text-xs'>
                         {sub.paymentType === "stripe"
                           ? sub.stripeSubscriptionId
-                          : "N/A"}
+                          : sub.razorpaySubscriptionId || "N/A"}
                       </TableCell>
                     </TableRow>
                   );
