@@ -1,151 +1,242 @@
-import { z } from "zod";
+import { useState } from "react";
+import z from "zod";
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  PricingCard,
-  type BillingCycle,
-  type Currency,
-} from "@/pages/other/PricingCard";
+import { loadRazorpay, razorpayOption } from "@/pages/web/home/razorpay-helper";
 import { useUser } from "@/store/user-store";
-import { useGetAllPlansPublic } from "@/api/checkout-api";
-import { useCheckoutStripe } from "@/api/checkout-api";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { DollarSign, IndianRupee } from "lucide-react";
+import { toast } from "sonner";
+import { useCheckout, useGetAllPlansPublic } from "@/api/checkout-api";
+import { cn } from "@/lib/utils";
+import { Spinner } from "@/components/ui/spinner";
+import { PricingCard } from "@/components/pricing-card";
 
 const pricingSearchSchema = z.object({
-  billing: z.enum(["month", "year"]).optional().default("month"),
-  currency: z.enum(["inr", "usd"]).optional().default("inr"),
+  isYearly: z.boolean().optional().default(false),
+  currency: z.enum(["USD", "INR"]).optional().default("INR"),
 });
-
 export const Route = createFileRoute("/_web/pricing")({
-  validateSearch: (search) => pricingSearchSchema.parse(search),
+  validateSearch: pricingSearchSchema,
   component: PricingPage,
 });
 
-export default function PricingPage() {
-  const { data, isLoading } = useGetAllPlansPublic();
-  const { billing, currency } = Route.useSearch();
+function PricingPage() {
+  const {
+    data: plansData,
+
+    error,
+    isPending: plansPending,
+  } = useGetAllPlansPublic();
+  const { isYearly, currency } = Route.useSearch();
   const { user } = useUser();
-
   const navigate = Route.useNavigate();
+  const [razorpayLoading, setRazorpayLoading] = useState(false);
 
-  const { mutate: checkoutStripeMutate, isPending } = useCheckoutStripe();
+  const { mutate: checkoutMutate, isPending: checkoutPending } = useCheckout();
 
-  const filteredPlans = data?.filter((plan) => plan.interval === billing) ?? [];
-  const checkoutStripeHandler = (id: string) => {
+  const checkoutStripeHandler = (id: string, price: number, plan: any) => {
     if (!user) {
       navigate({ to: "/auth/login" });
       return;
     }
-    if (currency === "usd") {
-      checkoutStripeMutate(id, {
-        onSuccess(data) {
-          localStorage.setItem("payment_status", "INIT");
-          window.open(data, "_blank");
+    // Only allow checkout if price is greater than 0
+    if (price > 0) {
+      checkoutMutate(
+        {
+          id,
+          billing: isYearly ? "yearly" : "monthly",
+          provider: currency === "INR" ? "razorpay" : "stripe",
         },
-      });
+        {
+          async onSuccess(data) {
+            localStorage.setItem("payment_status", "INIT");
+            if (currency === "USD") {
+              window.open(data.url, "_blank");
+            } else {
+              setRazorpayLoading(true);
+              console.log(data);
+              const isLoaded = await loadRazorpay();
+              if (!isLoaded) {
+                toast.error("Razorpay SDK failed to load");
+                return;
+              }
+              const options = razorpayOption(
+                data,
+                plan.title,
+                () => {
+                  setRazorpayLoading(false);
+                  toast.info("Payment cancelled");
+                },
+                (response) => {
+                  setRazorpayLoading(false);
+                  navigate({
+                    to: "/payment-procces",
+                    search: {
+                      razorpay_payment_id: response.razorpay_payment_id,
+                      razorpay_subscription_id:
+                        response.razorpay_subscription_id,
+                      razorpay_signature: response.razorpay_signature,
+                    },
+                  });
+                }
+              );
+              const rzp = new window.Razorpay(options);
+              rzp.open();
+              rzp.on("payment.failed", function (response: any) {
+                console.log(response);
+                toast.error("Payment Failed");
+                setRazorpayLoading(false);
+              });
+            }
+
+            // window.open(data, "_blank");
+          },
+          onError() {
+            toast.error("Error", {
+              description: "Failed to create checkout session.",
+            });
+          },
+        }
+      );
     }
   };
 
-  return (
-    <div className='container mx-auto max-w-7xl px-4 py-12'>
-      {/* Header */}
-      <div className='text-center mb-12'>
-        <h1 className='text-4xl font-extrabold tracking-tight lg:text-5xl'>
-          Our Pricing Plans
-        </h1>
-        <p className='mt-4 text-xl text-muted-foreground'>
-          Choose the plan that's right for you.
+  const setCurrency = (newCurrency: "USD" | "INR") => {
+    navigate({ search: (prev) => ({ ...prev, currency: newCurrency }) });
+  };
+
+  const toggleYearly = () => {
+    navigate({ search: (prev) => ({ ...prev, isYearly: !isYearly }) });
+  };
+
+  if (plansPending) {
+    return (
+      <div className='flex h-[80vh] items-center justify-center'>
+        <Spinner className='size-8' />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className='flex h-[80vh] flex-col items-center justify-center gap-4 text-center'>
+        <p className='text-destructive text-lg font-medium'>
+          Failed to load pricing plans.
         </p>
-      </div>
-
-      {/* Controls */}
-      <div className='flex flex-col sm:flex-row justify-center items-center gap-4 mb-10'>
-        <Select
-          value={currency}
-          onValueChange={(value) =>
-            navigate({
-              search: (prev) => ({ ...prev, currency: value as Currency }),
-              replace: true,
-            })
-          }
+        <button
+          onClick={() => window.location.reload()}
+          className='text-primary underline hover:no-underline'
         >
-          <SelectTrigger className='w-[180px]'>
-            <SelectValue placeholder='Select Currency' />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value='inr'>Currency: INR (₹)</SelectItem>
-            <SelectItem value='usd'>Currency: USD ($)</SelectItem>
-          </SelectContent>
-        </Select>
-
-        <Tabs
-          value={billing}
-          onValueChange={(value) =>
-            navigate({
-              search: (prev) => ({ ...prev, billing: value as BillingCycle }),
-              replace: true,
-            })
-          }
-          className='w-auto'
-        >
-          <TabsList>
-            <TabsTrigger value='month'>Monthly</TabsTrigger>
-            <TabsTrigger value='year'>Yearly (Save 16%)</TabsTrigger>
-          </TabsList>
-        </Tabs>
+          Try Again
+        </button>
       </div>
+    );
+  }
 
-      {/* Pricing Grid */}
-      <div className='grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3'>
-        {isLoading &&
-          // Show skeleton loaders while data is fetching
-          Array.from({ length: 3 }).map((_, i) => (
-            <Card key={i} className='flex flex-col'>
-              <CardHeader>
-                <Skeleton className='h-6 w-1/2' />
-                <Skeleton className='h-4 w-3/4' />
-              </CardHeader>
-              <CardContent className='flex-grow space-y-4'>
-                <Skeleton className='h-10 w-1/3' />
-                <Skeleton className='h-4 w-full' />
-                <Skeleton className='h-4 w-full' />
-              </CardContent>
-              <CardFooter>
-                <Skeleton className='h-10 w-full' />
-              </CardFooter>
-            </Card>
-          ))}
-
-        {!isLoading && filteredPlans.length === 0 && (
-          <p className='text-muted-foreground text-center md:col-span-3'>
-            No plans available for this billing cycle.
+  return (
+    <main className='pt-40 pb-20'>
+      <div className='container mx-auto px-6 max-w-6xl'>
+        {/* Header & Toggles */}
+        <div className='text-center mb-16'>
+          <h1 className='text-4xl md:text-5xl font-bold mb-6'>
+            Simple, Transparent Pricing
+          </h1>
+          <p className='text-xl text-muted-foreground mb-10'>
+            Choose the plan that fits your needs. No hidden fees.
           </p>
-        )}
 
-        {!isLoading &&
-          filteredPlans.map((plan) => (
+          {/* Controls Container */}
+          <div className='flex flex-col md:flex-row items-center justify-center gap-8 bg-secondary/30 p-2 rounded-xl w-full md:w-auto max-w-2xl mx-auto'>
+            {/* Currency Toggle */}
+            <div className='flex items-center gap-4 bg-background p-1 rounded-lg border shadow-sm'>
+              <button
+                onClick={() => setCurrency("USD")}
+                className={cn(
+                  "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                  currency === "USD"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <DollarSign className='h-4 w-4' /> USD
+              </button>
+              <button
+                onClick={() => setCurrency("INR")}
+                className={cn(
+                  "px-4 py-2 rounded-md text-sm font-medium transition-all flex items-center gap-2",
+                  currency === "INR"
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                <IndianRupee className='h-4 w-4' /> INR
+              </button>
+            </div>
+
+            <div className='h-8 w-px bg-border hidden md:block' />
+
+            {/* Billing Cycle Toggle */}
+            <div className='flex items-center gap-3'>
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  !isYearly ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                Monthly
+              </span>
+              <button
+                onClick={toggleYearly}
+                className={cn(
+                  "relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  isYearly ? "bg-primary" : "bg-input"
+                )}
+              >
+                <span
+                  className={cn(
+                    "inline-block h-4 w-4 transform rounded-full bg-background transition-transform",
+                    isYearly ? "translate-x-6" : "translate-x-1"
+                  )}
+                />
+              </button>
+              <span
+                className={cn(
+                  "text-sm font-medium",
+                  isYearly ? "text-foreground" : "text-muted-foreground"
+                )}
+              >
+                Yearly{" "}
+                <span className='text-green-500 text-xs font-bold ml-1'>
+                  -20%
+                </span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pricing Cards */}
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-8 justify-center'>
+          {/* Map over the plans provided */}
+          {plansData?.map((plan: any) => (
             <PricingCard
-              key={plan._id} // Use the database ID as the key
+              key={plan._id}
               plan={plan}
+              disabled={checkoutPending || razorpayLoading}
               currency={currency}
-              isPending={isPending}
-              checkoutHandler={checkoutStripeHandler}
+              cycle={isYearly ? "yearly" : "monthly"}
+              isPopular={plan.title.toLowerCase() !== "basic"}
+              onSubscribe={(planId) =>
+                checkoutStripeHandler(
+                  planId,
+                  currency === "USD"
+                    ? plan[isYearly ? "yearly" : "monthly"].priceUSD
+                    : plan[isYearly ? "yearly" : "monthly"].priceINR,
+                  plan
+                )
+              }
             />
           ))}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

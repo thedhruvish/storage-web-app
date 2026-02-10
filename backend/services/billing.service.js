@@ -16,7 +16,7 @@ import {
 } from "./stripe.service.js";
 
 // checkout
-export const generateCheckoutUrl = async ({ planId, user }) => {
+export const generateCheckoutUrl = async ({ planId, user, billing }) => {
   const userId = user._id.toString();
 
   const count = await countUserCheckoutUrls(userId);
@@ -31,11 +31,13 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
   const cachedUrl = await getRedisValue(cacheKey);
   if (cachedUrl) return cachedUrl;
 
-  const plan = await Plan.findById(planId);
-  if (!plan) throw new ApiError(404, "Plan not found");
+  const plan = await getPlanByIdService(planId);
+
+  const priceId =
+    billing === "monthly" ? plan.monthly.stripeId : plan.yearly.stripeId;
 
   const checkout = await createStripeCheckoutSession({
-    priceId: plan.default_price_id,
+    priceId,
     customer_email: user.email,
     metadata: {
       planId: plan._id.toString(),
@@ -48,6 +50,11 @@ export const generateCheckoutUrl = async ({ planId, user }) => {
   return checkout.url;
 };
 
+export const getPlanByIdService = async (planId) => {
+  const plan = await Plan.findById(planId);
+  if (!plan) throw new ApiError(404, "Plan not found");
+  return plan;
+};
 // coupons
 export const getCouponsService = async () => {
   const coupons = await listStripeCoupons();

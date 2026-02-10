@@ -1,5 +1,6 @@
 export const LOGIN_PROVIDER = ["EAMIL", "GOOGLE", "GITHUB"];
 export const SUBSCRIPTION_STATUS = [
+  "partial_active",
   "active",
   "cancelled",
   "paused",

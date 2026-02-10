@@ -76,9 +76,10 @@ export function PlanCreateForm() {
     defaultValues: {
       title: "",
       description: "",
-      priceINR: 1,
-      priceUSD: 1,
-      interval: "month",
+      monthlyPriceINR: 1,
+      monthlyPriceUSD: 1,
+      yearlyPriceINR: 1,
+      yearlyPriceUSD: 1,
       totalBytes: defaultBytes, // 4. Set RHF default in bytes
       isActive: true,
     },
@@ -140,14 +141,14 @@ export function PlanCreateForm() {
           )}
         />
 
-        {/* Prices (in a grid) */}
+        {/* Monthly Prices */}
         <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
           <FormField
             control={form.control}
-            name='priceINR'
+            name='monthlyPriceINR'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (INR)</FormLabel>
+                <FormLabel>Monthly Price (INR)</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
@@ -165,10 +166,10 @@ export function PlanCreateForm() {
           />
           <FormField
             control={form.control}
-            name='priceUSD'
+            name='monthlyPriceUSD'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Price (USD)</FormLabel>
+                <FormLabel>Monthly Price (USD)</FormLabel>
                 <FormControl>
                   <Input
                     type='number'
@@ -186,81 +187,99 @@ export function PlanCreateForm() {
           />
         </div>
 
-        {/* Interval & Bytes (in a grid) */}
+        {/* Yearly Prices */}
         <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
           <FormField
             control={form.control}
-            name='interval'
+            name='yearlyPriceINR'
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Billing Interval</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder='Select an interval' />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    <SelectItem value='month'>Monthly</SelectItem>
-                    <SelectItem value='year'>Yearly</SelectItem>
-                  </SelectContent>
-                </Select>
+                <FormLabel>Yearly Price (INR)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='9999'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
-
-          {/* --- 7. UPDATED Storage Quota Field --- */}
           <FormField
             control={form.control}
-            name='totalBytes' // This field now controls validation
-            render={() => (
+            name='yearlyPriceUSD'
+            render={({ field }) => (
               <FormItem>
-                <FormLabel>Storage Quota</FormLabel>
-                <div className='flex gap-2'>
-                  <FormControl>
-                    <Input
-                      type='number'
-                      placeholder='10'
-                      min='1'
-                      value={storageValue}
-                      onChange={(e) =>
-                        setStorageValue(parseFloat(e.target.value) || 0)
-                      }
-                      className='w-2/3' // Adjust width as needed
-                    />
-                  </FormControl>
-                  <Select
-                    value={storageUnit}
-                    onValueChange={(value: string) =>
-                      setStorageUnit(value as StorageUnit)
+                <FormLabel>Yearly Price (USD)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='199'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
                     }
-                  >
-                    <FormControl>
-                      <SelectTrigger className='w-1/3'>
-                        <SelectValue placeholder='Select unit' />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {STORAGE_UNITS.map((unit) => (
-                        <SelectItem key={unit} value={unit}>
-                          {unit}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <FormDescription>
-                  Total storage Bytes: {totalBytesWatched}
-                </FormDescription>
-                <FormMessage /> {/* This will show errors for totalBytes */}
+                  />
+                </FormControl>
+                <FormMessage />
               </FormItem>
             )}
           />
         </div>
+
+        {/* --- 7. UPDATED Storage Quota Field --- */}
+        <FormField
+          control={form.control}
+          name='totalBytes' // This field now controls validation
+          render={() => (
+            <FormItem>
+              <FormLabel>Storage Quota</FormLabel>
+              <div className='flex gap-2'>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='10'
+                    min='1'
+                    value={storageValue}
+                    onChange={(e) =>
+                      setStorageValue(parseFloat(e.target.value) || 0)
+                    }
+                    className='w-2/3' // Adjust width as needed
+                  />
+                </FormControl>
+                <Select
+                  value={storageUnit}
+                  onValueChange={(value: string) =>
+                    setStorageUnit(value as StorageUnit)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger className='w-1/3'>
+                      <SelectValue placeholder='Select unit' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {STORAGE_UNITS.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <FormDescription>
+                Total storage Bytes: {totalBytesWatched}
+              </FormDescription>
+              <FormMessage /> {/* This will show errors for totalBytes */}
+            </FormItem>
+          )}
+        />
 
         {/* Is Active (Switch) */}
         <FormField

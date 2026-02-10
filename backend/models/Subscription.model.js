@@ -31,7 +31,15 @@ const subscriptionSchema = new mongoose.Schema(
     },
     stripeSubscriptionId: {
       type: String,
-      required: true,
+    },
+    razorpaySubscriptionId: {
+      type: String,
+    },
+    razorpayPaymentId: {
+      type: String,
+    },
+    razorpaySignature: {
+      type: String,
     },
     isPauseCollection: {
       type: Boolean,

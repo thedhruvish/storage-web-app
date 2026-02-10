@@ -5,9 +5,10 @@ export const planCreateValidation = z.object({
   description: z
     .string()
     .min(3, "Description must be at least 3 characters long"),
-  priceINR: z.number().min(1, "Price must be at least 1"),
-  priceUSD: z.number().min(1, "Price must be at least 1"),
-  interval: z.enum(["month", "year"]),
+  monthlyPriceINR: z.number().min(1, "Monthly Price must be at least 1"),
+  monthlyPriceUSD: z.number().min(1, "Monthly Price must be at least 1"),
+  yearlyPriceINR: z.number().min(1, "Yearly Price must be at least 1"),
+  yearlyPriceUSD: z.number().min(1, "Yearly Price must be at least 1"),
   totalBytes: z.number().min(1000, "Total bytes must be at least 1000"),
   isActive: z.boolean(),
 });

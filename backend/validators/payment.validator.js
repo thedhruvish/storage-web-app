@@ -26,3 +26,7 @@ export const togglePromoCodeValidation = z.object({
 export const idValidation = z.object({
   id: z.string("ID is required"),
 });
+
+export const billingValidation = idValidation.extend({
+  billing: z.enum(["monthly", "yearly"]),
+});

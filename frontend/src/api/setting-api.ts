@@ -16,7 +16,14 @@ export type ApiSubscription = {
   _id: string;
   userId: string;
   planId: Plan;
-  status: "active" | "cancelled" | "paused" | "expired" | "failed" | "past_due";
+  status:
+    | "active"
+    | "cancelled"
+    | "paused"
+    | "expired"
+    | "failed"
+    | "past_due"
+    | "partial_active";
   startDate: string; // API sends strings, not Date objects
   endDate: string; // API sends strings, not Date objects
   stripeSubscriptionId: string;
@@ -25,6 +32,8 @@ export type ApiSubscription = {
   isPauseCollection: boolean;
   cancelDate?: string;
   customerId?: string;
+  razorpayPaymentId?: string;
+  razorpaySubscriptionId?: string;
 };
 
 /**

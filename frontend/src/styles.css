@@ -181,6 +181,13 @@ code {
   }
 }
 
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 @keyframes scaleIn {
   from {
     opacity: 0;

@@ -1,5 +1,5 @@
 import type { ColumnDef } from "@tanstack/react-table";
-import { ArrowUpDown, MoreHorizontal } from "lucide-react";
+import { MoreHorizontal } from "lucide-react";
 import { formatFileSize } from "@/utils/functions";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -43,34 +43,28 @@ export const getColumns = (
     ),
   },
   {
-    accessorKey: "priceINR",
-    header: ({ column }) => (
-      <Button
-        variant='ghost'
-        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-      >
-        Price (INR)
-        <ArrowUpDown className='ml-2 h-4 w-4' />
-      </Button>
-    ),
-    cell: ({ row }) => formatINR.format(row.getValue("priceINR")),
-  },
-  {
-    accessorKey: "priceUSD",
-    header: "Price (USD)",
-    cell: ({ row }) => formatUSD.format(row.getValue("priceUSD")),
-  },
-  {
-    accessorKey: "interval",
-    header: "Interval",
-    cell: ({ row }) => {
-      const interval = row.getValue("interval") as string;
-      return (
-        <span className='capitalize'>
-          {interval === "month" ? "Monthly" : "Yearly"}
+    accessorKey: "monthly",
+    header: "Monthly Price",
+    cell: ({ row }) => (
+      <div className='flex flex-col'>
+        <span>{formatINR.format(row.original.monthly.priceINR)}</span>
+        <span className='text-xs text-muted-foreground'>
+          {formatUSD.format(row.original.monthly.priceUSD)}
         </span>
-      );
-    },
+      </div>
+    ),
+  },
+  {
+    accessorKey: "yearly",
+    header: "Yearly Price",
+    cell: ({ row }) => (
+      <div className='flex flex-col'>
+        <span>{formatINR.format(row.original.yearly.priceINR)}</span>
+        <span className='text-xs text-muted-foreground'>
+          {formatUSD.format(row.original.yearly.priceUSD)}
+        </span>
+      </div>
+    ),
   },
   {
     accessorKey: "totalBytes",
