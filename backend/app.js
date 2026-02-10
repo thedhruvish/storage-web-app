@@ -62,6 +62,14 @@ app.use("/wh", webhookRoute);
 // parser data into json and add req.body
 app.use(express.json());
 
+// health
+app.get("/health", (req, res) => {
+  res.status(200).json({
+    message: "Server is runing..",
+    timestamp: Date.now(),
+  });
+});
+
 // cookies add req.cookie
 app.use(cookiesParser(cookieSecret));
 

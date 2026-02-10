@@ -1,23 +1,24 @@
 import { createClient } from "redis";
-
+let redisClient;
 if (!process.env.REDIS_URL) {
   throw new Error(
     "REDIS_URL is not defined add it in env file, key name is REDIS_URL",
   );
 }
 
-// create a client
-const redisClient = createClient({
-  url: process.env.REDIS_URL,
-});
-
-// handle errors
-redisClient.on("error", (err) => {
-  console.error("❗ Redis Client Error:", err.message);
-});
-
-// connect to the
 export const connectRedis = async () => {
+  if (redisClient) return redisClient;
+  // create a client
+  redisClient = createClient({
+    url: process.env.REDIS_URL,
+  });
+
+  // handle errors
+  redisClient.on("error", (err) => {
+    console.error("❗ Redis Client Error:", err.message);
+  });
+
+  // connect to the
   try {
     await redisClient.connect();
     console.log(" Redis connected successfully");

@@ -1,0 +1,38 @@
+org: storeflowspace
+service: storeflow
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  region: ap-south-1
+  stage: ${opt:stage, 'dev'}
+  architecture: arm64
+  deploymentBucket:
+    name: cloudfly
+
+  environment:
+    NODE_ENV: ${self:provider.stage}
+
+package:
+  individually: true
+
+functions:
+  auth:
+    name: ${self:service}-${self:provider.stage}-auth
+    handler: lambda-auth-server.handler
+    memorySize: 1024
+    timeout: 10
+    events:
+      - httpApi:
+          path: /auth/{proxy+}
+          method: ANY
+
+  api:
+    name: ${self:service}-${self:provider.stage}-api
+    handler: lambda-api-server.handler
+    memorySize: 256
+    timeout: 5
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
