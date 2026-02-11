@@ -39,7 +39,6 @@ export const razorpayOption = (
     },
     modal: {
       ondismiss: function () {
-        console.log("Razorpay modal closed by user");
         onClose?.();
       },
     },

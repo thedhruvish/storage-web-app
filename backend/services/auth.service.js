@@ -8,12 +8,11 @@ import {
   exstingAuthIdentity,
   getOneAuthIdentity,
 } from "./authIdentity.service.js";
-import { createAndCheckLimitSession, setRedisValue } from "./redis.service.js";
+import { createAndCheckLimitSession } from "./redis.service.js";
 import { sendOtpToMail, verifyMailOTP } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
-import { authenticator } from "otplib";
 
 export const registerWithEmailService = async ({
   name,

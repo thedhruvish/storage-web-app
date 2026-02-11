@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { z } from "zod";
 import { createFileRoute } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
@@ -19,7 +19,6 @@ function RouteComponent() {
   const { razorpay_payment_id, razorpay_subscription_id, razorpay_signature } =
     Route.useSearch();
   const navigate = Route.useNavigate();
-  const [isVerifying, setIsVerifying] = useState(true);
   const hasVerified = useRef(false);
   const verifyPayment = async () => {
     try {
@@ -32,11 +31,8 @@ function RouteComponent() {
       localStorage.setItem("payment_status", "INIT");
 
       navigate({ to: "/payment-success" });
-    } catch (error) {
-      console.error("Payment verification failed:", error);
+    } catch {
       navigate({ to: "/payment-fail" });
-    } finally {
-      setIsVerifying(false);
     }
   };
   useEffect(() => {
@@ -51,7 +47,7 @@ function RouteComponent() {
     } else if (!hasVerified.current) {
       navigate({ to: "/payment-fail" });
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     razorpay_payment_id,
     razorpay_subscription_id,

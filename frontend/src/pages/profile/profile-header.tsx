@@ -44,7 +44,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
           <div className='relative group'>
             {/* Premium Ring Logic */}
             <div
-              className={`rounded-full p-1 ${user.isPremium ? "bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500" : "bg-transparent"}`}
+              className={`rounded-full p-1 ${user.isPremium ? "bg-linear-to-tr from-indigo-500 via-purple-500 to-pink-500" : "bg-transparent"}`}
             >
               <div className='bg-card rounded-full p-0.5'>
                 <UserAvatarProfile
@@ -67,7 +67,7 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
             <div className='flex items-center gap-2'>
               <h2 className='text-2xl font-bold tracking-tight'>{user.name}</h2>
               {user.isPremium && (
-                <span className='px-2 py-0.5 rounded-full bg-gradient-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-200 dark:border-indigo-900'>
+                <span className='px-2 py-0.5 rounded-full bg-linear-to-r from-indigo-500/10 to-purple-500/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-bold uppercase tracking-wider border border-indigo-200 dark:border-indigo-900'>
                   Pro
                 </span>
               )}
@@ -113,10 +113,10 @@ export function ProfileHeader({ user }: ProfileHeaderProps) {
           {showUpgrade && (
             <Button
               asChild
-              className='w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white border-0 hover:opacity-90 transition-opacity'
+              className='w-full bg-linear-to-r from-indigo-500 via-purple-500 to-pink-500 text-white border-0 hover:opacity-90 transition-opacity'
               size='sm'
             >
-              <Link to='/pricing' search={{ billing: "year", currency: "usd" }}>
+              <Link to='/pricing'>
                 <Sparkles className='mr-2 h-4 w-4' />
                 Upgrade Plan
               </Link>

@@ -30,7 +30,6 @@ export function StorageProgress() {
 
           <Link
             to='/pricing'
-            search={{ billing: "year", currency: "usd" }}
             className='
         mt-2 mb-3 flex items-center gap-2 rounded-md
         bg-red-50 border border-red-200
@@ -45,7 +44,6 @@ export function StorageProgress() {
       ) : storageUsedPercentage > 90 ? (
         <Link
           to='/pricing'
-          search={{ billing: "year", currency: "usd" }}
           className='
             mt-2 mb-2 flex items-center gap-2 rounded-md
             bg-red-50 border border-red-200
@@ -59,7 +57,6 @@ export function StorageProgress() {
       ) : storageUsedPercentage > 85 ? (
         <Link
           to='/pricing'
-          search={{ billing: "year", currency: "usd" }}
           className='
             mt-2 mb-2 flex items-center gap-2 rounded-md
             bg-amber-50 border border-amber-200

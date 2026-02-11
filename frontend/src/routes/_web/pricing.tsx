@@ -53,7 +53,6 @@ function PricingPage() {
               window.open(data.url, "_blank");
             } else {
               setRazorpayLoading(true);
-              console.log(data);
               const isLoaded = await loadRazorpay();
               if (!isLoaded) {
                 toast.error("Razorpay SDK failed to load");
@@ -81,8 +80,7 @@ function PricingPage() {
               );
               const rzp = new window.Razorpay(options);
               rzp.open();
-              rzp.on("payment.failed", function (response: any) {
-                console.log(response);
+              rzp.on("payment.failed", function () {
                 toast.error("Payment Failed");
                 setRazorpayLoading(false);
               });

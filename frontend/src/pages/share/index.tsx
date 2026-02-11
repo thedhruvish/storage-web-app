@@ -31,7 +31,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
   return (
     <>
       {user ? (
-        <div className='[--header-height:calc(theme(spacing.14))]'>
+        <div className='[--header-height:calc(--spacing(14))]'>
           <SidebarProvider
             className='flex flex-col'
             defaultOpen={appearance.sidebar}
@@ -68,6 +68,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
                       files={getShareDocumentData.data?.data.documents || []}
                       documentType='file'
                       viewMode={appearance.directoryLayout}
+                      onFileDoubleClick={() => {}}
                     />
                   )}
                 </div>
@@ -81,7 +82,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
           <header className='bg-background/80 fixed top-0 z-10 w-full border-b backdrop-blur-sm'>
             <div className='container mx-auto flex items-center justify-between px-4 py-3'>
               <div className='flex items-center space-x-4'>
-                <h1 className='from-primary bg-gradient-to-r to-red-600 bg-clip-text text-xl font-bold text-transparent'>
+                <h1 className='from-primary bg-linear-to-r to-red-600 bg-clip-text text-xl font-bold text-transparent'>
                   ShareDocs
                 </h1>
               </div>
@@ -152,6 +153,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
                     files={getShareDocumentData.data?.data.documents || []}
                     documentType='file'
                     viewMode={appearance.directoryLayout}
+                    onFileDoubleClick={() => {}}
                   />
                 </div>
               </div>

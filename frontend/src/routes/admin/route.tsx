@@ -19,7 +19,7 @@ function RouteComponent() {
 
   useEffect(() => {
     if (!user) {
-      navagate({ to: "/login" });
+      navagate({ to: "/auth/login" });
     }
   }, [user, navagate]);
 
@@ -27,7 +27,7 @@ function RouteComponent() {
     return <Error403 errorTitle="You can't access this resource" />;
 
   return (
-    <div className='[--header-height:calc(theme(spacing.14))]'>
+    <div className='[--header-height:calc(--spacing(14))]'>
       <SidebarProvider
         className='flex flex-col'
         defaultOpen={appearance.sidebar}
