@@ -26,6 +26,15 @@ jobs:
         run: npm ci
         working-directory: ./frontend
 
+      - name: env file create
+        run: |
+          echo "VITE_BASE_URL=${{ vars.VITE_BASE_URL }}" >> .env
+          echo "VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL }}" >> .env
+          echo "VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}" >> .env
+          echo "VITE_CLOUDFLARE_TURNSTILE_SITE_KEY=${{ vars.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}" >> .env
+          echo "VITE_RAZORPAY_KEY_ID=${{ vars.VITE_RAZORPAY_KEY_ID }}" >> .env
+        working-directory: ./frontend
+
       - name: Build
         run: npm run build
         working-directory: ./frontend
