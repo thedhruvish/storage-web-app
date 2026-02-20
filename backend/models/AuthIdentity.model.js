@@ -1,5 +1,5 @@
 import mongoose, { Schema, model } from "mongoose";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { LOGIN_PROVIDER } from "./../constants/constant.js";
 
 const authIdentitySchema = new Schema(
@@ -54,7 +54,7 @@ authIdentitySchema.pre("save", async function (next) {
   if (!this.isModified("passwordHash") || !this.passwordHash) {
     return next();
   }
-  this.passwordHash = await bcrypt.hash(this.passwordHash, 10);
+  this.passwordHash = await bcrypt.hash(this.passwordHash, 8);
   next();
 });
 

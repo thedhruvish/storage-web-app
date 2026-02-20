@@ -1,4 +1,4 @@
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { authenticator } from "otplib";
 import {
@@ -23,7 +23,7 @@ export const generateBackupCode = async (length = 10) => {
     crypto.randomBytes(4).toString("hex").toUpperCase(),
   );
   const hashedCodes = await Promise.all(
-    plainTextCodes.map(async (code) => await bcrypt.hash(code, 10)),
+    plainTextCodes.map(async (code) => await bcrypt.hash(code, 8)),
   );
   return { hashedCodes, plainTextCodes };
 };
