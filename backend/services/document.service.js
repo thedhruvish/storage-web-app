@@ -90,16 +90,11 @@ export const cancelUpload = async (documentId) => {
 /**
  * Get signed URL for view/download
  */
-export const getDocumentSignedUrl = async (
-  documentId,
-  isDownload,
-  userId,
-) => {
+export const getDocumentSignedUrl = async (documentId, isDownload, userId) => {
   const document = await Document.findById(documentId);
   if (!document) {
     throw new ApiError(404, "Document not found");
   }
-
 
   await addToRecent(userId, documentId, "document");
 

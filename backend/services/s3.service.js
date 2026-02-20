@@ -60,13 +60,17 @@ export const getSignedUrlForGetObject = async (
   fileName,
   isDownload = false,
   parentDir = DIRECTORY_UPLOAD_FOLDER,
-  
 ) => {
   try {
     let url = null;
-    const keyObject = `${parentDir}${encodeURIComponent(key)}`
+    const keyObject = `${parentDir}${encodeURIComponent(key)}`;
     if (privateKey) {
-      url = generateCloudfrontSignedUrl(keyObject, fileName, isDownload, parentDir);
+      url = generateCloudfrontSignedUrl(
+        keyObject,
+        fileName,
+        isDownload,
+        parentDir,
+      );
     } else {
       const command = new GetObjectCommand({
         Bucket: BUCKET_NAME,

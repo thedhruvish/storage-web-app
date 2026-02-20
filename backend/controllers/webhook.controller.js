@@ -47,7 +47,6 @@ export const razorpayWebhookHandler = async (req, res) => {
   const payload = JSON.parse(rawBody);
   const event = payload.event;
 
-
   // Safe subscription handling
   let subscriptionId = null;
   let userId = null;
@@ -68,7 +67,7 @@ export const razorpayWebhookHandler = async (req, res) => {
   });
 
   res.status(200).json({ status: "ok" });
-  console.log(event)
+  console.log(event);
   switch (event) {
     case "subscription.activated":
       // subscription activated

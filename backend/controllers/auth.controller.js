@@ -76,7 +76,7 @@ export const getCureentUser = async (req, res) => {
       totalUsedBytes: directory?.metaData?.size,
     }),
   );
-};  
+};
 
 // logout user
 export const logout = async (req, res) => {
