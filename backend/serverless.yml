@@ -1,5 +1,5 @@
 org: storeflowspace
-service: storeflow
+service: storeone
 
 provider:
   name: aws
@@ -8,7 +8,7 @@ provider:
   stage: ${opt:stage, 'dev'}
   architecture: arm64
   deploymentBucket:
-    name: cloudfly
+    name: ${env:AWS_BUCKET_NAME}
 
   environment:
     NODE_ENV: ${self:provider.stage}
@@ -19,9 +19,15 @@ package:
 functions:
   auth:
     name: ${self:service}-${self:provider.stage}-auth
-    handler: lambda-auth-server.handler
+    handler: dist/lambda-auth-server.handler
     memorySize: 1024
     timeout: 10
+
+    package:
+      patterns:
+        - "!**/*"
+        - dist/lambda-api-server.mjs
+
     events:
       - httpApi:
           path: /auth/{proxy+}
@@ -29,10 +35,61 @@ functions:
 
   api:
     name: ${self:service}-${self:provider.stage}-api
-    handler: lambda-api-server.handler
+    handler: dist/lambda-api-server.handler
     memorySize: 256
     timeout: 5
+
+    package:
+      patterns:
+        - "!**/*"
+        - dist/lambda-api-server.mjs
+
     events:
       - httpApi:
           path: /{proxy+}
           method: ANY
+    iam:
+      role:
+        statements:
+          - Effect: Allow
+            Action:
+              - "s3:*"
+            Resource:
+              - "arn:aws:s3:::${env:AWS_BUCKET_NAME}/*"
+
+  image-resize:
+    name: ${self:service}-${self:provider.stage}-image-resize
+    handler: dist/lambda-image-resize.handler
+    memorySize: 612
+    timeout: 4
+    architecture: x86_64
+
+    package:
+      patterns:
+        - "!**/*"
+        - dist/lambda-image-resize.mjs
+
+    layers:
+      - ${env:SHARP_LAYER_ARN}
+
+    events:
+      - s3:
+          bucket: ${env:AWS_BUCKET_NAME}
+          event: s3:ObjectCreated:*
+          rules:
+            - prefix: objects/
+
+          existing: true
+          forceDeploy: true
+
+    # Iam permission
+    
+    iam:
+      role:
+        statements:
+          - Effect: Allow
+            Action:
+              - s3:GetObject
+              - s3:PutObject
+            Resource:
+              - "arn:aws:s3:::${env:AWS_BUCKET_NAME}/objects/*"
