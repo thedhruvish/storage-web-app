@@ -30,7 +30,7 @@ declare module "@tanstack/react-router" {
 }
 
 // Render the app
-const rootElement = document.getElementById("app");
+const rootElement = document.getElementById("dhruvish");
 if (rootElement && !rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
@@ -39,7 +39,7 @@ if (rootElement && !rootElement.innerHTML) {
         <ThemeProvider>
           <QueryClientProvider client={queryClient}>
             <RouterProvider router={router} />
-            <Toaster position='top-center' />
+            <Toaster position='left-bottom' />
           </QueryClientProvider>
         </ThemeProvider>
       </GoogleOAuthProvider>

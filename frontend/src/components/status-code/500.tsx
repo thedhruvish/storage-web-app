@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { APP_NAME } from "@/contansts";
 
 interface Error500Props {
   errorTitle?: string;
@@ -43,7 +44,7 @@ export default function Error500({
       <div className='flex items-center mb-8'>
         <DownloadCloud className={`h-8 w-8 mr-3 `} />
         <h1 className='text-2xl font-bold'>
-          Storage<span className='text-blue-600'>App</span>
+          {APP_NAME}<span className='text-blue-600'>cloud</span>
         </h1>
       </div>
 
@@ -66,7 +67,7 @@ export default function Error500({
           <div className={`p-4 rounded-lg mb-6 `}>
             <h2 className='font-medium mb-3 flex items-center'>
               <Server className='h-4 w-4 mr-2' />
-              Storage App Status
+              {APP_NAME} App Status
             </h2>
             <ul className='text-sm space-y-2'>
               <li className='flex items-center'>
@@ -118,7 +119,7 @@ export default function Error500({
 
       {/* Footer */}
       <footer className='mt-8 text-center text-sm text-muted-foreground'>
-        <p>© {new Date().getFullYear()} StorageApp. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
       </footer>
     </div>
   );

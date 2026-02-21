@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { APP_NAME } from "@/contansts";
 
 interface Error429Props {
   errorTitle?: string;
@@ -59,7 +60,7 @@ export default function Error429({
       <div className='flex items-center mb-8'>
         <DownloadCloud className={`h-8 w-8 mr-3 `} />
         <h1 className='text-2xl font-bold'>
-          Storage<span className='text-blue-600'>App</span>
+          {APP_NAME}<span className='text-blue-600'>cloud</span>
         </h1>
       </div>
 
@@ -133,10 +134,10 @@ export default function Error429({
           <p className='text-xs text-muted-foreground text-center mt-6'>
             Mistake? Contact support at{" "}
             <a
-              href='mailto:support@storage-app.com'
+              href='mailto:info@storeone.cloud'
               className='text-blue-600 hover:underline'
             >
-              support@storage-app.com
+              info@StoreOne.cloud
             </a>
           </p>
         </CardContent>
@@ -144,7 +145,7 @@ export default function Error429({
 
       {/* Footer */}
       <footer className='mt-8 text-center text-sm text-muted-foreground'>
-        <p>© {new Date().getFullYear()} StorageApp. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {APP_NAME}. All rights reserved.</p>
       </footer>
     </div>
   );

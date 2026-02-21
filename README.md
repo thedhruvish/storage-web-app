@@ -1,4 +1,4 @@
-# Storage Web App
+# STOREONE cloud
 
 ![Version](https://img.shields.io/badge/version-beta-blue)
 ![License](https://img.shields.io/badge/license-ISC-green)
@@ -69,8 +69,8 @@ A modern, full-stack web application for secure file storage, sharing, and manag
 ### Clone the Repository
 
 ```bash
-git clone https://github.com/thedhruvish/storage-web-app.git
-cd storage-web-app
+git clone https://github.com/thedhruvish/storeone.git
+cd storeone
 ```
 
 ### Backend Setup

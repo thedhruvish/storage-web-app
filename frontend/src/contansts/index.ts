@@ -1,1 +1,1 @@
-export const APP_NAME = "Storage App";
+export const APP_NAME = "StoreOne";

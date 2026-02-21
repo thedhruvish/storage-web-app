@@ -16,7 +16,6 @@ export default defineConfig({
   build: {
     outDir: "dist",
     emptyOutDir: true,
-    sourcemap: true,
     minify: true,
     cssMinify: true,
     terserOptions: {

@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { APP_NAME } from "@/contansts";
 
 interface Error403Props {
   errorTitle?: string;
@@ -43,7 +44,7 @@ export default function Error403({
       <div className='flex items-center mb-8'>
         <DownloadCloud className={`h-8 w-8 mr-3 `} />
         <h1 className='text-2xl font-bold'>
-          Storage<span className='text-blue-600'>App</span>
+          {APP_NAME}<span className='text-blue-600'>cloud</span>
         </h1>
       </div>
 
@@ -112,14 +113,14 @@ export default function Error403({
           {/* Support Info */}
           <p className='text-xs text-muted-foreground text-center mt-6'>
             Need access to this resource? Contact your administrator or
-            support@storage-app.com
+            info@storeone.cloud
           </p>
         </CardContent>
       </Card>
 
       {/* Footer */}
       <footer className='mt-8 text-center text-sm text-muted-foreground'>
-        <p>© {new Date().getFullYear()} StorageApp. All rights reserved.</p>
+        <p>© {new Date().getFullYear()} {APP_NAME} cloud. All rights reserved.</p>
       </footer>
     </div>
   );
