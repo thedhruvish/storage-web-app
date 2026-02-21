@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { APP_NAME } from "@/contansts";
 import { useUserStore } from "@/store/user-store";
 import { motion } from "framer-motion";
 import { Cloud, Moon, Sun, UserPlus, Menu } from "lucide-react";
@@ -28,7 +29,7 @@ export const Navbar = () => {
           <div className='bg-primary text-primary-foreground p-2 rounded-lg transition-transform group-hover:rotate-12 duration-300'>
             <Cloud className='h-6 w-6' />
           </div>
-          <span>StoreFlow</span>
+          <span>{APP_NAME}</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -40,12 +41,12 @@ export const Navbar = () => {
             Pricing
           </Link>
 
-          <Link
+          {/* <Link
             to='/self-host'
             className='hover:text-foreground hover:scale-105 transition-all duration-200'
           >
             Self Host
-          </Link>
+          </Link> */}
         </div>
 
         <div className='flex items-center gap-4'>
