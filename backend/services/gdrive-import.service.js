@@ -66,9 +66,10 @@ export const importFromGoogleDrive = async ({
   );
 
   if (directory.metaData.size + fileData.metaData.size > user.maxStorageBytes) {
-    await rm(
-      `${import.meta.dirname}/../storage/${fileData._id}${fileData.extension}`,
-    );
+    // TODO: here are the chang it
+    // await rm(
+    //   `${import.meta.dirname}/../storage/${fileData._id}${fileData.extension}`,
+    // );
     throw new ApiError(400, "Storage limit exceeded");
   }
 

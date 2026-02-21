@@ -6,7 +6,7 @@ provider:
   runtime: nodejs24.x
   region: ap-south-1
   stage: ${opt:stage, 'dev'}
-  architecture: arm64
+
   deploymentBucket:
     name: ${env:AWS_BUCKET_NAME}
 
@@ -22,12 +22,12 @@ functions:
     handler: dist/lambda-auth-server.handler
     memorySize: 1024
     timeout: 10
-
+    architecture: x86_64
     package:
       patterns:
         - "!**/*"
-        - dist/lambda-api-server.mjs
-
+        - "dist/lambda-auth-server.mjs"
+        - "dist/xhr-sync-worker.js"
     events:
       - httpApi:
           path: /auth/{proxy+}
@@ -38,12 +38,12 @@ functions:
     handler: dist/lambda-api-server.handler
     memorySize: 256
     timeout: 5
-
+    architecture: x86_64
     package:
       patterns:
         - "!**/*"
-        - dist/lambda-api-server.mjs
-
+        - "dist/lambda-api-server.mjs"
+        - "dist/xhr-sync-worker.js"
     events:
       - httpApi:
           path: /{proxy+}
@@ -60,30 +60,23 @@ functions:
   image-resize:
     name: ${self:service}-${self:provider.stage}-image-resize
     handler: dist/lambda-image-resize.handler
-    memorySize: 612
-    timeout: 4
-    architecture: x86_64
-
+    memorySize: 1024
+    timeout: 5
+    architecture: arm64
     package:
       patterns:
         - "!**/*"
-        - dist/lambda-image-resize.mjs
-
+        - "dist/lambda-image-resize.mjs"
     layers:
       - ${env:SHARP_LAYER_ARN}
-
     events:
       - s3:
           bucket: ${env:AWS_BUCKET_NAME}
           event: s3:ObjectCreated:*
           rules:
             - prefix: objects/
-
           existing: true
           forceDeploy: true
-
-    # Iam permission
-    
     iam:
       role:
         statements:
