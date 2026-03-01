@@ -17,6 +17,7 @@ import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
 import axiosClient from "@/api/axios-client";
 import { useGetAllDirectoryList } from "@/api/directory-api";
+import { formatFileSize } from "@/utils/functions";
 import { truncateFileName } from "@/utils/truncateFileName";
 import { Button } from "@/components/ui/button";
 import {
@@ -77,6 +78,14 @@ export function MultiFileUploadDialog({ open }: Props) {
   const onDrop = (acceptedFiles: Array<File>) => {
     if (!user) return;
     const totalSize = acceptedFiles.reduce((acc, file) => acc + file.size, 0);
+
+    if (totalSize > user.uploadLimit) {
+      // TODO: add the banner that are the show the upgrade plan
+      toast.error(
+        `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
+      );
+      return;
+    }
     if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
       toast.error("You have exceeded your storage limit.");
       return;

@@ -10,6 +10,7 @@ export type User = {
   role: string;
   totalUsedBytes: number;
   maxStorageBytes: number;
+  uploadLimit: number;
 };
 
 type UserStore = {

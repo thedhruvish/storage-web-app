@@ -10,6 +10,7 @@ export const planCreateValidation = z.object({
   yearlyPriceINR: z.number().min(1, "Yearly Price must be at least 1"),
   yearlyPriceUSD: z.number().min(1, "Yearly Price must be at least 1"),
   totalBytes: z.number().min(1000, "Total bytes must be at least 1000"),
+  uploadLimit: z.number({ message: "Upload Limit are the required." }),
   isActive: z.boolean(),
 });
 
@@ -20,6 +21,7 @@ export type Plan = {
   title: string;
   description: string;
   totalBytes: number;
+  uploadLimit: number;
   isActive: boolean;
   createdAt: string;
   updatedAt: string;

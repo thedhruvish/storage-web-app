@@ -9,6 +9,7 @@ import {
 import { googleOAuthClient, getDriveClient } from "../lib/google.client.js";
 import { updateParentDirectorySize } from "./directory.service.js";
 import ImportToken from "../models/ImportToken.model.js";
+import { formatFileSize } from "../utils/format-bytes.js";
 
 export const importFromGoogleDrive = async ({
   user,
@@ -19,7 +20,7 @@ export const importFromGoogleDrive = async ({
     userId: user._id,
     services: "google",
   }).lean();
-  
+
   if (!tokenDoc?.refreshToken) {
     throw new ApiError(401, "Google not connected");
   }
@@ -48,6 +49,13 @@ export const importFromGoogleDrive = async ({
     });
 
     const meta = await getFileList(drive, driveFile.id);
+
+    if (fileSize > user.uploadLimit) {
+      throw new ApiError(
+        400,
+        `You can't Upload more than ${formatFileSize(user.uploadLimit)}. Upgrade Your Plan`,
+      );
+    }
 
     if (directory.metaData.size + meta.totalSize > user.maxStorageBytes) {
       throw new ApiError(400, "Storage limit exceeded");

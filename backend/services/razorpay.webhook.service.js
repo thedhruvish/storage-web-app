@@ -10,8 +10,18 @@ const updateUserStorage = async (subscription, operation) => {
 
   const update =
     operation === "add"
-      ? { $inc: { maxStorageBytes: plan.totalBytes } }
-      : { $inc: { maxStorageBytes: -plan.totalBytes } };
+      ? {
+          $inc: {
+            maxStorageBytes: plan.totalBytes,
+            uploadLimit: plan.uploadLimit,
+          },
+        }
+      : {
+          $inc: {
+            maxStorageBytes: -plan.totalBytes,
+            uploadLimit: -plan.uploadLimit,
+          },
+        };
 
   await User.findByIdAndUpdate(subscription.userId, update);
 };

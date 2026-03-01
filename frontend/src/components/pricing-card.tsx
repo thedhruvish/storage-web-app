@@ -1,6 +1,7 @@
 import { motion } from "framer-motion";
 import { CheckCircle2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { formatFileSize } from "@/utils/functions";
 
 interface PlanDetails {
   priceINR: number;
@@ -14,7 +15,8 @@ export interface Plan {
   title: string;
   monthly: PlanDetails;
   yearly: PlanDetails;
-  fetures: string[]; // Keeping 'fetures' as per provided data structure, though 'features' is correct spelling
+  fetures: string[];
+  uploadLimit: number;
   totalBytes?: number;
 }
 
@@ -101,6 +103,18 @@ export function PricingCard({
             {feature}
           </li>
         ))}
+        <li
+          key={`plan-upload-${plan.uploadLimit.toString()}`}
+          className='flex gap-3'
+        >
+          <CheckCircle2
+            className={cn(
+              "h-5 w-5 shrink-0",
+              isPopular ? "text-primary" : "text-green-500"
+            )}
+          />
+          File upload limit: {formatFileSize(plan.uploadLimit, 0)} per file
+        </li>
       </ul>
 
       <button

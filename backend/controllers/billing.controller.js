@@ -91,6 +91,7 @@ export const verifyRazorpayPayment = async (req, res) => {
   await User.findByIdAndUpdate(userId, {
     $inc: {
       maxStorageBytes: plan.totalBytes,
+      uploadLimit: plan.uploadLimit,
     },
     dueDeleteDate: null,
   });

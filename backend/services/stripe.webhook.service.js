@@ -1,6 +1,7 @@
 import Subscription from "../models/Subscription.model.js";
+import User from "../models/User.model.js";
 import WebHookLog from "../models/WebHookLog.model.js";
-
+// TODO: fix upload limmit
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // verify webhook stripe
@@ -47,6 +48,7 @@ const handleInvoiceSuccess = async (event) => {
       {
         $inc: {
           maxStorageBytes: parentSubscription.planId.totalBytes,
+          uploadLimit: parentSubscription.planId.uploadLimit,
         },
         $set: {
           dueDeleteDate: null,
@@ -59,7 +61,7 @@ const handleInvoiceSuccess = async (event) => {
 
 const handleInvoiceFailed = async (event) => {
   const objSubFail = event.data.object;
-  const failedSub = await Subscription.findOneAndUpdate(
+  await Subscription.findOneAndUpdate(
     { stripeSubscriptionId: objSubFail.subscription },
     {
       $push: {
@@ -103,21 +105,19 @@ const handleCheckoutCompleted = async (event) => {
       paymentType: "stripe",
     });
 
-    const user = await User.findByIdAndUpdate(
-      checkoutSessionObj.metadata.userId,
-      {
-        $inc: {
-          maxStorageBytes: checkoutSessionObj.metadata.totalBytes,
-        },
-        stripeCustomerId: checkoutSessionObj.customer,
-        dueDeleteDate: null,
+    await User.findByIdAndUpdate(checkoutSessionObj.metadata.userId, {
+      $inc: {
+        maxStorageBytes: checkoutSessionObj.metadata.totalBytes,
+        uploadLimit: checkoutSessionObj.metadata.uploadLimit,
       },
-    );
+      stripeCustomerId: checkoutSessionObj.customer,
+      dueDeleteDate: null,
+    });
   }
 };
 
 const handleSubscriptionUpdated = async (event) => {
-  subscription = event.data.object;
+  const subscription = event.data.object;
   const previous = event.data.previous_attributes || {};
   const changedKeys = Object.keys(previous);
   const updateVal = {};
@@ -182,6 +182,7 @@ const handleSubscriptionUpdated = async (event) => {
       await User.findByIdAndUpdate(subscriptionUpdate.userId, {
         $inc: {
           maxStorageBytes: -subscriptionUpdate.planId.totalBytes,
+          uploadLimit: -subscriptionUpdate.planId.uploadLimit,
         },
         $set: {
           dueDeleteDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000), // +5 days
@@ -193,6 +194,7 @@ const handleSubscriptionUpdated = async (event) => {
       await User.findByIdAndUpdate(subscriptionUpdate.userId, {
         $inc: {
           maxStorageBytes: subscriptionUpdate.planId.totalBytes,
+          uploadLimit: subscriptionUpdate.planId.uploadLimit,
         },
         $set: { dueDeleteDate: null },
       });
@@ -200,7 +202,7 @@ const handleSubscriptionUpdated = async (event) => {
   }
 };
 const handleSubscriptionDeleted = async (event) => {
-  subscription = event.data.object;
+  const subscription = event.data.object;
 
   const olderSubscription = await Subscription.findOneAndUpdate(
     { stripeSubscriptionId: subscription.id },
@@ -224,6 +226,7 @@ const handleSubscriptionDeleted = async (event) => {
     {
       $inc: {
         maxStorageBytes: -olderSubscription.planId.maxStorageBytes,
+        uploadLimit: -olderSubscription.planId.uploadLimit,
       },
       $set: {
         dueDeleteDate: new Date(Date.now() + 5 * 24 * 60 * 60 * 1000),

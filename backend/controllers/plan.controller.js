@@ -24,11 +24,13 @@ export const createPlan = async (req, res) => {
     yearlyPriceUSD,
     totalBytes,
     isActive,
+    uploadLimit,
   } = req.body;
 
   const planId = new mongoose.Types.ObjectId();
   const metadata = {
     totalBytes,
+    uploadLimit,
     planId: planId.toString(),
   };
   // 1. Create Stripe Product with Monthly Price as default
@@ -70,10 +72,7 @@ export const createPlan = async (req, res) => {
     productId: stripeProductPlan.id,
     unit_amount: yearlyPriceUSD,
     interval: "year",
-    metadata: {
-      totalBytes,
-      planId: planId.toString(),
-    },
+    metadata,
   });
 
   // Plan save on the db
@@ -82,6 +81,7 @@ export const createPlan = async (req, res) => {
     title,
     description,
     totalBytes,
+    uploadLimit,
     isActive,
     createBy: req.user._id,
     productId: stripeProductPlan.id,

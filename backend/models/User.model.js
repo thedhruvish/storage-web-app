@@ -1,6 +1,6 @@
 import { model, Schema } from "mongoose";
 import { ROLE } from "../constants/role.js";
-import { DEFAULT_STORAGE } from "../constants/constant.js";
+import { DEFAULT_STORAGE, UPLOAD_LIMIT } from "../constants/constant.js";
 
 const userSchema = new Schema(
   {
@@ -29,6 +29,11 @@ const userSchema = new Schema(
       type: Number,
       required: true,
       default: DEFAULT_STORAGE,
+    },
+    uploadLimit: {
+      type: Number,
+      required: true,
+      default: UPLOAD_LIMIT,
     },
     isDeleted: {
       type: Boolean,

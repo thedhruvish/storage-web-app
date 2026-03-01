@@ -10,6 +10,7 @@ import {
 } from "./s3.service.js";
 import { updateParentDirectorySize } from "./directory.service.js";
 import { addToRecent } from "./recent.service.js";
+import { formatFileSize } from "../utils/format-bytes.js";
 
 /**
  * Create document + generate presigned URL
@@ -24,6 +25,13 @@ export const createPresignedDocument = async ({
   const directory = await Directory.findById(parentDirId, {
     metaData: 1,
   }).lean();
+
+  if (fileSize > user.uploadLimit) {
+    throw new ApiError(
+      400,
+      `You can't Upload more than ${formatFileSize(user.uploadLimit)}. Upgrade Your Plan`,
+    );
+  }
 
   const newUsedSize = directory.metaData.size + fileSize;
   if (newUsedSize > user.maxStorageBytes) {

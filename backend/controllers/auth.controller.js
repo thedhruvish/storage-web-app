@@ -75,9 +75,14 @@ export const getCureentUser = async (req, res) => {
     },
     {
       path: "userId",
-      select: "id name email picture role maxStorageBytes",
+      select: "id name email picture role maxStorageBytes uploadLimit",
     },
   );
+  // When user session are the store on the redis than it delete
+  if (!directory?.userId && req.user._id) {
+    await deleteRedisKey(`user:${req.user._id.toString()}`);
+    throw new ApiError(401, "User need to re Authenticated.");
+  }
   const user = directory.userId;
 
   const avatarUrl = await getSignedUrlForGetObject(

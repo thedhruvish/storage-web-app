@@ -19,7 +19,7 @@ export const removeSubscriptionExpiryData = () => {
           const users = await User.find({
             dueDeleteDate: { $lt: new Date() },
           })
-            .select("maxStorageBytes rootDirId")
+            .select("maxStorageBytes rootDirId ")
             .populate({
               path: "rootDirId",
               select: "metaData.size",
@@ -97,6 +97,7 @@ export const removeSubscriptionExpiryData = () => {
           await Promise.all(
             session.docsToDelete.map(async (d) => {
               try {
+                // TODO: change use the s3
                 await rm(
                   `${import.meta.dirname}/../storage/${d.documentId}${d.extension}`,
                 );

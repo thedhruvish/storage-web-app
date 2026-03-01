@@ -81,6 +81,7 @@ export function PlanCreateForm() {
       yearlyPriceINR: 1,
       yearlyPriceUSD: 1,
       totalBytes: defaultBytes, // 4. Set RHF default in bytes
+      uploadLimit: 375 ** 3,
       isActive: true,
     },
   });
@@ -277,6 +278,53 @@ export function PlanCreateForm() {
                 Total storage Bytes: {totalBytesWatched}
               </FormDescription>
               <FormMessage /> {/* This will show errors for totalBytes */}
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name='uploadLimit'
+          render={() => (
+            <FormItem>
+              <FormLabel>Upload File Quota</FormLabel>
+              <div className='flex gap-2'>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='10'
+                    min='1'
+                    value={storageValue}
+                    onChange={(e) =>
+                      setStorageValue(parseFloat(e.target.value) || 0)
+                    }
+                    className='w-2/3'
+                  />
+                </FormControl>
+                <Select
+                  value={storageUnit}
+                  onValueChange={(value: string) =>
+                    setStorageUnit(value as StorageUnit)
+                  }
+                >
+                  <FormControl>
+                    <SelectTrigger className='w-1/3'>
+                      <SelectValue placeholder='Select unit' />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {STORAGE_UNITS.map((unit) => (
+                      <SelectItem key={unit} value={unit}>
+                        {unit}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <FormDescription>
+                Total storage Bytes: {totalBytesWatched}
+              </FormDescription>
+              <FormMessage />
             </FormItem>
           )}
         />

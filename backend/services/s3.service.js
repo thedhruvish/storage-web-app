@@ -65,7 +65,7 @@ export const getSignedUrlForGetObject = async (
     let url = null;
 
     const keyObject = `${parentDir}${encodeURIComponent(key)}`;
-    console.log({ CLOUDFRONT_PRIVATE_KEY, cf: process.env.SECRET_CF_KEY });
+
     if (CLOUDFRONT_PRIVATE_KEY || process.env.SECRET_CF_KEY) {
       url = await generateCloudfrontSignedUrl(
         keyObject,

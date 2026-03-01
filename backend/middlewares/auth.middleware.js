@@ -24,7 +24,10 @@ export const checkAuth = async (req, res, next) => {
     user = JSON.parse(user);
   } else {
     user = await User.findById(userId);
-
+    if (!user) {
+      res.clearCookie("sessionId");
+      return res.status(401).json(new ApiError(401, "Unauthorized 2"));
+    }
     await setRedisValue(
       `user:${userId}`,
       JSON.stringify({
@@ -33,6 +36,7 @@ export const checkAuth = async (req, res, next) => {
         email: user.email,
         role: user.role,
         maxStorageBytes: user.maxStorageBytes,
+        uploadLimit: user.uploadLimit,
       }),
       {
         expiration: { type: "EX", value: 3600 },
@@ -45,6 +49,7 @@ export const checkAuth = async (req, res, next) => {
     email: user.email,
     role: user.role,
     maxStorageBytes: user.maxStorageBytes,
+    uploadLimit: user.uploadLimit,
   };
   next();
 };

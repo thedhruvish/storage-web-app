@@ -3,6 +3,7 @@ import { useParams } from "@tanstack/react-router";
 import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { toast } from "sonner";
+import { formatFileSize } from "@/utils/functions";
 
 export const useFileUploader = () => {
   const params = useParams({ strict: false });
@@ -18,6 +19,15 @@ export const useFileUploader = () => {
         (acc, file) => acc + file.size,
         0
       );
+
+      if (totalSize > user.uploadLimit) {
+        // TODO: add the banner that are the show the upgrade plan
+        toast.error(
+          `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
+        );
+        return;
+      }
+
       if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
         toast.error("You have exceeded your storage limit.");
         return;

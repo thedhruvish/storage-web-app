@@ -50,6 +50,10 @@ const planSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    uploadLimit: {
+      type: Number,
+      require: true,
+    },
     isActive: {
       type: Boolean,
       default: false,

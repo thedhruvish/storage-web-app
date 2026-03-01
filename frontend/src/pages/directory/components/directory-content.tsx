@@ -9,6 +9,7 @@ import { useUser } from "@/store/user-store";
 import { UploadCloud } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { toast } from "sonner";
+import { formatFileSize } from "@/utils/functions";
 import { ContextMenu, ContextMenuTrigger } from "@/components/ui/context-menu";
 import { Separator } from "@/components/ui/separator";
 import { FileManagerSkeleton } from "@/components/file-manager-skeleton";
@@ -67,6 +68,15 @@ export function DirectoryContent({
       if (!user) return;
 
       const totalSize = acceptedFiles.reduce((acc, file) => acc + file.size, 0);
+
+      if (totalSize > user.uploadLimit) {
+        // TODO: add the banner that are the show the upgrade plan
+        toast.error(
+          `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
+        );
+        return;
+      }
+
       if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
         toast.error("You have exceeded your storage limit.");
         return;
