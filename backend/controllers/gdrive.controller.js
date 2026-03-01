@@ -6,6 +6,7 @@ import {
   isGoogleConnected,
 } from "../services/gdrive-auth.service.js";
 import { importFromGoogleDrive } from "../services/gdrive-import.service.js";
+import ApiError from "../utils/ApiError.js";
 
 export const genrateGoogleDriveImportAuthUrl = (req, res) => {
   res.redirect(generateAuthUrl());
@@ -37,14 +38,32 @@ export const getGoogleAccessToken = async (req, res) => {
 };
 
 export const importDriveData = async (req, res) => {
-  const accessToken = await getGoogleAccessTokenForUser(req.user._id);
+  try {
+    await importFromGoogleDrive({
+      user: req.user,
+      uploadDirId: req.params.id || req.user.rootDirId,
+      driveFile: req.body,
+    });
+  } catch (error) {
+    console.error("❌ downloadSingleFile FULL ERROR:", {
+      name: error.name,
+      message: error.message,
+      code: error.code,
+      stack: error.stack,
+    });
 
-  await importFromGoogleDrive({
-    user: req.user,
-    uploadDirId: req.params.id || req.user.rootDirId,
-    driveFile: req.body,
-    accessToken,
-  });
+    // Google auth error ONLY if 401 from Google
+    if (error.code === 401 || error.response?.status === 401) {
+      throw new ApiError(401, "GOOGLE_REAUTH_REQUIRED");
+    }
+
+    // AWS credentials error
+    if (error.name === "CredentialsProviderError") {
+      throw new ApiError(500, "AWS_CREDENTIALS_MISSING");
+    }
+
+    throw error;
+  }
 
   res.status(201).json(new ApiResponse(201, "Import completed successfully"));
 };

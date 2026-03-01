@@ -115,10 +115,6 @@ export const downloadSingleFile = async (
 
     const parallelUploads3 = new Upload({
       client: s3Client,
-      credentials: {
-        accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-      },
       params: {
         Bucket: BUCKET_NAME,
         Key: fileNameKey,
@@ -147,6 +143,7 @@ export const downloadSingleFile = async (
       },
     };
   } catch (error) {
+    console.log(JSON.stringify(error));
     console.error("❌ downloadSingleFile error:", error.message);
     throw new Error("Failed to download file from Google Drive");
   }
@@ -157,7 +154,7 @@ const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 const GOOGLE_EXPORT_MIMES = {
   "application/vnd.google-apps.document": {
     mime: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-    ext: ".dcox",
+    ext: ".docx",
   },
   "application/vnd.google-apps.spreadsheet": {
     mime: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",

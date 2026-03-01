@@ -60,8 +60,9 @@ export function UserNav({
             >
               Billing
             </DropdownMenuItem>
-            <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem>New Team</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => navigate({ to: "/pricing" })}>
+              Price
+            </DropdownMenuItem>
           </DropdownMenuGroup>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => navigate({ to: "/app/logout" })}>

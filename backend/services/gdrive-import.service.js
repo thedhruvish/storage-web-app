@@ -1,4 +1,3 @@
-import { rm } from "node:fs/promises";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
@@ -9,15 +8,24 @@ import {
 } from "./gdrive.service.js";
 import { googleOAuthClient, getDriveClient } from "../lib/google.client.js";
 import { updateParentDirectorySize } from "./directory.service.js";
+import ImportToken from "../models/ImportToken.model.js";
 
 export const importFromGoogleDrive = async ({
   user,
   uploadDirId,
   driveFile,
-  accessToken,
 }) => {
+  const tokenDoc = await ImportToken.findOne({
+    userId: user._id,
+    services: "google",
+  }).lean();
+  
+  if (!tokenDoc?.refreshToken) {
+    throw new ApiError(401, "Google not connected");
+  }
+
   googleOAuthClient.setCredentials({
-    access_token: accessToken,
+    refresh_token: tokenDoc.refreshToken,
   });
 
   const drive = getDriveClient(googleOAuthClient);

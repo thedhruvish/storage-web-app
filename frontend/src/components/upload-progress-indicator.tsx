@@ -46,7 +46,7 @@ export function UploadProgressIndicator() {
   if (files.length === 0) return null;
 
   return (
-    <div className='fixed bottom-0 left-0 right-0 z-50 rounded-t-lg border bg-card text-card-foreground shadow-2xl transition-all sm:left-auto sm:w-[350px] sm:bottom-4 sm:right-4 sm:rounded-lg'>
+    <div className='fixed bottom-0 left-0 right-0 z-50 rounded-t-lg border bg-card text-card-foreground shadow-2xl transition-all sm:left-auto sm:w-87.5 sm:bottom-4 sm:right-4 sm:rounded-lg'>
       <div className='flex items-center justify-between border-b p-3'>
         <h3 className='text-sm font-semibold'>
           {isUploading
@@ -99,7 +99,7 @@ export function UploadProgressIndicator() {
                       key={item.id}
                       className='group flex items-center gap-3 text-sm'
                     >
-                      <FileIcon className='h-5 w-5 flex-shrink-0 text-muted-foreground' />
+                      <FileIcon className='h-5 w-5 shrink-0 text-muted-foreground' />
                       <div className='flex-1 min-w-0'>
                         <p className='truncate font-medium'>{item.file.name}</p>
                         {(item.status === "uploading" ||
@@ -125,7 +125,7 @@ export function UploadProgressIndicator() {
                         )}
                       </div>
 
-                      <div className='flex h-6 w-6 flex-shrink-0 items-center justify-center'>
+                      <div className='flex h-6 w-6 shrink-0 items-center justify-center'>
                         {(item.status === "uploading" ||
                           item.status === "queued") && (
                           <Button
