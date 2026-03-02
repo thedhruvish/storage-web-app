@@ -1,5 +1,6 @@
 import { useCallback, useRef } from "react";
 import { useParams } from "@tanstack/react-router";
+import { useStorageStore } from "@/store/storage-store";
 import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { toast } from "sonner";
@@ -10,9 +11,12 @@ export const useFileUploader = () => {
   const directoryId = (params as { directoryId?: string }).directoryId || "";
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useUser();
+  const { totalUsedBytes } = useStorageStore();
+
   const openPricingHash = useCallback(() => {
     window.location.hash = "price";
   }, []);
+
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -30,7 +34,7 @@ export const useFileUploader = () => {
         return;
       }
 
-      if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+      if (totalUsedBytes + totalSize > user.maxStorageBytes) {
         openPricingHash();
         toast.error("You have exceeded your storage limit.");
         return;

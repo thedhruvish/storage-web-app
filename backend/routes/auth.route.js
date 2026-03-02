@@ -19,6 +19,7 @@ import {
   connectAccountWithGoogle,
   disConnectAccount,
   deleteSession,
+  getUseStorage,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
@@ -91,6 +92,7 @@ router.post("/2fa/login/passkey-verify", verifyPasskeyChallenge);
 // authenticated route
 router.use(checkAuth);
 router.get("/me", getCureentUser);
+router.get("/storage", getUseStorage);
 
 // link account
 router.post("/google/link", connectWithGoogle);

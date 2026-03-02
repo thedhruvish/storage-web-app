@@ -84,20 +84,33 @@ export const getCureentUser = async (req, res) => {
     throw new ApiError(401, "User need to re Authenticated.");
   }
   const user = directory.userId;
-
-  const avatarUrl = await getSignedUrlForGetObject(
-    directory.userId.picture,
-    "my_avatar.png",
-    false,
-    AVATAR_UPLOAD_FOLDER,
-    8640 * 7,
-  );
-  user.picture = avatarUrl;
+  const avatarUrl = user.picture;
+  if (!user.picture.startsWith("http")) {
+    avatarUrl = await getSignedUrlForGetObject(
+      directory.userId.picture,
+      "my_avatar.png",
+      false,
+      AVATAR_UPLOAD_FOLDER,
+      8640 * 7,
+    );
+    user.picture = avatarUrl;
+  }
   res.status(200).json(
     new ApiResponse(200, "User login Successfuly", {
       picture: avatarUrl,
       ...user,
       totalUsedBytes: directory?.metaData?.size,
+    }),
+  );
+};
+
+export const getUseStorage = async (req, res) => {
+  const directory = await singleFindDirectory(req.user.rootDirId, {
+    metaData: 1,
+  });
+  res.status(200).json(
+    new ApiResponse(200, "User login Successfuly", {
+      size: directory.metaData.size,
     }),
   );
 };

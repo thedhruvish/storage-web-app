@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { STORAGE_SIZE_API_KEY } from "@/contansts";
 import axiosClient from "./axios-client";
 
 export const checkConnectedGoogle = ({ enabled }: { enabled: boolean }) => {
@@ -34,6 +35,9 @@ export const useImportFolderByDrive = (directoryId: string = "") => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["directorys", directoryId],
+      });
+      queryClient.invalidateQueries({
+        queryKey: [STORAGE_SIZE_API_KEY], // Invalidate the updated directory
       });
     },
   });

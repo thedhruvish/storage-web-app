@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useAppearance } from "@/store/appearance-store";
 import { useDialogStore } from "@/store/dialogs-store";
 import { useDirectoryStore } from "@/store/directory-store";
+import { useStorageStore } from "@/store/storage-store";
 import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
 import { UploadCloud } from "lucide-react";
@@ -52,6 +53,7 @@ export function DirectoryContent({
   const { selectedFiles, clearSelection } = useDirectoryStore();
   const { setOpen, setCurrentItem: setDialogCurrentItem } = useDialogStore();
   const { user } = useUser();
+  const { totalUsedBytes } = useStorageStore();
   const openPricingHash = useCallback(() => {
     window.location.hash = "price";
   }, []);
@@ -80,7 +82,7 @@ export function DirectoryContent({
         return;
       }
 
-      if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+      if (totalUsedBytes + totalSize > user.maxStorageBytes) {
         toast.error("You have exceeded your storage limit.");
         openPricingHash();
         return;
@@ -90,7 +92,7 @@ export function DirectoryContent({
         uploadFiles(acceptedFiles, directoryId);
       }
     },
-    [directoryId, user, allowedUpload, openPricingHash]
+    [directoryId, user, totalUsedBytes, allowedUpload, openPricingHash]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

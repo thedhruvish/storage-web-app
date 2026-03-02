@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import type {
   AuthenticationResponseJSON,
   RegistrationResponseJSON,
@@ -23,13 +23,6 @@ export const useRegisterMutation = () => {
       password: string;
       turnstileToken: string;
     }) => axiosClient.post("/auth/register", userData),
-  });
-};
-
-export const useGetCurrentUser = () => {
-  return useQuery({
-    queryKey: ["user"],
-    queryFn: () => axiosClient.get("/sso/me"),
   });
 };
 

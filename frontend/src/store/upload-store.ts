@@ -1,4 +1,5 @@
 import axios from "axios";
+import { STORAGE_SIZE_API_KEY } from "@/contansts";
 import { toast } from "sonner";
 import { create } from "zustand";
 import axiosClient from "@/api/axios-client";
@@ -127,7 +128,7 @@ const processFile = async (fileItem: UploadableFile, directoryId: string) => {
       });
     }
   } finally {
-    queryClient.invalidateQueries({ queryKey: ["user"] });
+    queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
     queryClient.invalidateQueries({ queryKey: ["directorys", directoryId] });
     const currentFiles = useUploadStore.getState().files;
     const stillUploading = currentFiles.some((f) => f.status === "uploading");

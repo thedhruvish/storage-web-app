@@ -5,6 +5,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useParams } from "@tanstack/react-router";
 import { useDialogStore } from "@/store/dialogs-store";
+import { useStorageStore } from "@/store/storage-store";
 import { useUser } from "@/store/user-store";
 import {
   AlertCircle,
@@ -60,6 +61,7 @@ export function MultiFileUploadDialog({ open }: Props) {
   type FileUploadValues = z.infer<typeof fileUploadSchema>;
 
   const { directoryId = "" } = useParams({ strict: false });
+  const { totalUsedBytes } = useStorageStore();
 
   const getDirectoryDataHook = useGetAllDirectoryList(directoryId);
   const { closeDialog } = useDialogStore();
@@ -89,7 +91,7 @@ export function MultiFileUploadDialog({ open }: Props) {
       );
       return;
     }
-    if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+    if (totalUsedBytes + totalSize > user.maxStorageBytes) {
       openPricingHash();
       toast.error("You have exceeded your storage limit.");
       return;

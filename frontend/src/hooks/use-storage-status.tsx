@@ -1,4 +1,7 @@
 import { useMemo } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { STORAGE_SIZE_API_KEY } from "@/contansts";
+import { useStorageStore } from "@/store/storage-store";
 import { useUserStore } from "@/store/user-store";
 import { formatFileSize } from "@/utils/functions";
 
@@ -10,7 +13,10 @@ const STORAGE_THRESHOLD_BYTES = 10000000;
  * @param user - The user object (or null) containing storage info.
  */
 export const useStorageStatus = () => {
+  const queryClient = useQueryClient();
   const user = useUserStore((state) => state.user);
+  const totalUsedBytesRaw = useStorageStore((state) => state.totalUsedBytes);
+
   const {
     isUploadDisabled,
     storageUsedPercentage,
@@ -28,30 +34,34 @@ export const useStorageStatus = () => {
       };
     }
 
-    const { maxStorageBytes, totalUsedBytes } = user;
-    const remainingSpace = maxStorageBytes - totalUsedBytes;
+    const { maxStorageBytes } = user;
+    const remainingSpace = maxStorageBytes - totalUsedBytesRaw;
 
     const disabled = remainingSpace < STORAGE_THRESHOLD_BYTES;
 
     let percentage = 0;
-    if (maxStorageBytes > 0 && totalUsedBytes > 0) {
-      percentage = (totalUsedBytes / maxStorageBytes) * 100;
+    if (maxStorageBytes > 0 && totalUsedBytesRaw > 0) {
+      percentage = (totalUsedBytesRaw / maxStorageBytes) * 100;
     }
 
-    // if (totalUsedBytes > maxStorageBytes) {
-    //   percentage = 100;
-    // }
+    if (totalUsedBytesRaw > maxStorageBytes) {
+      percentage = 100;
+    }
 
     return {
       isUploadDisabled: disabled,
       storageUsedPercentage: Math.round(percentage),
-      totalUsedBytes: formatFileSize(totalUsedBytes),
+      totalUsedBytes: formatFileSize(totalUsedBytesRaw),
       maxStorageBytes: formatFileSize(maxStorageBytes),
       formattedRemaining: formatFileSize(
         remainingSpace > 0 ? remainingSpace : 0
       ),
     };
-  }, [user]);
+  }, [user, totalUsedBytesRaw]);
+
+  const refreshStorage = () => {
+    queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
+  };
 
   return {
     isUploadDisabled,
@@ -59,6 +69,7 @@ export const useStorageStatus = () => {
     totalUsedBytes,
     maxStorageBytes,
     formattedRemaining,
+    refreshStorage,
     storageTooltipMessage: (
       <p>Storage limit is max. Please upgrade your plan.</p>
     ),

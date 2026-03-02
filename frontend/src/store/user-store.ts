@@ -8,7 +8,6 @@ export type User = {
   profile: string;
   rootDirId: string;
   role: string;
-  totalUsedBytes: number;
   maxStorageBytes: number;
   uploadLimit: number;
 };

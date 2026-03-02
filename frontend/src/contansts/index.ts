@@ -11,3 +11,5 @@ export const AVATAR_ACCEPTED_TYPES = {
 export type AVATAR_ACCEPTED_TYPES_T = typeof AVATAR_ACCEPTED_TYPES;
 
 export const GITHUB_REPO_LINK = "https://github.com/thedhruvish/storeone";
+
+export const STORAGE_SIZE_API_KEY = "size";

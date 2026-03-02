@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { STORAGE_SIZE_API_KEY } from "@/contansts";
 import { useDialogStore } from "@/store/dialogs-store";
+import { useStorageStatus } from "@/hooks/use-storage-status";
 import axiosClient from "./axios-client";
 
 export const useGetAllDirectoryList = (
@@ -55,6 +57,9 @@ export const useDeleteDirectory = (directoryId: string = "") => {
     onSuccess: () => {
       queryClient.invalidateQueries({
         queryKey: ["directorys", directoryId], // Invalidate the updated directory
+      });
+      queryClient.invalidateQueries({
+        queryKey: [STORAGE_SIZE_API_KEY], // Invalidate the updated directory
       });
     },
   });
@@ -205,6 +210,7 @@ export const useEmptyTrash = () => {
   return useMutation({
     mutationFn: () => axiosClient.delete(`/directory/trash`),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
       queryClient.invalidateQueries({
         queryKey: ["directorys"],
       });
@@ -227,6 +233,7 @@ export const useRestore = () => {
       type: "directory" | "document";
     }) => axiosClient.put(`/${type}/${id}/restore`),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
       queryClient.invalidateQueries({
         queryKey: ["directorys"],
       });
@@ -249,6 +256,7 @@ export const useHardDelete = () => {
       type: "directory" | "document";
     }) => axiosClient.delete(`/${type}/${id}/hard`),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
       queryClient.invalidateQueries({
         queryKey: ["directorys"],
       });
@@ -277,11 +285,12 @@ interface IMediaType {
 
 export const useBatchs = () => {
   const queryClient = useQueryClient();
-
+  const { refreshStorage } = useStorageStatus();
   return useMutation({
     mutationFn: ({ type, ids, action }: IMediaType) =>
       axiosClient.post(`/${type}/batch/${action}`, { ids }),
     onSuccess: () => {
+      refreshStorage();
       queryClient.invalidateQueries({
         queryKey: ["directorys"],
       });

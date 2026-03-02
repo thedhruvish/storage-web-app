@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { STORAGE_SIZE_API_KEY } from "@/contansts";
 import axiosClient from "./axios-client";
 
 // update
@@ -28,7 +29,7 @@ export const useDeleteDocument = (directoryId?: string) => {
         queryKey: ["directorys", directoryId], // Invalidate the updated directory
       });
       queryClient.invalidateQueries({
-        queryKey: ["user"], // Invalidate the updated directory
+        queryKey: [STORAGE_SIZE_API_KEY], // Invalidate the updated directory
       });
     },
   });

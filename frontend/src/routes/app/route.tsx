@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useAppearance } from "@/store/appearance-store";
 import { useUser } from "@/store/user-store";
-import { useGetCurrentUser } from "@/api/auth";
+import { useGetCurrentUser, useGetRealStorage } from "@/api/user-api";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Dialogs } from "@/components/dialogs";
@@ -15,6 +15,7 @@ export const Route = createFileRoute("/app")({
 function RouteComponent() {
   const { user, setUser } = useUser();
   const { appearance } = useAppearance();
+  useGetRealStorage();
   const getCureentUser = useGetCurrentUser();
   const navagate = useNavigate();
 
