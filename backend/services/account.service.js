@@ -13,7 +13,11 @@ import TwoFa from "../models/TwoFa.model.js";
 import User from "../models/User.model.js";
 import ApiError from "../utils/ApiError.js";
 import { deleteAllUserSessions } from "./redis.service.js";
-import { bulkDeleteS3Objects, getSignedUrlForGetObject } from "./s3.service.js";
+import {
+  buildS3DeleteKeys,
+  bulkDeleteS3Objects,
+  getSignedUrlForGetObject,
+} from "./s3.service.js";
 import {
   createCustomerPortalSession,
   pauseStripeSubscription,
@@ -214,9 +218,12 @@ export const wipeAllData = async ({ userId }) => {
         .session(session)
         .lean()
         .then((documents) => {
-          s3ObjectsToDelete = documents.map((file) => ({
-            Key: `${DIRECTORY_UPLOAD_FOLDER}${file._id}${file.extension}`,
-          }));
+          s3ObjectsToDelete = documents.flatMap((file) =>
+            buildS3DeleteKeys({
+              id: file._id,
+              extension: file.extension,
+            }),
+          );
 
           return Promise.all([
             Directory.deleteMany(

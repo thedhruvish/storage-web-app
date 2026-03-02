@@ -3,13 +3,14 @@ import Document from "../models/Document.model.js";
 import Directory from "../models/Directory.model.js";
 import ApiError from "../utils/ApiError.js";
 import {
-  deleteS3Object,
+  buildS3DeleteKeys,
+  bulkDeleteS3Objects,
   generatePresignedUrl,
   getSignedUrlForGetObject,
   verifyUploadedObject,
 } from "./s3.service.js";
 import { updateParentDirectorySize } from "./directory.service.js";
-import { addToRecent, removeFromRecent } from "./recent.service.js";
+import { addToRecent } from "./recent.service.js";
 import { formatFileSize } from "../utils/format-bytes.js";
 
 /**
@@ -71,10 +72,15 @@ export const completeUpload = async (documentId) => {
   const fileKey = `${document.id}${document.extension}`;
   const isValid = await verifyUploadedObject(fileKey, document.metaData.size);
 
+  const keys = buildS3DeleteKeys({
+    id: document._id,
+    extension: document.extension,
+  });
+
   if (!isValid) {
     await Promise.all([
       Document.deleteOne({ _id: document._id }),
-      deleteS3Object(fileKey),
+      bulkDeleteS3Objects(keys),
     ]);
     throw new ApiError(400, "Please re-upload file");
   }
@@ -92,7 +98,11 @@ export const completeUpload = async (documentId) => {
  */
 export const cancelUpload = async (documentId) => {
   const doc = await Document.findByIdAndDelete(documentId);
-  await deleteS3Object(`${doc._id}${doc.extension}`);
+  const buildDeleteKey = buildS3DeleteKeys({
+    id: doc._id,
+    extension: doc.extension,
+  });
+  await bulkDeleteS3Objects(buildDeleteKey);
 };
 
 /**
@@ -150,7 +160,12 @@ export const hardDeleteDocument = async (documentId) => {
   }
 
   await Promise.all([
-    deleteS3Object(`${document.id}${document.extension}`),
+    bulkDeleteS3Objects(
+      buildS3DeleteKeys({
+        extension: document.extension,
+        id: document._id,
+      }),
+    ),
     updateParentDirectorySize(document.parentDirId, -document.metaData.size),
   ]);
 };
@@ -160,13 +175,13 @@ export const hardDeleteDocument = async (documentId) => {
  */
 export const softDeleteDocument = async (documentId) => {
   const document = await Document.findOneAndUpdate(
-      {
-        _id: documentId,
-        isCompletedUpload: true,
-      },
-      {
-        $set: { trashAt: new Date() },
-      },
+    {
+      _id: documentId,
+      isCompletedUpload: true,
+    },
+    {
+      $set: { trashAt: new Date() },
+    },
   );
   if (document) {
     return { message: "Soft deleted Items" };

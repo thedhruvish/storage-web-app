@@ -4,7 +4,7 @@ import Document from "../models/Document.model.js";
 import { rm } from "node:fs/promises";
 import mongoose from "mongoose";
 import { updateParentDirectorySize } from "../services/directory.service.js";
-import { bulkDeleteS3Objects } from "../services/s3.service.js";
+import { buildS3DeleteKeys, bulkDeleteS3Objects } from "../services/s3.service.js";
 import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 
 export const removeSubscriptionExpiryData = () => {
@@ -96,12 +96,14 @@ export const removeSubscriptionExpiryData = () => {
         });
 
         if (session.docsToDelete) {
-          // Bulk delete
-          await bulkDeleteS3Objects(
-            session.docsToDelete.map((file) => ({
-              Key: `${DIRECTORY_UPLOAD_FOLDER}${file.documentId}${file.extension}`,
-            })),
+          const deleteKeys = session.docsToDelete.flatMap((file) =>
+            buildS3DeleteKeys({
+              id: file.documentId,
+              extension: file.extension,
+            }),
           );
+
+          await bulkDeleteS3Objects(deleteKeys);
         }
 
         console.log("Cleanup done.");

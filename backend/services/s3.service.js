@@ -10,7 +10,9 @@ import { generateCloudfrontSignedUrl } from "./cloudforntCdn.service.js";
 import { s3Client } from "../lib/s3.client.js";
 import {
   BUCKET_NAME,
+  DIRECTORY_PREVIEW_FOLDER,
   DIRECTORY_UPLOAD_FOLDER,
+  IMAGE_EXTS,
   PRESIGNED_URL_EXPIRATION,
 } from "../constants/s3.constants.js";
 import { CLOUDFRONT_PRIVATE_KEY } from "../constants/constant.js";
@@ -122,4 +124,19 @@ export const bulkDeleteS3Objects = async (fileKeys) => {
   } catch (error) {
     return false;
   }
+};
+
+export const buildS3DeleteKeys = ({ id, extension }) => {
+  const fileKey = `${id}${extension}`;
+
+  const keys = [{ Key: `${DIRECTORY_UPLOAD_FOLDER}${fileKey}` }];
+
+  // Preview exists for images
+  if (IMAGE_EXTS.includes(extension)) {
+    keys.push({
+      Key: `${DIRECTORY_PREVIEW_FOLDER}${id}.avif`,
+    });
+  }
+
+  return keys;
 };

@@ -6,7 +6,11 @@ import {
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";
 import ApiError from "../utils/ApiError.js";
-import { bulkDeleteS3Objects, getSignedUrlForGetObject } from "./s3.service.js";
+import {
+  buildS3DeleteKeys,
+  bulkDeleteS3Objects,
+  getSignedUrlForGetObject,
+} from "./s3.service.js";
 import { addToRecent, removeFromRecent } from "./recent.service.js";
 
 /**
@@ -204,9 +208,12 @@ export const hardDeleteDirectory = async (directoryId) => {
   );
   await Promise.all([
     bulkDeleteS3Objects(
-      documents.map((file) => ({
-        Key: `${DIRECTORY_UPLOAD_FOLDER}${file._id}${file.extension}`,
-      })),
+      documents.flatMap((file) =>
+        buildS3DeleteKeys({
+          id: file._id,
+          extension: file.extension,
+        }),
+      ),
     ),
     Document.deleteMany({ _id: { $in: documents.map((d) => d._id) } }),
     Directory.deleteMany({ _id: { $in: directories.map((d) => d._id) } }),
