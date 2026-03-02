@@ -9,8 +9,12 @@ import {
   hardDeleteDocument,
   softDeleteDocument,
   restoreDocument,
+  batchSoftDeletedocument,
 } from "../services/document.service.js";
-import { removeFromRecent } from "../services/recent.service.js";
+import {
+  removeFromRecent,
+  removeFromRecents,
+} from "../services/recent.service.js";
 
 export const createPresigned = async (req, res) => {
   const result = await createPresignedDocument({
@@ -63,9 +67,9 @@ export const starredToggleDocument = async (req, res) => {
 };
 
 export const softDeleteDocumentById = async (req, res) => {
-  await softDeleteDocument(req.params.id);
+  const { message } = await softDeleteDocument(req.params.id);
   await removeFromRecent(req.user._id, req.params.id, "document");
-  res.status(200).json(new ApiResponse(200, "Document deleted successfully"));
+  res.status(200).json(new ApiResponse(200, message));
 };
 
 export const hardDeleteDocumentById = async (req, res) => {
@@ -77,4 +81,32 @@ export const hardDeleteDocumentById = async (req, res) => {
 export const restoreDocumentById = async (req, res) => {
   await restoreDocument(req.params.id);
   res.status(200).json(new ApiResponse(200, "Document restored successfully"));
+};
+
+// batch oprations
+export const softDeleteBatchDocumentController = async (req, res) => {
+  const { ids } = req.body;
+  await Promise.all([
+    Promise.all(ids.map((id) => batchSoftDeletedocument(id))),
+    removeFromRecents(req.user._id, ids, "document"),
+  ]);
+  res.status(200).json(new ApiResponse(200, "Document deleted successfully"));
+};
+
+export const hardDeleteBatchDocumentController = async (req, res) => {
+  const { ids } = req.body;
+  await Promise.all([
+    Promise.all(ids.map((id) => hardDeleteDocument(id))),
+    removeFromRecents(req.user._id, ids, "document"),
+  ]);
+
+  res.status(200).json(new ApiResponse(200, "Document deleted successfully"));
+};
+export const restoreDeleteBatchDocumentController = async (req, res) => {
+  const { ids } = req.body;
+  await Promise.all([
+    Promise.all(ids.map((id) => restoreDocument(id))),
+    removeFromRecents(req.user._id, ids, "document"),
+  ]);
+  res.status(200).json(new ApiResponse(200, "Document restore successfully"));
 };

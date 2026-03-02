@@ -216,6 +216,8 @@ export const hardDeleteDirectory = async (directoryId) => {
 /**
  * Update parent dir size
  */
+
+// On the here are the fix latter bcz i call n number of db call
 export const updateParentDirectorySize = async (dirId, size) => {
   try {
     const directories = [];
@@ -256,6 +258,11 @@ export const emptyTrash = async (userId) => {
     Document.find({ userId, trashAt: { $ne: null } }),
   ]);
 
+  await Promise.all([
+    documents.map((document) =>
+      updateParentDirectorySize(document.parentDirId, -document.metaData.size),
+    ),
+  ]);
   await Promise.all([
     bulkDeleteS3Objects(
       documents.map((file) => ({

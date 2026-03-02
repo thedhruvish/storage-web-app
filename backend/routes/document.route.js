@@ -9,15 +9,38 @@ import {
   restoreDocumentById,
   starredToggleDocument,
   updateDocumentById,
+  softDeleteBatchDocumentController,
+  hardDeleteBatchDocumentController,
+  restoreDeleteBatchDocumentController,
 } from "../controllers/document.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { nameValidation } from "../validators/comman.validator.js";
+import {
+  batchOprationValidation,
+  nameValidation,
+} from "../validators/comman.validator.js";
 
 const router = express.Router();
 
 router.param("parentDirId", paramsValidation);
+
+// a batch
+router.post(
+  "/batch/sdelete",
+  validateInput(batchOprationValidation),
+  softDeleteBatchDocumentController,
+);
+router.post(
+  "/batch/hdelete",
+  validateInput(batchOprationValidation),
+  hardDeleteBatchDocumentController,
+);
+router.post(
+  "/batch/restore",
+  validateInput(batchOprationValidation),
+  restoreDeleteBatchDocumentController,
+);
 
 router
   .route("/{:parentDirId}/init")

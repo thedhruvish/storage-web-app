@@ -55,7 +55,29 @@ export const removeFromRecent = async (userId, itemId, type) => {
     console.error("Redis Error (removeFromRecent):", error);
   }
 };
+/**
+ * Remove items from recent list
+ * items = [{ id, type }, { id, type }] or [ids,ids] in that another pass the parms
+ * type: directory | document
+ */
+export const removeFromRecents = async (userId, items, type = undefined) => {
+  if (!userId || !items?.length) return;
 
+  const key = `${RECENT_KEY_PREFIX}${userId}`;
+  let members;
+  if (type) {
+    members = items.map((id) => `${type}:${id}`);
+  } else {
+    // items = [{ id, type }, { id, type }]
+    members = items.map(({ id, type }) => `${type}:${id}`);
+  }
+
+  try {
+    await redisClient.zRem(key, ...members);
+  } catch (error) {
+    console.error("Redis Error (removeFromRecent):", error);
+  }
+};
 /**
  * Get recent items
  * @param {string} userId

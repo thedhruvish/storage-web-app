@@ -9,7 +9,7 @@ import {
   verifyUploadedObject,
 } from "./s3.service.js";
 import { updateParentDirectorySize } from "./directory.service.js";
-import { addToRecent } from "./recent.service.js";
+import { addToRecent, removeFromRecent } from "./recent.service.js";
 import { formatFileSize } from "../utils/format-bytes.js";
 
 /**
@@ -144,6 +144,7 @@ export const toggleStarDocument = async (documentId) => {
  */
 export const hardDeleteDocument = async (documentId) => {
   const document = await Document.findByIdAndDelete(documentId);
+
   if (!document) {
     throw new ApiError(404, "Document not found");
   }
@@ -158,13 +159,21 @@ export const hardDeleteDocument = async (documentId) => {
  *  Soft delete document
  */
 export const softDeleteDocument = async (documentId) => {
-  const document = await Document.findById(documentId);
-  if (!document) {
-    throw new ApiError(404, "Document not found");
+  const document = await Document.findOneAndUpdate(
+      {
+        _id: documentId,
+        isCompletedUpload: true,
+      },
+      {
+        $set: { trashAt: new Date() },
+      },
+  );
+  if (document) {
+    return { message: "Soft deleted Items" };
   }
 
-  document.trashAt = Date.now();
-  await document.save();
+  await Document.deleteOne({ _id: documentId });
+  return { message: "This items was the permanently delete" };
 };
 
 export const restoreDocument = async (documentId) => {
@@ -175,4 +184,16 @@ export const restoreDocument = async (documentId) => {
 
   document.trashAt = null;
   await document.save();
+};
+
+export const batchSoftDeletedocument = async (documentIds) => {
+  await Document.updateMany(
+    {
+      _id: { $in: documentIds },
+    },
+    {
+      $set: { trashAt: new Date() },
+    },
+  );
+  return { message: "Soft deleted Items" };
 };

@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "@tanstack/react-router";
 import { useDialogStore } from "@/store/dialogs-store";
+import { useDirectoryStore } from "@/store/directory-store";
 import { TriangleAlert } from "lucide-react";
 import { toast } from "sonner";
-import {
-  useDeleteDirectory,
-  useGetAllDirectoryList,
-  useHardDelete,
-} from "@/api/directory-api";
-import { useDeleteDocument } from "@/api/docuement-api";
+import { useGetAllDirectoryList, useBatchs } from "@/api/directory-api";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface Props {
@@ -17,12 +12,10 @@ interface Props {
 }
 
 export function FileDeleteDialog({ open, onOpenChange }: Props) {
-  const { directoryId } = useParams({ strict: false });
-  const { currentItem, closeDialog } = useDialogStore();
+  const { currentItem, closeDialog, selectedItems } = useDialogStore();
+  const { clearSelection } = useDirectoryStore();
   const [fileName, setFileName] = useState("");
-  const deleteDirectory = useDeleteDirectory(directoryId);
-  const deleteDocument = useDeleteDocument(directoryId);
-  const hardDelete = useHardDelete();
+  const batchOprations = useBatchs();
   const getallDirectorys = useGetAllDirectoryList();
 
   useEffect(() => {
@@ -30,38 +23,62 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
       setFileName(currentItem.name);
     }
   }, [currentItem]);
+
   if (!currentItem) return;
-  const fileType = currentItem.extension ? "File" : "Directory";
+
+  const isMultiple = selectedItems && selectedItems.length > 1;
+  const fileType = isMultiple
+    ? "items"
+    : currentItem.extension
+      ? "File"
+      : "Directory";
+  const displayName = isMultiple ? `${selectedItems.length} items` : fileName;
 
   // Check if item is in trash (soft deleted)
   const isTrash = !!currentItem.trashAt;
 
   const handleDelete = async () => {
+    const itemsToDelete = isMultiple ? selectedItems : [currentItem];
+    const documentIds = itemsToDelete
+      .filter((i) => i.extension)
+      .map((i) => i._id);
+    const directoryIds = itemsToDelete
+      .filter((i) => !i.extension)
+      .map((i) => i._id);
+
     try {
-      if (isTrash) {
-        // PERMANENT DELETE
-        await hardDelete.mutateAsync({
-          id: currentItem._id,
-          type: currentItem.extension ? "document" : "directory",
-        });
-        toast.success(`${fileName} permanently deleted`);
-      } else {
-        // SOFT DELETE
-        if (currentItem.extension) {
-          await deleteDocument.mutateAsync({
-            id: currentItem._id,
-          });
-        } else {
-          await deleteDirectory.mutateAsync({
-            id: currentItem._id,
-          });
-        }
-        toast.success(`${fileName} moved to trash`);
+      const promises = [];
+      const actionType = isTrash ? "hdelete" : "sdelete";
+
+      if (directoryIds.length > 0) {
+        promises.push(
+          batchOprations.mutateAsync({
+            ids: directoryIds,
+            type: "directory",
+            action: actionType,
+          })
+        );
       }
+
+      if (documentIds.length > 0) {
+        promises.push(
+          batchOprations.mutateAsync({
+            ids: documentIds,
+            type: "document",
+            action: actionType,
+          })
+        );
+      }
+
+      await Promise.all(promises);
+      toast.success(
+        `${displayName} ${isTrash ? "permanently deleted" : "moved to trash"}`
+      );
     } catch {
-      toast.error(`Error deleting ${fileName}`);
+      toast.error(`Error deleting ${displayName}`);
     } finally {
       getallDirectorys.refetch();
+      clearSelection();
       closeDialog();
     }
   };
@@ -71,24 +88,22 @@ export function FileDeleteDialog({ open, onOpenChange }: Props) {
       open={open}
       onOpenChange={onOpenChange}
       handleConfirm={handleDelete}
-      disabled={
-        deleteDocument.isPending ||
-        deleteDirectory.isPending ||
-        hardDelete.isPending
-      }
+      disabled={batchOprations.isPending}
       title={
         <span className='text-destructive'>
           <TriangleAlert
             className='stroke-destructive mr-1 inline-block'
             size={18}
           />{" "}
-          {isTrash ? `Delete ${fileType} Forever?` : `Delete ${fileType}`}
+          {isTrash
+            ? `Delete ${isMultiple ? "Items" : fileType} Forever?`
+            : `Delete ${isMultiple ? "Items" : fileType}`}
         </span>
       }
       desc={
         isTrash
-          ? `Are you sure you want to permanently delete this ${fileType}? This action cannot be undone.`
-          : `Are you sure you want to move this ${fileType} to trash?`
+          ? `Are you sure you want to permanently delete ${isMultiple ? "these items" : `this ${fileType}`}? This action cannot be undone.`
+          : `Are you sure you want to move ${isMultiple ? "these items" : `this ${fileType}`} to trash?`
       }
       confirmText={isTrash ? "Delete Forever" : "Delete"}
       destructive

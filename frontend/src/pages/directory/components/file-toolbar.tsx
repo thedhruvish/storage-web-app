@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { FileItem } from "@/pages/directory/types";
 import { useAppearance } from "@/store/appearance-store";
 import { useDialogStore } from "@/store/dialogs-store";
@@ -19,7 +20,7 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useHardDelete, useRestore } from "@/api/directory-api";
+import { useBatchs } from "@/api/directory-api";
 import { checkConnectedGoogle } from "@/api/import-data-api";
 import { useDrivePicker } from "@/hooks/use-drive-picker";
 import { useFileUploader } from "@/hooks/use-file-uploader";
@@ -38,6 +39,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ConfirmDialog } from "@/components/confirm-dialog";
 
 interface FileToolbarProps {
   viewMode: "grid" | "list";
@@ -54,10 +56,12 @@ export function FileToolbar({
   extraActions,
   isTrash = false,
 }: FileToolbarProps) {
+  const [deleteForeverDialog, setDeleteForeverDialog] = useState(false);
   const { selectedFiles, clearSelection } = useDirectoryStore();
+
   const selectedItems = allFiles.filter((f) => selectedFiles.has(f._id));
   const { openPicker, pickerOpened, pickerRef, accessToken } = useDrivePicker();
-  const { setOpen, setCurrentItem } = useDialogStore();
+  const { setOpen, setCurrentItem, setSelectedItems } = useDialogStore();
   const { setAppearance } = useAppearance();
 
   const { isUploadDisabled, storageTooltipMessage } = useStorageStatus();
@@ -81,6 +85,9 @@ export function FileToolbar({
     if (!selectedItems.length) return;
     const file = selectedItems[0];
     setCurrentItem({ ...file, type: file.extension ? "file" : "folder" });
+    if (action === "delete") {
+      setSelectedItems(selectedItems);
+    }
     setOpen(action as any);
   };
 
@@ -92,74 +99,135 @@ export function FileToolbar({
     });
   };
 
-  /* import RotateCcw, toast, useRestore, useHardDelete */
+  const batchOperations = useBatchs();
 
-  const restoreMutation = useRestore();
-  const hardDeleteMutation = useHardDelete();
+  const handleRestoreSelected = async () => {
+    const documentIds = selectedItems
+      .filter((i) => i.extension)
+      .map((i) => i._id);
+    const directoryIds = selectedItems
+      .filter((i) => !i.extension)
+      .map((i) => i._id);
 
-  const handleRestoreSelected = () => {
-    selectedItems.forEach((file) => {
-      restoreMutation.mutate(
-        {
-          id: file._id,
-          type: file.extension ? "document" : "directory",
-        },
-        {
-          onSuccess: () => {
-            toast.success("Restored"); // frequent toasts annoying?
-          },
-        }
-      );
-    });
-    toast.success("Restore started");
-    clearSelection();
+    try {
+      const promises = [];
+      if (directoryIds.length > 0) {
+        promises.push(
+          batchOperations.mutateAsync({
+            ids: directoryIds,
+            type: "directory",
+            action: "restore",
+          })
+        );
+      }
+      if (documentIds.length > 0) {
+        promises.push(
+          batchOperations.mutateAsync({
+            ids: documentIds,
+            type: "document",
+            action: "restore",
+          })
+        );
+      }
+
+      await Promise.all(promises);
+      toast.success("Restore completed");
+    } catch {
+      toast.error("Error during restore");
+    } finally {
+      clearSelection();
+    }
   };
 
   const handleDeleteForeverSelected = async () => {
-    selectedItems.forEach((file) => {
-      hardDeleteMutation.mutate({
-        id: file._id,
-        type: file.extension ? "document" : "directory",
-      });
-    });
-    toast.success("Deleting started");
-    clearSelection();
+    const documentIds = selectedItems
+      .filter((i) => i.extension)
+      .map((i) => i._id);
+    const directoryIds = selectedItems
+      .filter((i) => !i.extension)
+      .map((i) => i._id);
+
+    try {
+      const promises = [];
+      if (directoryIds.length > 0) {
+        promises.push(
+          batchOperations.mutateAsync({
+            ids: directoryIds,
+            type: "directory",
+            action: "hdelete",
+          })
+        );
+      }
+      if (documentIds.length > 0) {
+        promises.push(
+          batchOperations.mutateAsync({
+            ids: documentIds,
+            type: "document",
+            action: "hdelete",
+          })
+        );
+      }
+
+      await Promise.all(promises);
+      toast.success("Deleted successfully");
+    } catch {
+      toast.error("Error deleting items");
+    } finally {
+      clearSelection();
+      setDeleteForeverDialog(false);
+    }
   };
 
   if (selectedItems.length > 0) {
     if (isTrash) {
       return (
-        <div className='flex items-center justify-between gap-2 border-b p-4 bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-200'>
-          <div className='flex items-center gap-4'>
-            <Button
-              variant='ghost'
-              size='icon'
-              className='h-8 w-8'
-              onClick={clearSelection}
-            >
-              <X className='h-4 w-4' />
-            </Button>
-            <span className='font-medium text-sm'>
-              {selectedItems.length} selected
-            </span>
+        <>
+          <div className='flex items-center justify-between gap-2 border-b p-4 bg-primary/5 animate-in fade-in slide-in-from-top-2 duration-200'>
+            <div className='flex items-center gap-4'>
+              <Button
+                variant='ghost'
+                size='icon'
+                className='h-8 w-8'
+                onClick={clearSelection}
+              >
+                <X className='h-4 w-4' />
+              </Button>
+              <span className='font-medium text-sm'>
+                {selectedItems.length} selected
+              </span>
+            </div>
+            <div className='flex items-center gap-2'>
+              <Button variant='ghost' size='sm' onClick={handleRestoreSelected}>
+                <RotateCcw className='mr-2 h-4 w-4' />
+                Restore
+              </Button>
+              <Button
+                variant='ghost'
+                size='sm'
+                className='text-destructive hover:bg-destructive/10'
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setDeleteForeverDialog(true);
+                }}
+              >
+                <Trash2 className='mr-2 h-4 w-4' />
+                Delete Forever
+              </Button>
+              {extraActions}
+            </div>
           </div>
-          <div className='flex items-center gap-2'>
-            <Button variant='ghost' size='sm' onClick={handleRestoreSelected}>
-              <RotateCcw className='mr-2 h-4 w-4' />
-              Restore
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='text-destructive hover:bg-destructive/10'
-              onClick={handleDeleteForeverSelected}
-            >
-              <Trash2 className='mr-2 h-4 w-4' />
-              Delete Forever
-            </Button>
-            {extraActions}
+          <div onClick={(e) => e.stopPropagation()}>
+            <ConfirmDialog
+              open={deleteForeverDialog}
+              onOpenChange={setDeleteForeverDialog}
+              title='Delete'
+              desc={`Are you sure you want to delete ${selectedItems.length} items?`}
+              handleConfirm={handleDeleteForeverSelected}
+              isLoading={batchOperations.isPending}
+              destructive
+            />
           </div>
-        </div>
+        </>
       );
     }
     return (

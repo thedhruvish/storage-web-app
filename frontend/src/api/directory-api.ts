@@ -268,3 +268,26 @@ export const useGetSharedWithMe = () => {
     },
   });
 };
+
+interface IMediaType {
+  type: "directory" | "document";
+  ids: string[];
+  action: "sdelete" | "hdelete" | "restore";
+}
+
+export const useBatchs = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ type, ids, action }: IMediaType) =>
+      axiosClient.post(`/${type}/batch/${action}`, { ids }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["directorys"],
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["trash"],
+      });
+    },
+  });
+};

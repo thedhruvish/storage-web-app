@@ -11,3 +11,8 @@ export const importDriveDataValidation = z.object({
   mimeType: z.string("Folder Id is required"),
   name: z.string("Folder Id is required"),
 });
+
+// batch options
+export const batchOprationValidation = z.object({
+  ids: z.array(z.string()).min(1, "Ids are the required"),
+});

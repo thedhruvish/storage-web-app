@@ -11,7 +11,10 @@ import {
   getAllTrash,
   getSharedWithMe,
 } from "../services/directory.service.js";
-import { removeFromRecent } from "../services/recent.service.js";
+import {
+  removeFromRecent,
+  removeFromRecents,
+} from "../services/recent.service.js";
 
 export const getDirectory = async (req, res) => {
   const isStarred =
@@ -49,7 +52,6 @@ export const updateDirectoryById = async (req, res) => {
 
 export const starredToggleDirectory = async (req, res) => {
   await toggleStarDirectory(req.params.id);
-
   res
     .status(200)
     .json(new ApiResponse(200, "Directory star toggled successfully"));
@@ -88,4 +90,38 @@ export const getSharedWithMeController = async (req, res) => {
   const result = await getSharedWithMe(req.user._id);
 
   res.status(200).json(new ApiResponse(200, "Shared files list", result));
+};
+
+// batch controllers
+
+export const softDeleteBatchDirectorycontroller = async (req, res) => {
+  const { ids } = req.body;
+
+  await Promise.all([
+    Promise.all(ids.map((id) => softDeleteDirectory(id))),
+
+    removeFromRecents(req.user._id, ids, "directory"),
+  ]);
+
+  res
+    .status(200)
+    .json(new ApiResponse(200, "Directories deleted successfully"));
+};
+
+export const hardDeleteBatchDirectoryController = async (req, res) => {
+  const { ids } = req.body;
+  await Promise.all([
+    Promise.all(ids.map((id) => hardDeleteDirectory(id))),
+    removeFromRecents(req.user._id, ids, "directory"),
+  ]);
+
+  res.status(200).json(new ApiResponse(200, "Directory deleted successfully"));
+};
+export const restoreDeleteBatchDirectoryController = async (req, res) => {
+  const { ids } = req.body;
+  await Promise.all([
+    Promise.all(ids.map((id) => restoreDirectory(id))),
+    removeFromRecents(req.user._id, ids, "directory"),
+  ]);
+  res.status(200).json(new ApiResponse(200, "Directory re store successfully"));
 };

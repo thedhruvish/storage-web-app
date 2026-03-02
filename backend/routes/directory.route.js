@@ -10,16 +10,38 @@ import {
   restoreDirectoryById,
   getTrashController,
   getSharedWithMeController,
+  softDeleteBatchDirectorycontroller,
+  hardDeleteBatchDirectoryController,
+  restoreDeleteBatchDirectoryController,
 } from "../controllers/directory.controller.js";
 import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
 import { validateInput } from "../utils/validateInput.js";
-import { nameValidation } from "../validators/comman.validator.js";
+import {
+  batchOprationValidation,
+  nameValidation,
+} from "../validators/comman.validator.js";
 
 const router = express.Router();
 
-router.delete("/trash", permissionMiddleware("delete"), emptyTrashController);
+// Batch oprations
+router.post(
+  "/batch/sdelete",
+  validateInput(batchOprationValidation),
+  softDeleteBatchDirectorycontroller,
+);
+router.post(
+  "/batch/hdelete",
+  validateInput(batchOprationValidation),
+  hardDeleteBatchDirectoryController,
+);
+router.post(
+  "/batch/restore",
+  validateInput(batchOprationValidation),
+  restoreDeleteBatchDirectoryController,
+);
 
+router.delete("/trash", permissionMiddleware("delete"), emptyTrashController);
 router.get("/trash", permissionMiddleware("read"), getTrashController);
 
 router.get(
