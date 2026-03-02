@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { z } from "zod";
 import axios, { isAxiosError } from "axios";
 import { useForm } from "react-hook-form";
@@ -69,6 +69,9 @@ export function MultiFileUploadDialog({ open }: Props) {
     resolver: zodResolver(fileUploadSchema),
     defaultValues: { files: [] },
   });
+  const openPricingHash = useCallback(() => {
+    window.location.hash = "price";
+  }, []);
 
   const [fileProgressList, setFileProgressList] = React.useState<
     Array<FileProgress>
@@ -80,13 +83,14 @@ export function MultiFileUploadDialog({ open }: Props) {
     const totalSize = acceptedFiles.reduce((acc, file) => acc + file.size, 0);
 
     if (totalSize > user.uploadLimit) {
-      // TODO: add the banner that are the show the upgrade plan
+      openPricingHash();
       toast.error(
         `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
       );
       return;
     }
     if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+      openPricingHash();
       toast.error("You have exceeded your storage limit.");
       return;
     }

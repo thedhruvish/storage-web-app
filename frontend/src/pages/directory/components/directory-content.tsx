@@ -52,6 +52,9 @@ export function DirectoryContent({
   const { selectedFiles, clearSelection } = useDirectoryStore();
   const { setOpen, setCurrentItem: setDialogCurrentItem } = useDialogStore();
   const { user } = useUser();
+  const openPricingHash = useCallback(() => {
+    window.location.hash = "price";
+  }, []);
 
   // Combine directories and documents
   const allFiles = useMemo(
@@ -70,15 +73,16 @@ export function DirectoryContent({
       const totalSize = acceptedFiles.reduce((acc, file) => acc + file.size, 0);
 
       if (totalSize > user.uploadLimit) {
-        // TODO: add the banner that are the show the upgrade plan
         toast.error(
-          `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
+          `You can't Upload more than ${formatFileSize(user.uploadLimit)} ...`
         );
+        openPricingHash();
         return;
       }
 
       if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
         toast.error("You have exceeded your storage limit.");
+        openPricingHash();
         return;
       }
 
@@ -86,7 +90,7 @@ export function DirectoryContent({
         uploadFiles(acceptedFiles, directoryId);
       }
     },
-    [directoryId, user, allowedUpload]
+    [directoryId, user, allowedUpload, openPricingHash]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

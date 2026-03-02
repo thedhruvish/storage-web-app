@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useCallback, useRef } from "react";
 import { useParams } from "@tanstack/react-router";
 import { uploadFiles } from "@/store/upload-store";
 import { useUser } from "@/store/user-store";
@@ -10,7 +10,9 @@ export const useFileUploader = () => {
   const directoryId = (params as { directoryId?: string }).directoryId || "";
   const inputRef = useRef<HTMLInputElement>(null);
   const { user } = useUser();
-
+  const openPricingHash = useCallback(() => {
+    window.location.hash = "price";
+  }, []);
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (files && files.length > 0) {
@@ -21,7 +23,7 @@ export const useFileUploader = () => {
       );
 
       if (totalSize > user.uploadLimit) {
-        // TODO: add the banner that are the show the upgrade plan
+        openPricingHash();
         toast.error(
           `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
         );
@@ -29,6 +31,7 @@ export const useFileUploader = () => {
       }
 
       if (user.totalUsedBytes + totalSize > user.maxStorageBytes) {
+        openPricingHash();
         toast.error("You have exceeded your storage limit.");
         return;
       }

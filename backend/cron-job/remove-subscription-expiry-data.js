@@ -4,6 +4,8 @@ import Document from "../models/Document.model.js";
 import { rm } from "node:fs/promises";
 import mongoose from "mongoose";
 import { updateParentDirectorySize } from "../services/directory.service.js";
+import { bulkDeleteS3Objects } from "../services/s3.service.js";
+import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 
 export const removeSubscriptionExpiryData = () => {
   // Run every day at 00:05
@@ -94,17 +96,11 @@ export const removeSubscriptionExpiryData = () => {
         });
 
         if (session.docsToDelete) {
-          await Promise.all(
-            session.docsToDelete.map(async (d) => {
-              try {
-                // TODO: change use the s3
-                await rm(
-                  `${import.meta.dirname}/../storage/${d.documentId}${d.extension}`,
-                );
-              } catch (error) {
-                console.warn("File delete failed:", d.documentId);
-              }
-            }),
+          // Bulk delete
+          await bulkDeleteS3Objects(
+            session.docsToDelete.map((file) => ({
+              Key: `${DIRECTORY_UPLOAD_FOLDER}${file.documentId}${file.extension}`,
+            })),
           );
         }
 

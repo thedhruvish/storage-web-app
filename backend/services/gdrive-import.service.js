@@ -10,6 +10,7 @@ import { googleOAuthClient, getDriveClient } from "../lib/google.client.js";
 import { updateParentDirectorySize } from "./directory.service.js";
 import ImportToken from "../models/ImportToken.model.js";
 import { formatFileSize } from "../utils/format-bytes.js";
+import { deleteS3Object } from "./s3.service.js";
 
 export const importFromGoogleDrive = async ({
   user,
@@ -82,10 +83,7 @@ export const importFromGoogleDrive = async ({
   );
 
   if (directory.metaData.size + fileData.metaData.size > user.maxStorageBytes) {
-    // TODO: here are the chang it
-    // await rm(
-    //   `${import.meta.dirname}/../storage/${fileData._id}${fileData.extension}`,
-    // );
+    await deleteS3Object(`${fileData._id}${fileData.extension}`);
     throw new ApiError(400, "Storage limit exceeded");
   }
 

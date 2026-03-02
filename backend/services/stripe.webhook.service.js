@@ -1,7 +1,7 @@
 import Subscription from "../models/Subscription.model.js";
 import User from "../models/User.model.js";
 import WebHookLog from "../models/WebHookLog.model.js";
-// TODO: fix upload limmit
+
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 // verify webhook stripe

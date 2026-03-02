@@ -3,11 +3,13 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 import Error404 from "@/components/status-code/404";
 import Error500 from "@/components/status-code/500";
+import { GlobalPriceHashModal } from "@/components/global-price-hash-modal";
 
 export const Route = createRootRoute({
   component: () => (
     <>
       <Outlet />
+      <GlobalPriceHashModal />
       {import.meta.env.MODE === "development" && (
         <>
           <ReactQueryDevtools buttonPosition='bottom-left' />
