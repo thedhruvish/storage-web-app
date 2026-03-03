@@ -1,4 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
+import type { User } from "@/store/user-store";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -12,17 +13,7 @@ import {
 import { StorageProgress } from "./storage-progress";
 import { UserAvatarProfile } from "./user-avatar-profile";
 
-export function UserNav({
-  user,
-}: {
-  user: {
-    name?: string;
-    email?: string;
-    picture?: string;
-    totalUsedBytes: number;
-    maxStorageBytes: number;
-  };
-}) {
+export function UserNav({ user }: { user: User }) {
   const navigate = useNavigate();
   if (user) {
     return (

@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { loadRazorpay, razorpayOption } from "@/pages/web/home/razorpay-helper";
+import { useUser } from "@/store/user-store";
 import { DollarSign, IndianRupee } from "lucide-react";
 import { toast } from "sonner";
 import { useCheckout, useGetAllPlansPublic } from "@/api/checkout-api";
-import { PricingCard } from "@/components/pricing-card";
-import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
-import { loadRazorpay, razorpayOption } from "@/pages/web/home/razorpay-helper";
-import { useUser } from "@/store/user-store";
+import { Spinner } from "@/components/ui/spinner";
+import { PricingCard } from "@/components/pricing-card";
 
 export type PricingViewState = {
   isYearly: boolean;
@@ -218,7 +218,9 @@ export function PricingView({
                 )}
               >
                 Yearly{" "}
-                <span className='ml-1 text-xs font-bold text-green-500'>-20%</span>
+                <span className='ml-1 text-xs font-bold text-green-500'>
+                  -20%
+                </span>
               </span>
             </div>
           </div>

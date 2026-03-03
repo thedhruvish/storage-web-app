@@ -4,7 +4,10 @@ import Document from "../models/Document.model.js";
 import { rm } from "node:fs/promises";
 import mongoose from "mongoose";
 import { updateParentDirectorySize } from "../services/directory.service.js";
-import { buildS3DeleteKeys, bulkDeleteS3Objects } from "../services/s3.service.js";
+import {
+  buildS3DeleteKeys,
+  bulkDeleteS3Objects,
+} from "../services/s3.service.js";
 import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 
 export const removeSubscriptionExpiryData = () => {

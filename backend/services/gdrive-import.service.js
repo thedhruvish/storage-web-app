@@ -10,10 +10,7 @@ import { googleOAuthClient, getDriveClient } from "../lib/google.client.js";
 import { updateParentDirectorySize } from "./directory.service.js";
 import ImportToken from "../models/ImportToken.model.js";
 import { formatFileSize } from "../utils/format-bytes.js";
-import {
-  bulkDeleteS3Objects,
-  buildS3DeleteKeys,
-} from "./s3.service.js";
+import { bulkDeleteS3Objects, buildS3DeleteKeys } from "./s3.service.js";
 
 export const importFromGoogleDrive = async ({
   user,
