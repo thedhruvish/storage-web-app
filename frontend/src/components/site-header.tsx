@@ -36,97 +36,106 @@ export function SiteHeader() {
   const hiddenItems = BreadCrumData.slice(0, -2);
   return (
     <header className='bg-background sticky top-0 z-50 flex w-full items-center border-b'>
-      <div className='flex h-(--header-height) w-full items-center gap-2 px-4'>
-        <Button
-          className='h-8 w-8'
-          variant='ghost'
-          size='icon'
-          onClick={toggleSidebar}
-        >
-          <SidebarIcon />
-        </Button>
+      <div className='flex h-(--header-height) w-full items-center px-4'>
+        <div className='flex items-center gap-2 flex-1'>
+          <Button
+            className='h-8 w-8'
+            variant='ghost'
+            size='icon'
+            onClick={toggleSidebar}
+          >
+            <SidebarIcon />
+          </Button>
 
-        <Separator orientation='vertical' className='mr-2 h-4' />
+          <Separator orientation='vertical' className='mr-2 h-4' />
 
-        <Breadcrumb className='hidden sm:block'>
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink to='/'>Home</BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            {status === "loading" ? (
-              <>
-                <Skeleton className='h-6 w-40 rounded-md' />
-              </>
-            ) : (
-              <>
-                {!shouldCollapse ? (
-                  BreadCrumData.map((item, i) => (
-                    <div key={item._id} className='flex items-center'>
-                      <BreadcrumbItem>
-                        <BreadcrumbLink to={`/directory/${item._id}`}>
-                          {item.name}
-                        </BreadcrumbLink>
-                      </BreadcrumbItem>
-                      {i <= BreadCrumData.length - 1 && <BreadcrumbSeparator />}
-                    </div>
-                  ))
-                ) : (
-                  <>
-                    <BreadcrumbItem>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant='ghost'
-                            size='icon'
-                            className='h-6 w-6 p-0'
-                          >
-                            <MoreHorizontal className='h-4 w-4' />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align='start'>
-                          {hiddenItems.map((item) => (
-                            <DropdownMenuItem key={item._id} asChild>
-                              <Link
-                                to={"/app/directory/$directoryId"}
-                                params={{ directoryId: item._id }}
-                              >
-                                {item.name}
-                              </Link>
-                            </DropdownMenuItem>
-                          ))}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </BreadcrumbItem>
-                    <BreadcrumbSeparator />
-
-                    {lastTwo.map((item, i) => (
+          <Breadcrumb className='hidden lg:block'>
+            <BreadcrumbList>
+              <BreadcrumbItem>
+                <BreadcrumbLink to='/'>Home</BreadcrumbLink>
+              </BreadcrumbItem>
+              <BreadcrumbSeparator />
+              {status === "loading" ? (
+                <>
+                  <Skeleton className='h-6 w-40 rounded-md' />
+                </>
+              ) : (
+                <>
+                  {!shouldCollapse ? (
+                    BreadCrumData.map((item, i) => (
                       <div key={item._id} className='flex items-center'>
                         <BreadcrumbItem>
                           <BreadcrumbLink to={`/directory/${item._id}`}>
                             {item.name}
                           </BreadcrumbLink>
                         </BreadcrumbItem>
-                        {i < lastTwo.length - 1 && <BreadcrumbSeparator />}
+                        {i <= BreadCrumData.length - 1 && (
+                          <BreadcrumbSeparator />
+                        )}
                       </div>
-                    ))}
-                  </>
-                )}
-                {currentItemName && (
-                  <>
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{currentItemName}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </>
-                )}
-              </>
-            )}
-          </BreadcrumbList>
-        </Breadcrumb>
+                    ))
+                  ) : (
+                    <>
+                      <BreadcrumbItem>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant='ghost'
+                              size='icon'
+                              className='h-6 w-6 p-0'
+                            >
+                              <MoreHorizontal className='h-4 w-4' />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align='start'>
+                            {hiddenItems.map((item) => (
+                              <DropdownMenuItem key={item._id} asChild>
+                                <Link
+                                  to={"/app/directory/$directoryId"}
+                                  params={{ directoryId: item._id }}
+                                >
+                                  {item.name}
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </BreadcrumbItem>
+                      <BreadcrumbSeparator />
 
-        <SearchForm className='w-full sm:ml-auto sm:w-auto' />
-        <ModeToggle />
-        <UserNav user={user} />
+                      {lastTwo.map((item, i) => (
+                        <div key={item._id} className='flex items-center'>
+                          <BreadcrumbItem>
+                            <BreadcrumbLink to={`/directory/${item._id}`}>
+                              {item.name}
+                            </BreadcrumbLink>
+                          </BreadcrumbItem>
+                          {i < lastTwo.length - 1 && <BreadcrumbSeparator />}
+                        </div>
+                      ))}
+                    </>
+                  )}
+                  {currentItemName && (
+                    <>
+                      <BreadcrumbItem>
+                        <BreadcrumbPage>{currentItemName}</BreadcrumbPage>
+                      </BreadcrumbItem>
+                    </>
+                  )}
+                </>
+              )}
+            </BreadcrumbList>
+          </Breadcrumb>
+        </div>
+
+        <div className='flex-1 flex justify-center px-4'>
+          <SearchForm className='hidden sm:flex w-full max-w-[400px]' />
+        </div>
+
+        <div className='flex items-center gap-2 flex-1 justify-end'>
+          <ModeToggle />
+          <UserNav user={user} />
+        </div>
       </div>
     </header>
   );

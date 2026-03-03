@@ -2,7 +2,9 @@ import { useEffect } from "react";
 import { useParams } from "@tanstack/react-router";
 import { DirectoryContent } from "@/pages/directory/components/directory-content";
 import { useBreadCrumStore } from "@/store/breadCrum-store";
+import { useSearchStore } from "@/store/search-store";
 import { useGetAllDirectoryList } from "@/api/directory-api";
+import { useDebounce } from "@/hooks/use-debounce";
 
 export default function Home({
   directoryId: propDirectoryId = "",
@@ -14,8 +16,19 @@ export default function Home({
   const directoryId =
     (params as { directoryId?: string }).directoryId || propDirectoryId;
 
-  const { data, isLoading, isError, isSuccess, error } =
-    useGetAllDirectoryList(directoryId);
+  const { query, extensions, size, isStarred } = useSearchStore();
+  const debouncedQuery = useDebounce(query, 500);
+  const debouncedExtensions = useDebounce(extensions, 500);
+
+  const { data, isLoading, isError, isSuccess, error } = useGetAllDirectoryList(
+    directoryId,
+    {
+      search: debouncedQuery,
+      extensions: debouncedExtensions,
+      size,
+      isStarred,
+    }
+  );
 
   // Handle Side Effects (Breadcrumbs)
   useEffect(() => {

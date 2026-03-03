@@ -17,10 +17,12 @@ import {
 } from "../services/recent.service.js";
 
 export const getDirectory = async (req, res) => {
+  const { search, extensions, less_size, greater_size } = req.query;
   const isStarred =
     req.query.isStarred !== undefined
       ? req.query.isStarred === "true"
       : undefined;
+
   const isTrash =
     req.query.isTrash !== undefined ? req.query.isTrash === "true" : undefined;
 
@@ -28,6 +30,10 @@ export const getDirectory = async (req, res) => {
     directoryId: req.params.id || req.user.rootDirId,
     isStarred,
     isTrash,
+    search,
+    extensions,
+    less_size,
+    greater_size,
     userId: req.user._id,
   });
 

@@ -8,14 +8,37 @@ export const useGetAllDirectoryList = (
   directoryId: string = "",
   filter: Record<string, any> = {
     isStarred: undefined,
+    search: undefined,
+    extensions: undefined,
+    size: undefined,
   }
 ) => {
   return useQuery({
     queryKey: ["directorys", directoryId, filter],
     queryFn: async ({ queryKey }) => {
       const [, id] = queryKey;
+
+      const queryParams = new URLSearchParams();
+      if (filter.isStarred) queryParams.append("isStarred", "true");
+      if (filter.search) queryParams.append("search", filter.search);
+      if (filter.extensions)
+        queryParams.append("extensions", filter.extensions);
+
+      if (filter.size && filter.size !== "any") {
+        if (filter.size.startsWith("less_")) {
+          queryParams.append("less_size", filter.size.replace("less_", ""));
+        } else if (filter.size.startsWith("greater_")) {
+          queryParams.append(
+            "greater_size",
+            filter.size.replace("greater_", "")
+          );
+        }
+      }
+
+      const queryString = queryParams.toString();
+
       const response = await axiosClient.get(
-        `/directory/${id || ""}?${filter.isStarred ? "isStarred=true" : ""}`
+        `/directory/${id || ""}${queryString ? `?${queryString}` : ""}`
       );
       return response.data;
     },

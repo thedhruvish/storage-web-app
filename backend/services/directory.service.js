@@ -11,15 +11,20 @@ import {
   bulkDeleteS3Objects,
   getSignedUrlForGetObject,
 } from "./s3.service.js";
-import { addToRecent, removeFromRecent } from "./recent.service.js";
+import { addToRecent } from "./recent.service.js";
 
 /**
  * Get directory with children
  */
 export const getDirectoryWithContent = async ({
   directoryId,
-  isStarred,
   userId,
+  isStarred,
+  isTrash,
+  search,
+  extensions,
+  less_size,
+  greater_size,
 }) => {
   const directory = await Directory.findById(directoryId).populate({
     path: "path",
@@ -30,28 +35,68 @@ export const getDirectoryWithContent = async ({
     throw new ApiError(404, "Directory not found");
   }
 
-  const filter = { trashAt: null };
+  const filter = {
+    parentDirId: directory._id,
+  };
+
+  if (isTrash !== undefined) {
+    filter.trashAt = isTrash ? { $ne: null } : null;
+  } else {
+    filter.trashAt = null;
+  }
+
   if (isStarred !== undefined) {
     filter.isStarred = isStarred;
   }
 
+  if (search) {
+    filter.name = { $regex: search, $options: "i" };
+  }
+
+  if (extensions) {
+    const extArray = extensions.split(",").map((ext) => {
+      let cleaned = ext.trim();
+      if (!cleaned.startsWith(".")) {
+        cleaned = `.${cleaned}`;
+      }
+      return cleaned;
+    });
+
+    filter.extension = { $in: extArray };
+  }
+
+  if (less_size || greater_size) {
+    filter["metaData.size"] = {};
+
+    if (less_size) {
+      filter["metaData.size"].$lt = parseInt(less_size) * 1024 * 1024;
+    }
+
+    if (greater_size) {
+      filter["metaData.size"].$gt = parseInt(greater_size) * 1024 * 1024;
+    }
+  }
+
   const [directories, documents] = await Promise.all([
-    Directory.find({ parentDirId: directory._id, ...filter }),
-    Document.find({ parentDirId: directory._id, ...filter }),
-    addToRecent(userId, directoryId, "directory"),
+    Directory.find(filter),
+    Document.find(filter),
   ]);
+
+  addToRecent(userId, directoryId, "directory").catch(() => {});
 
   const documentsWithPreviewUrl = await Promise.all(
     documents.map(async (doc) => {
       if (!IMAGE_EXTS.includes(doc.extension)) {
         return doc;
       }
+
       const previewUrl = await getSignedUrlForGetObject(
         `${doc._id}.avif`,
         doc.name,
         false,
         DIRECTORY_PREVIEW_FOLDER,
       );
+
       return { ...doc.toObject(), previewUrl };
     }),
   );
@@ -79,6 +124,7 @@ export const getAllTrash = async (userId) => {
       trashAt: 1,
     })
     .sort({ trashAt: -1 });
+
   const documents = await Document.find({
     userId,
     trashAt: { $ne: null },
