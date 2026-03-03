@@ -26,7 +26,6 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { planCreateValidation, type PlanFormValues } from "./schema";
 
-// --- 2. Define Storage Units and Conversion Logic ---
 const STORAGE_UNITS = ["MB", "GB", "TB"] as const;
 type StorageUnit = (typeof STORAGE_UNITS)[number];
 
@@ -36,33 +35,29 @@ const BYTES_IN_UNIT: Record<StorageUnit, number> = {
   TB: 1024 * 1024 * 1024 * 1024,
 };
 
-/**
- * Finds the best human-readable unit and value from a number of bytes.
- */
 function getHumanReadableStorage(bytes: number): {
   value: number;
   unit: StorageUnit;
 } {
   if (bytes >= BYTES_IN_UNIT.TB) {
-    return { value: Number((bytes / BYTES_IN_UNIT.TB).toFixed(2)), unit: "TB" };
+    return { value: bytes / BYTES_IN_UNIT.TB, unit: "TB" };
   }
   if (bytes >= BYTES_IN_UNIT.GB) {
-    return { value: Number((bytes / BYTES_IN_UNIT.GB).toFixed(2)), unit: "GB" };
+    return { value: bytes / BYTES_IN_UNIT.GB, unit: "GB" };
   }
-  // Default to MB
-  const mbValue = Number((bytes / BYTES_IN_UNIT.MB).toFixed(2));
-  return { value: Math.max(mbValue, 1), unit: "MB" };
+  return { value: bytes / BYTES_IN_UNIT.MB, unit: "MB" };
 }
-// --- End of Storage Logic ---
 
 export function PlanCreateForm() {
   const { mutate: createNewPlan, isPending: isCreatingPlan } =
     useCreateNewPlan();
   const navigation = useNavigate();
 
-  // 3. Set up default value and local state for the UI
-  const defaultBytes = 1 * BYTES_IN_UNIT.GB; // Default to 1 GB
-  const initialStorage = getHumanReadableStorage(defaultBytes);
+  const defaultTotalBytes = 1 * BYTES_IN_UNIT.GB;
+  const defaultUploadBytes = 100 * BYTES_IN_UNIT.MB;
+
+  const initialStorage = getHumanReadableStorage(defaultTotalBytes);
+  const initialUpload = getHumanReadableStorage(defaultUploadBytes);
 
   const [storageValue, setStorageValue] = useState<number>(
     initialStorage.value
@@ -70,6 +65,9 @@ export function PlanCreateForm() {
   const [storageUnit, setStorageUnit] = useState<StorageUnit>(
     initialStorage.unit
   );
+
+  const [uploadValue, setUploadValue] = useState<number>(initialUpload.value);
+  const [uploadUnit, setUploadUnit] = useState<StorageUnit>(initialUpload.unit);
 
   const form = useForm<PlanFormValues>({
     resolver: zodResolver(planCreateValidation),
@@ -80,25 +78,26 @@ export function PlanCreateForm() {
       monthlyPriceUSD: 1,
       yearlyPriceINR: 1,
       yearlyPriceUSD: 1,
-      totalBytes: defaultBytes, // 4. Set RHF default in bytes
-      uploadLimit: 375 ** 3,
+      totalBytes: defaultTotalBytes,
+      uploadLimit: defaultUploadBytes,
       isActive: true,
     },
   });
 
-  // 5. Sync local UI state (value + unit) to the RHF state (totalBytes)
   useEffect(() => {
-    const totalBytes = Math.round(
-      (storageValue || 0) * BYTES_IN_UNIT[storageUnit]
-    );
-    form.setValue("totalBytes", totalBytes, { shouldValidate: true });
+    const bytes = Math.round((storageValue || 0) * BYTES_IN_UNIT[storageUnit]);
+    form.setValue("totalBytes", bytes, { shouldValidate: true });
   }, [storageValue, storageUnit, form]);
 
-  // 6. Watch the RHF value to display the formatted size
+  useEffect(() => {
+    const bytes = Math.round((uploadValue || 0) * BYTES_IN_UNIT[uploadUnit]);
+    form.setValue("uploadLimit", bytes, { shouldValidate: true });
+  }, [uploadValue, uploadUnit, form]);
+
   const totalBytesWatched = form.watch("totalBytes");
+  const uploadLimitWatched = form.watch("uploadLimit");
 
   function onSubmit(values: PlanFormValues) {
-    // `values.totalBytes` will be the calculated number in bytes
     createNewPlan(values, {
       onSuccess: () => {
         navigation({ to: "/admin/plan" });
@@ -124,7 +123,6 @@ export function PlanCreateForm() {
           )}
         />
 
-        {/* Description */}
         <FormField
           control={form.control}
           name='description'
@@ -142,102 +140,9 @@ export function PlanCreateForm() {
           )}
         />
 
-        {/* Monthly Prices */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-          <FormField
-            control={form.control}
-            name='monthlyPriceINR'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Monthly Price (INR)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    placeholder='999'
-                    min='1'
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='monthlyPriceUSD'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Monthly Price (USD)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    placeholder='19'
-                    min='1'
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Yearly Prices */}
-        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
-          <FormField
-            control={form.control}
-            name='yearlyPriceINR'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Yearly Price (INR)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    placeholder='9999'
-                    min='1'
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name='yearlyPriceUSD'
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Yearly Price (USD)</FormLabel>
-                <FormControl>
-                  <Input
-                    type='number'
-                    placeholder='199'
-                    min='1'
-                    {...field}
-                    onChange={(e) =>
-                      field.onChange(parseFloat(e.target.value) || 0)
-                    }
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* --- 7. UPDATED Storage Quota Field --- */}
         <FormField
           control={form.control}
-          name='totalBytes' // This field now controls validation
+          name='totalBytes'
           render={() => (
             <FormItem>
               <FormLabel>Storage Quota</FormLabel>
@@ -245,15 +150,15 @@ export function PlanCreateForm() {
                 <FormControl>
                   <Input
                     type='number'
-                    placeholder='10'
                     min='1'
                     value={storageValue}
                     onChange={(e) =>
                       setStorageValue(parseFloat(e.target.value) || 0)
                     }
-                    className='w-2/3' // Adjust width as needed
+                    className='w-2/3'
                   />
                 </FormControl>
+
                 <Select
                   value={storageUnit}
                   onValueChange={(value: string) =>
@@ -262,7 +167,7 @@ export function PlanCreateForm() {
                 >
                   <FormControl>
                     <SelectTrigger className='w-1/3'>
-                      <SelectValue placeholder='Select unit' />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -274,14 +179,17 @@ export function PlanCreateForm() {
                   </SelectContent>
                 </Select>
               </div>
+
               <FormDescription>
-                Total storage Bytes: {totalBytesWatched}
+                Total storage in bytes: {totalBytesWatched}
               </FormDescription>
-              <FormMessage /> {/* This will show errors for totalBytes */}
+
+              <FormMessage />
             </FormItem>
           )}
         />
 
+        {/* Upload Limit */}
         <FormField
           control={form.control}
           name='uploadLimit'
@@ -292,24 +200,24 @@ export function PlanCreateForm() {
                 <FormControl>
                   <Input
                     type='number'
-                    placeholder='10'
                     min='1'
-                    value={storageValue}
+                    value={uploadValue}
                     onChange={(e) =>
-                      setStorageValue(parseFloat(e.target.value) || 0)
+                      setUploadValue(parseFloat(e.target.value) || 0)
                     }
                     className='w-2/3'
                   />
                 </FormControl>
+
                 <Select
-                  value={storageUnit}
+                  value={uploadUnit}
                   onValueChange={(value: string) =>
-                    setStorageUnit(value as StorageUnit)
+                    setUploadUnit(value as StorageUnit)
                   }
                 >
                   <FormControl>
                     <SelectTrigger className='w-1/3'>
-                      <SelectValue placeholder='Select unit' />
+                      <SelectValue />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -321,21 +229,23 @@ export function PlanCreateForm() {
                   </SelectContent>
                 </Select>
               </div>
+
               <FormDescription>
-                Total storage Bytes: {totalBytesWatched}
+                Upload limit in bytes: {uploadLimitWatched}
               </FormDescription>
+
               <FormMessage />
             </FormItem>
           )}
         />
 
-        {/* Is Active (Switch) */}
+        {/* Active Switch */}
         <FormField
           control={form.control}
           name='isActive'
           render={({ field }) => (
-            <FormItem className='flex flex-row items-center justify-between rounded-lg border p-4'>
-              <div className='space-y-0.5'>
+            <FormItem className='flex items-center justify-between rounded-lg border p-4'>
+              <div>
                 <FormLabel>Active Plan</FormLabel>
                 <FormDescription>
                   Is this plan available for new subscriptions?
@@ -354,7 +264,7 @@ export function PlanCreateForm() {
         <Button type='submit' disabled={isCreatingPlan}>
           {isCreatingPlan ? (
             <>
-              <Spinner /> {"Plan Creating"}
+              <Spinner /> Plan Creating
             </>
           ) : (
             "Create Plan"
