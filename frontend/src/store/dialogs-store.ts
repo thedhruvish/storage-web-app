@@ -11,7 +11,8 @@ type DialogDialogType =
   | "newDirectory"
   | "uploadFile"
   | "details"
-  | "importFile";
+  | "importFile"
+  | "preview";
 
 interface DialogState {
   open: DialogDialogType | null;

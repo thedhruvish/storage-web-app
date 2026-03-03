@@ -3,6 +3,7 @@ import FileDetailsDialog from "@/pages/directory/components/dialog-details";
 import { RenameDialog } from "@/pages/directory/components/dialog-file-rename";
 import { ImportFileDialog } from "@/pages/directory/components/dialog-import-file";
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
+import { DialogPreviewFile } from "@/pages/directory/components/dialog-preview-file";
 import { ShareDialog } from "@/pages/directory/components/dialog-share";
 import { MultiFileUploadDialog } from "@/pages/directory/components/dialog-upload-file";
 import { useDialogStore } from "@/store/dialogs-store";
@@ -56,6 +57,8 @@ export function Dialogs() {
         open={open === "share"}
         onOpenChange={(state) => (state ? setOpen("share") : closeDialog())}
       />
+
+      <DialogPreviewFile />
     </>
   );
 }

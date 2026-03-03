@@ -106,8 +106,9 @@ export function DirectoryContent({
   const handleFileDoubleClickDefault = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-        // It's a file
-        window.location.href = `${import.meta.env.VITE_BACKEND_URL}/document/${file._id}`;
+        // It's a file, open the preview dialog
+        setDialogCurrentItem(file);
+        setOpen("preview");
       } else {
         // It's a folder
         navigate({
@@ -116,7 +117,7 @@ export function DirectoryContent({
         });
       }
     },
-    [navigate]
+    [navigate, setDialogCurrentItem, setOpen]
   );
 
   const handleFileDoubleClick =

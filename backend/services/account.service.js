@@ -1,9 +1,6 @@
 import mongoose from "mongoose";
 import { LOGIN_PROVIDER, PAYMENT_GETWAY } from "../constants/constant.js";
-import {
-  AVATAR_UPLOAD_FOLDER,
-  DIRECTORY_UPLOAD_FOLDER,
-} from "../constants/s3.constants.js";
+import { AVATAR_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
 import Directory from "../models/Directory.model.js";
 import Document from "../models/Document.model.js";

@@ -70,7 +70,7 @@ router.put(
 
 router
   .route("/:id")
-  .get(permissionMiddleware("read", false), getDocumentById)
+  .get(permissionMiddleware("read", false), getDocumentById   )
   .put(
     validateInput(nameValidation),
     permissionMiddleware("write", false),

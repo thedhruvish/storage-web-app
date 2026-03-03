@@ -45,6 +45,17 @@ export const useGetAllDirectoryList = (
   });
 };
 
+export const useGetFilePreview = (fileId: string) => {
+  return useQuery({
+    queryKey: ["file-preview", fileId],
+    queryFn: async () => {
+      const response = await axiosClient.get(`/document/${fileId}`);
+      return response.data;
+    },
+    enabled: !!fileId,
+  });
+};
+
 export const useGetAllTrash = () => {
   return useQuery({
     queryKey: ["trash"],

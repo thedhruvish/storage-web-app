@@ -48,7 +48,10 @@ export const getDocumentById = async (req, res) => {
     req.query.action === "download",
     req.user?._id,
   );
-  res.redirect(url);
+  if (req.query.action === "download") {
+    return res.redirect(url);
+  }
+  res.status(200).json(new ApiResponse(200, "Preview link", url));
 };
 
 export const updateDocumentById = async (req, res) => {
