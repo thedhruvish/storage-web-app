@@ -1,12 +1,16 @@
+import { lazy, Suspense } from "react";
 import { FileDeleteDialog } from "@/pages/directory/components/dialog-delete-file";
 import FileDetailsDialog from "@/pages/directory/components/dialog-details";
 import { RenameDialog } from "@/pages/directory/components/dialog-file-rename";
 import { ImportFileDialog } from "@/pages/directory/components/dialog-import-file";
 import { NewDirectoryDialog } from "@/pages/directory/components/dialog-new-directory";
-import { DialogPreviewFile } from "@/pages/directory/components/dialog-preview-file";
 import { ShareDialog } from "@/pages/directory/components/dialog-share";
 import { MultiFileUploadDialog } from "@/pages/directory/components/dialog-upload-file";
 import { useDialogStore } from "@/store/dialogs-store";
+
+const DialogPreviewFile = lazy(
+  () => import("@/pages/directory/components/dialog-preview-file")
+);
 
 export function Dialogs() {
   const { open, setOpen, closeDialog } = useDialogStore();
@@ -17,19 +21,16 @@ export function Dialogs() {
         open={open === "rename"}
         onOpenChange={(state) => (state ? setOpen("rename") : closeDialog())}
       />
-
       <FileDetailsDialog
         key={"file-details"}
         open={open === "details"}
         onOpenChange={(state) => (state ? setOpen("details") : closeDialog())}
       />
-
       <FileDeleteDialog
         key='delete-file'
         open={open === "delete"}
         onOpenChange={(state) => (state ? setOpen("delete") : closeDialog())}
       />
-
       <NewDirectoryDialog
         key='new-directory'
         open={open === "newDirectory"}
@@ -37,13 +38,13 @@ export function Dialogs() {
           state ? setOpen("newDirectory") : closeDialog()
         }
       />
-
       <MultiFileUploadDialog
         key='upload-file'
         open={open === "uploadFile"}
-        onOpenChange={(state) => (state ? setOpen("delete") : closeDialog())}
+        onOpenChange={(state) =>
+          state ? setOpen("uploadFile") : closeDialog()
+        }
       />
-
       <ImportFileDialog
         key='import-file'
         open={open === "importFile"}
@@ -51,14 +52,14 @@ export function Dialogs() {
           state ? setOpen("importFile") : closeDialog()
         }
       />
-
       <ShareDialog
         key={"share-dialog"}
         open={open === "share"}
         onOpenChange={(state) => (state ? setOpen("share") : closeDialog())}
       />
-
-      <DialogPreviewFile />
+      <Suspense fallback={null}>
+        {open === "preview" && <DialogPreviewFile />}
+      </Suspense>{" "}
     </>
   );
 }

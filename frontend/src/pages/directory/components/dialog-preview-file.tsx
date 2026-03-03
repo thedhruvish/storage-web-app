@@ -2,7 +2,6 @@ import { Suspense, lazy } from "react";
 import { useDialogStore } from "@/store/dialogs-store";
 import { DocViewerRenderers } from "@iamjariwala/react-doc-viewer";
 import type { DocRenderer } from "@iamjariwala/react-doc-viewer";
-import "@iamjariwala/react-doc-viewer/dist/index.css";
 import { Loader2 } from "lucide-react";
 import { Download, X } from "lucide-react";
 import { useGetFilePreview } from "@/api/directory-api";
@@ -10,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useTheme } from "@/components/theme-provider";
 
-const DocViewer = lazy(() => import("@iamjariwala/react-doc-viewer"));
+const PreviewViewer = lazy(() => import("./preview-viewer"));
 
 const CustomVideoRenderer: DocRenderer = ({
   mainState: { currentDocument },
@@ -34,7 +33,7 @@ CustomVideoRenderer.fileTypes = [
 ];
 CustomVideoRenderer.weight = 1;
 
-export function DialogPreviewFile() {
+export default function DialogPreviewFile() {
   const { open, setOpen, currentItem } = useDialogStore();
   const { theme } = useTheme();
   const { data, isPending, isError, error } = useGetFilePreview(
@@ -105,7 +104,7 @@ export function DialogPreviewFile() {
             </div>
           ) : (
             <Suspense fallback={<div>Loading viewer...</div>}>
-              <DocViewer
+              <PreviewViewer
                 className='h-full w-full [&_video]:max-w-full [&_video]:max-h-full [&_video]:object-contain'
                 documents={docs}
                 prefetchMethod='GET'
