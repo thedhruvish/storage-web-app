@@ -108,7 +108,6 @@ export function PlanCreateForm() {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
-        {/* Title */}
         <FormField
           control={form.control}
           name='title'
@@ -139,6 +138,98 @@ export function PlanCreateForm() {
             </FormItem>
           )}
         />
+
+        {/* Monthly Prices */}
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+          <FormField
+            control={form.control}
+            name='monthlyPriceINR'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Monthly Price (INR)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='999'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='monthlyPriceUSD'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Monthly Price (USD)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='19'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Yearly Prices */}
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+          <FormField
+            control={form.control}
+            name='yearlyPriceINR'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Yearly Price (INR)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='9999'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name='yearlyPriceUSD'
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Yearly Price (USD)</FormLabel>
+                <FormControl>
+                  <Input
+                    type='number'
+                    placeholder='199'
+                    min='1'
+                    {...field}
+                    onChange={(e) =>
+                      field.onChange(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
 
         <FormField
           control={form.control}
