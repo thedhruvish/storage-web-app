@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Processing Payment...</title>
+
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <style>
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        font-family:
+          system-ui,
+          -apple-system,
+          sans-serif;
+        background-color: #f3f4f6;
+      }
+      .loader {
+        border: 4px solid #e5e7eb;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+        margin-bottom: 20px;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+      .text {
+        color: #374151;
+        font-size: 1.125rem;
+      }
+      .subtext {
+        color: #6b7280;
+        font-size: 0.875rem;
+        margin-top: 0.5rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="loader"></div>
+    <div class="text">Initializing Secure Checkout</div>
+    <div class="subtext">Please do not close this window.</div>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        const urlParams = new URLSearchParams(window.location.search);
+
+        const sub_id = urlParams.get("sub_id");
+        const name = urlParams.get("name") || "";
+        const email = urlParams.get("email") || "";
+        const title = urlParams.get("title") || "Plan";
+        const userId = urlParams.get("userId") || "";
+        const callbackUrl = urlParams.get("callback") || "/";
+
+        if (!sub_id) {
+          alert("Missing subscription ID. Returning to home.");
+          window.location.href = "https://storeone.cloud";
+          return;
+        }
+
+        const options = {
+          key: urlParams.get("key") || "",
+          currency: "INR",
+          name: "Store One",
+          description: title,
+          subscription_id: sub_id,
+          image: "https://storeone.cloud/android-chrome-192x192.png",
+          prefill: {
+            name: name,
+            email: email,
+          },
+          handler: function (response) {
+            const redirectUrl = new URL(callbackUrl);
+            redirectUrl.searchParams.set(
+              "razorpay_payment_id",
+              response.razorpay_payment_id
+            );
+            redirectUrl.searchParams.set(
+              "razorpay_subscription_id",
+              response.razorpay_subscription_id
+            );
+            redirectUrl.searchParams.set(
+              "razorpay_signature",
+              response.razorpay_signature
+            );
+            window.location.href = redirectUrl.toString();
+          },
+          modal: {
+            ondismiss: function () {
+              // Dialog closed without payment
+              const redirectUrl = new URL(callbackUrl);
+              redirectUrl.searchParams.set("error", "cancelled");
+              window.location.href = redirectUrl.toString();
+            },
+          },
+          theme: {
+            color: "#000000",
+          },
+          notes: {
+            userId: userId,
+            planId: sub_id,
+          },
+        };
+
+        if (!options.key) {
+          alert(
+            "Razorpay Key is missing. Please ensure 'key' is passed in the URL."
+          );
+          return;
+        }
+
+        const rzp1 = new window.Razorpay(options);
+
+        rzp1.on("payment.failed", function (response) {
+          const redirectUrl = new URL(callbackUrl);
+          redirectUrl.searchParams.set("error", "failed");
+          redirectUrl.searchParams.set("reason", response.error.reason);
+          window.location.href = redirectUrl.toString();
+        });
+
+        rzp1.open();
+      });
+    </script>
+  </body>
+</html>

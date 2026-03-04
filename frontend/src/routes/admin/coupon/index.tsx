@@ -48,7 +48,6 @@ function RouteComponent() {
           isLoading={isLoading}
         />
       )}
-      ;
     </ContentTableLayout>
   );
 }

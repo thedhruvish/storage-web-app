@@ -79,11 +79,31 @@ export function PricingView({
       {
         async onSuccess(data) {
           localStorage.setItem("payment_status", "INIT");
+          // This is for the stripe payment
           if (currency === "USD") {
             window.open(data.url, "_blank");
             setLoadingPlanId(null);
             return;
           }
+          // for the razorpay payment razorpay here are the redirect.
+          const redirectUrl = new URL(window.location.origin + "/pay.html");
+          redirectUrl.searchParams.set("sub_id", data);
+          redirectUrl.searchParams.set("name", user?.name || "");
+          redirectUrl.searchParams.set("email", user?.email || "");
+          redirectUrl.searchParams.set("title", plan.title);
+          redirectUrl.searchParams.set("userId", user?._id || "");
+          redirectUrl.searchParams.set(
+            "key",
+            import.meta.env.VITE_RAZORPAY_KEY_ID
+          );
+          redirectUrl.searchParams.set(
+            "callback",
+            window.location.origin + "/payment-procces"
+          );
+
+          window.open(redirectUrl.toString(), "_blank");
+          setLoadingPlanId(null);
+          return;
 
           const isLoaded = await loadRazorpay();
           if (!isLoaded) {
