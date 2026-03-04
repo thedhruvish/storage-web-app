@@ -11,7 +11,8 @@ export const SUBSCRIPTION_STATUS = [
 ];
 export const PAYMENT_GETWAY = ["stripe", "razorpay"];
 
-export const DEFAULT_STORAGE = 1024 ** 3;
+export const DEFAULT_STORAGE = 806 ** 3;
+
 export const UPLOAD_LIMIT = 375 ** 3;
 
 export const SESSION_OPTIONS = {

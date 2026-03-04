@@ -54,6 +54,10 @@ const planSchema = new mongoose.Schema(
       type: Number,
       require: true,
     },
+    isPopular: {
+      type: Boolean,
+      default: false,
+    },
     isActive: {
       type: Boolean,
       default: false,

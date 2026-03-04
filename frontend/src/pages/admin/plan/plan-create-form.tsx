@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useNavigate } from "@tanstack/react-router";
+import { Plus, Trash2 } from "lucide-react";
 import { useCreateNewPlan } from "@/api/plan-api";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,7 +82,14 @@ export function PlanCreateForm() {
       totalBytes: defaultTotalBytes,
       uploadLimit: defaultUploadBytes,
       isActive: true,
+      isPopular: false,
+      features: [{ value: "" }],
     },
+  });
+
+  const { fields, append, remove } = useFieldArray({
+    name: "features",
+    control: form.control,
   });
 
   useEffect(() => {
@@ -98,7 +106,11 @@ export function PlanCreateForm() {
   const uploadLimitWatched = form.watch("uploadLimit");
 
   function onSubmit(values: PlanFormValues) {
-    createNewPlan(values, {
+    const payload = {
+      ...values,
+      features: values.features?.map((f) => f.value) || [],
+    };
+    createNewPlan(payload as any, {
       onSuccess: () => {
         navigation({ to: "/admin/plan" });
       },
@@ -330,27 +342,91 @@ export function PlanCreateForm() {
           )}
         />
 
-        {/* Active Switch */}
-        <FormField
-          control={form.control}
-          name='isActive'
-          render={({ field }) => (
-            <FormItem className='flex items-center justify-between rounded-lg border p-4'>
-              <div>
-                <FormLabel>Active Plan</FormLabel>
-                <FormDescription>
-                  Is this plan available for new subscriptions?
-                </FormDescription>
-              </div>
-              <FormControl>
-                <Switch
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-            </FormItem>
-          )}
-        />
+        <div className='space-y-4'>
+          <div className='flex items-center justify-between'>
+            <FormLabel className='text-base'>Features</FormLabel>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={() => append({ value: "" })}
+            >
+              <Plus className='mr-2 h-4 w-4' />
+              Add Feature
+            </Button>
+          </div>
+          {fields.map((field, index) => (
+            <FormField
+              key={field.id}
+              control={form.control}
+              name={`features.${index}.value`}
+              render={({ field }) => (
+                <FormItem>
+                  <FormControl>
+                    <div className='flex items-center gap-2'>
+                      <Input {...field} placeholder='E.g. 50GB Storage' />
+                      <Button
+                        type='button'
+                        variant='ghost'
+                        size='icon'
+                        onClick={() => remove(index)}
+                        disabled={fields.length === 1}
+                      >
+                        <Trash2 className='h-4 w-4 text-destructive' />
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ))}
+        </div>
+
+        {/* Active & Popular Switch */}
+        <div className='grid grid-cols-1 gap-6 md:grid-cols-2'>
+          <FormField
+            control={form.control}
+            name='isActive'
+            render={({ field }) => (
+              <FormItem className='flex items-center justify-between rounded-lg border p-4'>
+                <div>
+                  <FormLabel>Active Plan</FormLabel>
+                  <FormDescription>
+                    Is this plan available for new subscriptions?
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name='isPopular'
+            render={({ field }) => (
+              <FormItem className='flex items-center justify-between rounded-lg border p-4'>
+                <div>
+                  <FormLabel>Popular Plan</FormLabel>
+                  <FormDescription>
+                    Highlight this plan as the most popular choice.
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        </div>
 
         <Button type='submit' disabled={isCreatingPlan}>
           {isCreatingPlan ? (

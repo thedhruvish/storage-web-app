@@ -84,6 +84,8 @@ app.use(cookiesParser(cookieSecret));
 // auth router
 app.use("/sso", rateLimiter({ maxLimit: 20 }), authRoute);
 
+app.use("/auth", rateLimiter({ maxLimit: 20 }), authRoute);
+
 // plan route
 app.use("/plan", rateLimiter({ maxLimit: 100 }), planRoute);
 

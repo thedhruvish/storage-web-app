@@ -25,8 +25,9 @@ export const createPlan = async (req, res) => {
     totalBytes,
     isActive,
     uploadLimit,
+    features,
+    isPopular,
   } = req.body;
-
   const planId = new mongoose.Types.ObjectId();
   const metadata = {
     totalBytes,
@@ -83,6 +84,8 @@ export const createPlan = async (req, res) => {
     totalBytes,
     uploadLimit,
     isActive,
+    features,
+    isPopular,
     createBy: req.user._id,
     productId: stripeProductPlan.id,
 

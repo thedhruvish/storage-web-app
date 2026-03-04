@@ -12,6 +12,14 @@ export const planCreateValidation = z.object({
   totalBytes: z.number().min(1000, "Total bytes must be at least 1000"),
   uploadLimit: z.number({ message: "Upload Limit are the required." }),
   isActive: z.boolean(),
+  isPopular: z.boolean().optional(),
+  features: z
+    .array(
+      z.object({
+        value: z.string().min(1, "Feature cannot be empty"),
+      })
+    )
+    .optional(),
 });
 
 export type PlanFormValues = z.infer<typeof planCreateValidation>;
@@ -23,6 +31,8 @@ export type Plan = {
   totalBytes: number;
   uploadLimit: number;
   isActive: boolean;
+  isPopular: boolean;
+  features: string[];
   createdAt: string;
   updatedAt: string;
   monthly: {

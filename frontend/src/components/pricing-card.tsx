@@ -15,7 +15,7 @@ export interface Plan {
   title: string;
   monthly: PlanDetails;
   yearly: PlanDetails;
-  fetures: string[];
+  features: string[];
   uploadLimit: number;
   totalBytes?: number;
 }
@@ -92,7 +92,7 @@ export function PricingCard({
       </p>
 
       <ul className='space-y-4 mb-8 flex-1 text-sm'>
-        {plan?.fetures?.map((feature, i) => (
+        {plan?.features?.map((feature, i) => (
           <li key={i} className='flex gap-3'>
             <CheckCircle2
               className={cn(

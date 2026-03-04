@@ -11,5 +11,7 @@ export const planCreateValidation = z.object({
   yearlyPriceUSD: z.number().min(1, "Yearly Price must be at least 1"),
   totalBytes: z.number().min(1000, "Total bytes must be at least 1000"),
   uploadLimit: z.number({ message: "Upload Limit are the required." }),
+  features: z.array(z.string()).optional(),
+  isPopular: z.boolean().optional(),
   isActive: z.boolean(),
 });

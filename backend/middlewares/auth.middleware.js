@@ -7,7 +7,6 @@ export const checkAuth = async (req, res, next) => {
 
   // check valid id
   if (!sessionId) {
-    console.log("not defind id");
     res.clearCookie("sessionId");
     return res.status(401).json(new ApiError(401, "Unauthorized 1"));
   }

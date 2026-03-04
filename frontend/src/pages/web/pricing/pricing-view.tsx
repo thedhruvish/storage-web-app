@@ -234,7 +234,7 @@ export function PricingView({
               disabled={checkoutPending || razorpayLoading}
               currency={currency}
               cycle={isYearly ? "yearly" : "monthly"}
-              isPopular={plan.title.toLowerCase() !== "basic"}
+              isPopular={plan.isPopular}
               onSubscribe={(planId) =>
                 checkoutStripeHandler(
                   planId,
