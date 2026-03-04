@@ -163,7 +163,7 @@ export function PlanCreateForm() {
                   <Input
                     type='number'
                     placeholder='999'
-                    min='1'
+                    min='0'
                     {...field}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
@@ -184,7 +184,7 @@ export function PlanCreateForm() {
                   <Input
                     type='number'
                     placeholder='19'
-                    min='1'
+                    min='0'
                     {...field}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
@@ -209,7 +209,7 @@ export function PlanCreateForm() {
                   <Input
                     type='number'
                     placeholder='9999'
-                    min='1'
+                    min='0'
                     {...field}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
@@ -230,7 +230,7 @@ export function PlanCreateForm() {
                   <Input
                     type='number'
                     placeholder='199'
-                    min='1'
+                    min='0'
                     {...field}
                     onChange={(e) =>
                       field.onChange(parseFloat(e.target.value) || 0)
@@ -253,7 +253,7 @@ export function PlanCreateForm() {
                 <FormControl>
                   <Input
                     type='number'
-                    min='1'
+                    min='0'
                     value={storageValue}
                     onChange={(e) =>
                       setStorageValue(parseFloat(e.target.value) || 0)
@@ -303,7 +303,7 @@ export function PlanCreateForm() {
                 <FormControl>
                   <Input
                     type='number'
-                    min='1'
+                    min='0'
                     value={uploadValue}
                     onChange={(e) =>
                       setUploadValue(parseFloat(e.target.value) || 0)

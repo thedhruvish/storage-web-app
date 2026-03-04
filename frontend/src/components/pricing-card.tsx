@@ -25,6 +25,7 @@ interface PricingCardProps {
   currency: "USD" | "INR";
   cycle: "monthly" | "yearly";
   disabled?: boolean;
+  isLoading?: boolean;
   isPopular?: boolean;
   onSubscribe: (id: string) => void;
 }
@@ -34,6 +35,7 @@ export function PricingCard({
   currency,
   cycle,
   disabled,
+  isLoading,
   isPopular,
   onSubscribe,
 }: PricingCardProps) {
@@ -119,7 +121,7 @@ export function PricingCard({
 
       <button
         onClick={() => onSubscribe(id)}
-        disabled={disabled}
+        disabled={disabled || isLoading}
         className={cn(
           "w-full py-3 rounded-lg font-medium transition-colors",
           isPopular
@@ -127,7 +129,7 @@ export function PricingCard({
             : "border hover:bg-secondary"
         )}
       >
-        {disabled
+        {isLoading
           ? "Processing..."
           : price === 0
             ? "Get Started Free"

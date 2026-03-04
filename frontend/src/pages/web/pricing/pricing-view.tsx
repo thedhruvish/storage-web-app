@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { loadRazorpay, razorpayOption } from "@/pages/web/home/razorpay-helper";
 import { useUser } from "@/store/user-store";
-import { DollarSign, IndianRupee } from "lucide-react";
+import { DollarSign, IndianRupee, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useCheckout, useGetAllPlansPublic } from "@/api/checkout-api";
 import { cn } from "@/lib/utils";
-import { Spinner } from "@/components/ui/spinner";
+import { Button } from "@/components/ui/button";
 import { PricingCard } from "@/components/pricing-card";
+import { PlanSkeleton } from "./plan-skeleton";
 
 export type PricingViewState = {
   isYearly: boolean;
@@ -32,14 +33,14 @@ export function PricingView({
   } = useGetAllPlansPublic();
   const { user } = useUser();
   const navigate = useNavigate();
-  const [razorpayLoading, setRazorpayLoading] = useState(false);
+  const [loadingPlanId, setLoadingPlanId] = useState<string | null>(null);
   const [localIsYearly, setLocalIsYearly] = useState(false);
   const [localCurrency, setLocalCurrency] = useState<"USD" | "INR">("INR");
 
   const isYearly = value?.isYearly ?? localIsYearly;
   const currency = value?.currency ?? localCurrency;
 
-  const { mutate: checkoutMutate, isPending: checkoutPending } = useCheckout();
+  const { mutate: checkoutMutate } = useCheckout();
 
   const setCurrency = (newCurrency: "USD" | "INR") => {
     if (onValueChange) {
@@ -67,6 +68,8 @@ export function PricingView({
       return;
     }
 
+    setLoadingPlanId(id);
+
     checkoutMutate(
       {
         id,
@@ -78,14 +81,14 @@ export function PricingView({
           localStorage.setItem("payment_status", "INIT");
           if (currency === "USD") {
             window.open(data.url, "_blank");
+            setLoadingPlanId(null);
             return;
           }
 
-          setRazorpayLoading(true);
           const isLoaded = await loadRazorpay();
           if (!isLoaded) {
             toast.error("Razorpay SDK failed to load");
-            setRazorpayLoading(false);
+            setLoadingPlanId(null);
             return;
           }
 
@@ -93,11 +96,11 @@ export function PricingView({
             data,
             plan.title,
             () => {
-              setRazorpayLoading(false);
+              setLoadingPlanId(null);
               toast.info("Payment cancelled");
             },
             (response) => {
-              setRazorpayLoading(false);
+              setLoadingPlanId(null);
               navigate({
                 to: "/payment-procces",
                 search: {
@@ -113,10 +116,11 @@ export function PricingView({
           rzp.open();
           rzp.on("payment.failed", function () {
             toast.error("Payment Failed");
-            setRazorpayLoading(false);
+            setLoadingPlanId(null);
           });
         },
         onError() {
+          setLoadingPlanId(null);
           toast.error("Error", {
             description: "Failed to create checkout session.",
           });
@@ -126,26 +130,29 @@ export function PricingView({
   };
 
   if (plansPending) {
-    return (
-      <div className='flex h-[80vh] items-center justify-center'>
-        <Spinner className='size-8' />
-      </div>
-    );
+    return <PlanSkeleton mode={mode} />;
   }
 
   if (error) {
     return (
-      <div className='flex h-[80vh] flex-col items-center justify-center gap-4 text-center'>
-        <p className='text-destructive text-lg font-medium'>
-          Failed to load pricing plans.
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className='text-primary underline hover:no-underline'
-        >
-          Try Again
-        </button>
-      </div>
+      <main className={mode === "modal" ? "pt-8 pb-12" : "pt-40 pb-20"}>
+        <div className='container mx-auto max-w-6xl px-6'>
+          <div className='flex min-h-[50vh] flex-col items-center justify-center text-center'>
+            <div className='bg-destructive/10 p-6 rounded-full mb-6 relative'>
+              <AlertCircle className='h-12 w-12 text-destructive relative z-10' />
+              <div className='absolute inset-0 bg-destructive/20 animate-ping rounded-full' />
+            </div>
+            <h2 className='text-3xl font-bold mb-4'>Pricing Unavailable</h2>
+            <p className='text-muted-foreground mb-8 max-w-md text-lg'>
+              We encountered an unexpected error while retrieving our pricing
+              plans. Please verify your connection and try again.
+            </p>
+            <Button onClick={() => window.location.reload()} size='lg'>
+              Try Again
+            </Button>
+          </div>
+        </div>
+      </main>
     );
   }
 
@@ -231,7 +238,8 @@ export function PricingView({
             <PricingCard
               key={plan._id}
               plan={plan}
-              disabled={checkoutPending || razorpayLoading}
+              isLoading={loadingPlanId === plan._id}
+              disabled={!!loadingPlanId && loadingPlanId !== plan._id}
               currency={currency}
               cycle={isYearly ? "yearly" : "monthly"}
               isPopular={plan.isPopular}
