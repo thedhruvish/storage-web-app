@@ -8,7 +8,6 @@ import {
   buildS3DeleteKeys,
   bulkDeleteS3Objects,
 } from "../services/s3.service.js";
-import { DIRECTORY_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 
 export const removeSubscriptionExpiryData = () => {
   // Run every day at 00:05

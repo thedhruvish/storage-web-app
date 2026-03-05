@@ -1,5 +1,6 @@
 import User from "../models/User.model.js";
 import { deleteAllUserSessions } from "../services/redis.service.js";
+import { buildS3DeleteKeys, bulkDeleteS3Objects } from "./s3.service.js";
 
 export const getAllUsersService = async () => {
   return await User.find({});
@@ -24,15 +25,18 @@ export const hardDeleteUserService = async (userId) => {
     extension: 1,
   });
 
-  // delete physical files
-  for (const doc of documents) {
-    await rm(`./storage/${doc._id}${doc.extension}`, {
-      force: true,
-    });
-  }
+  const deleteKeys = documents.flatMap((file) =>
+    buildS3DeleteKeys({
+      id: file.documentId,
+      extension: file.extension,
+    }),
+  );
 
-  await Document.deleteMany({ userId });
-  await Directory.deleteMany({ userId });
+  await Promise.all([
+    bulkDeleteS3Objects(deleteKeys),
+    Document.deleteMany({ userId }),
+    Directory.deleteMany({ userId }),
+  ]);
 
   const user = await User.findByIdAndDelete(userId);
   if (!user) {
