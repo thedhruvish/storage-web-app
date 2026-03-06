@@ -33,6 +33,7 @@ jobs:
           echo "VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}" >> .env
           echo "VITE_CLOUDFLARE_TURNSTILE_SITE_KEY=${{ vars.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}" >> .env
           echo "VITE_RAZORPAY_KEY_ID=${{ vars.VITE_RAZORPAY_KEY_ID }}" >> .env
+          each "VITE_PAYMENT_URL=${{ vars.VITE_PAYMENT_URL }}" >> .env
         working-directory: ./frontend
 
       - name: Build

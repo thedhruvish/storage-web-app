@@ -8,6 +8,14 @@ const pricingSearchSchema = z.object({
 });
 export const Route = createFileRoute("/_web/pricing")({
   validateSearch: pricingSearchSchema,
+  head: () => ({
+    links: [
+      {
+        rel: "canonical",
+        href: `${import.meta.env.VITE_BASE_URL}/pricing`,
+      },
+    ],
+  }),
   component: PricingPage,
 });
 

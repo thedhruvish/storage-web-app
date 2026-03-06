@@ -85,8 +85,12 @@ export function PricingView({
             setLoadingPlanId(null);
             return;
           }
+
           // for the razorpay payment razorpay here are the redirect.
-          const redirectUrl = new URL(window.location.origin + "/pay.html");
+          const PAY_URL = import.meta.env.DEV
+            ? `${window.location.origin}/pay.html`
+            : import.meta.env.VITE_PAYMENT_URL;
+          const redirectUrl = new URL(PAY_URL);
           redirectUrl.searchParams.set("sub_id", data);
           redirectUrl.searchParams.set("name", user?.name || "");
           redirectUrl.searchParams.set("email", user?.email || "");
