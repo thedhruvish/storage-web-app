@@ -30,10 +30,10 @@ jobs:
         run: |
           echo "VITE_BASE_URL=${{ vars.VITE_BASE_URL }}" >> .env
           echo "VITE_BACKEND_URL=${{ vars.VITE_BACKEND_URL }}" >> .env
-          echo "VITE_GOOGLE_CLIENT_ID=${{ vars.VITE_GOOGLE_CLIENT_ID }}" >> .env
-          echo "VITE_CLOUDFLARE_TURNSTILE_SITE_KEY=${{ vars.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}" >> .env
-          echo "VITE_RAZORPAY_KEY_ID=${{ vars.VITE_RAZORPAY_KEY_ID }}" >> .env
-          each "VITE_PAYMENT_URL=${{ vars.VITE_PAYMENT_URL }}" >> .env
+          echo "VITE_GOOGLE_CLIENT_ID=${{ secrets.VITE_GOOGLE_CLIENT_ID }}" >> .env
+          echo "VITE_CLOUDFLARE_TURNSTILE_SITE_KEY=${{ secrets.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY }}" >> .env
+          echo "VITE_RAZORPAY_KEY_ID=${{ secrets.VITE_RAZORPAY_KEY_ID }}" >> .env
+          echo "VITE_PAYMENT_URL=${{ vars.VITE_PAYMENT_URL }}" >> .env
         working-directory: ./frontend
 
       - name: Build
