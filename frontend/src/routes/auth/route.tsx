@@ -4,7 +4,9 @@ import {
   createFileRoute,
   useNavigate,
   useLocation,
+  Link,
 } from "@tanstack/react-router";
+import { APP_NAME } from "@/contansts";
 import { useUser } from "@/store/user-store";
 import { GalleryVerticalEnd } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,12 +36,15 @@ function RouteComponent() {
           isSetupPage ? "max-w-2xl" : "max-w-sm"
         )}
       >
-        <a href='#' className='flex items-center gap-2 self-center font-medium'>
+        <Link
+          to='/'
+          className='flex items-center gap-2 self-center font-medium'
+        >
           <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
             <GalleryVerticalEnd className='size-4' />
           </div>
-          Dhruvish Inc.
-        </a>
+          {APP_NAME}
+        </Link>
         <Outlet />
       </div>
     </div>
