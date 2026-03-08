@@ -52,7 +52,7 @@ export const useStorageStatus = () => {
       isUploadDisabled: disabled,
       storageUsedPercentage: Math.round(percentage),
       totalUsedBytes: formatFileSize(totalUsedBytesRaw),
-      maxStorageBytes: formatFileSize(maxStorageBytes),
+      maxStorageBytes: formatFileSize(maxStorageBytes, 0),
       formattedRemaining: formatFileSize(
         remainingSpace > 0 ? remainingSpace : 0
       ),

@@ -29,7 +29,7 @@ export const useFileUploader = () => {
       if (totalSize > user.uploadLimit) {
         openPricingHash();
         toast.error(
-          `You can't Upload more than ${formatFileSize(user.uploadLimit)}`
+          `You can't Upload more than ${formatFileSize(user.uploadLimit,0)}`
         );
         return;
       }

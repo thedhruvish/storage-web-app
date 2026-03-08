@@ -270,7 +270,8 @@ export function BillingSettingsPage() {
                             </p>
                             <p className='font-semibold text-sm'>
                               {formatFileSize(
-                                currentSubscription.planId.totalBytes
+                                currentSubscription.planId.totalBytes,
+                                2
                               )}
                             </p>
                           </div>
