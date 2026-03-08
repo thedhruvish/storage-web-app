@@ -7,6 +7,7 @@ import {
   disableStripeProduct,
 } from "../services/stripe.service.js";
 import { createRazorpayPlan } from "../services/razorpay.service.js";
+import { getRedisValue, setRedisValue } from "../services/redis.service.js";
 
 // handle the plances with stripe
 export const getAllPlans = async (req, res) => {
@@ -133,8 +134,13 @@ export const deletePlan = async (req, res) => {
 };
 
 export const getAllPlansForPublic = async (req, res) => {
-  const plans = await Plan.find({ isActive: true }).select(
-    "-createBy -createdAt -updatedAt -__v -isActive",
-  );
+  let plans = null;
+  plans = await getRedisValue("PLAN");
+  if (!plans) {
+    plans = await Plan.find({ isActive: true }).select(
+      "-createBy -createdAt -updatedAt -__v -isActive",
+    );
+    await setRedisValue("PLAN", JSON.stringify(plans));
+  }
   res.status(200).json(new ApiResponse(200, "Plans list", plans));
 };
