@@ -6,6 +6,7 @@ import {
   deleteShareLink,
   getDirectoryPermissionUsers,
   getShareLink,
+  openGustDocsController,
   removeDirectoryPermision,
 } from "../controllers/share.controller.js";
 import { permissionMiddleware } from "../middlewares/permission.middleware.js";
@@ -18,10 +19,13 @@ import {
 } from "../validators/permission.validator.js";
 import paramsValidation from "../middlewares/paramsValidation.middleware.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
+import { getDocumentById } from "../controllers/document.controller.js";
 
 const router = express.Router();
 // public route to get the document
 router.route("/share/:myId").get(getShareLink);
+
+router.route("/open/:shareId/:id").get(openGustDocsController);
 
 // check auth
 router.use(checkAuth, permissionMiddleware("write"));

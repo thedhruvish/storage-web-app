@@ -107,3 +107,9 @@ export const getShareLinkService = async (link) => {
 export const deleteShareLinkService = async (directoryId) => {
   await ShareLink.deleteOne({ directoryId });
 };
+
+export const openGustFile = async (docId, link) => {
+  const docs = await Document.findById(docId).populate("parentDirId");
+  const share = await ShareLink.findOne({ link });
+  return docs.parentDirId._id.toString() === share.directoryId?.toString();
+};

@@ -112,7 +112,7 @@ export function ActiveSessions({
                         <div className='flex items-center gap-1'>
                           <Globe className='h-3 w-3' />
                           {session?.location?.city ||
-                          session.location.regionName
+                          session.location?.regionName
                             ? `${session?.location?.city ?? ""}${session?.location?.city && session.location.regionName ? ", " : ""}${session?.location?.regionName ?? ""}`
                             : session.ipAddress}
                         </div>

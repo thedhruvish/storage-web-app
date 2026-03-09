@@ -56,6 +56,19 @@ export const useGetFilePreview = (fileId: string) => {
   });
 };
 
+export const useGetGuestFilePreview = (shareId: string, fileId: string) => {
+  return useQuery({
+    queryKey: ["guest-file-preview", shareId, fileId],
+    queryFn: async () => {
+      const response = await axiosClient.get(
+        `/permission/open/${shareId}/${fileId}`
+      );
+      return response.data;
+    },
+    enabled: !!shareId && !!fileId,
+  });
+};
+
 export const useGetAllTrash = () => {
   return useQuery({
     queryKey: ["trash"],

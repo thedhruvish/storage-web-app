@@ -113,8 +113,9 @@ export const getDocumentSignedUrl = async (documentId, isDownload, userId) => {
   if (!document) {
     throw new ApiError(404, "Document not found");
   }
-
-  await addToRecent(userId, documentId, "document");
+  if (userId) {
+    addToRecent(userId, documentId, "document").catch();
+  }
 
   return getSignedUrlForGetObject(
     `${document.id}${document.extension}`,

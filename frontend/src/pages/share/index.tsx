@@ -1,6 +1,10 @@
-import { useNavigate } from "@tanstack/react-router";
+import { lazy, Suspense } from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { APP_NAME } from "@/contansts";
 import { FileGrid } from "@/pages/directory/components/file-grid";
+import type { FileItem } from "@/pages/directory/types";
 import { useAppearance } from "@/store/appearance-store";
+import { useDialogStore } from "@/store/dialogs-store";
 import { useUser } from "@/store/user-store";
 import { Moon, Sun } from "lucide-react";
 import { getShareDocument } from "@/api/docuement-api";
@@ -13,9 +17,26 @@ import { SiteHeader } from "@/components/site-header";
 import Error404 from "@/components/status-code/404";
 import { useTheme } from "@/components/theme-provider";
 
+const DialogPreviewFile = lazy(
+  () => import("@/pages/directory/components/dialog-preview-file")
+);
+
 export default function Index({ shareId = "" }: { shareId?: string }) {
   const getShareDocumentData = getShareDocument(shareId);
   const { user } = useUser();
+  const { setOpen, setCurrentItem, open } = useDialogStore();
+
+  const handleFileDoubleClick = (file: FileItem) => {
+    if (file.extension) {
+      if (user) {
+        setCurrentItem({ ...file, shareId });
+        setOpen("preview");
+      } else {
+        setCurrentItem({ ...file, isGuest: true, shareId });
+        setOpen("preview");
+      }
+    }
+  };
   const { appearance } = useAppearance();
   const { theme, setTheme } = useTheme();
   const navigate = useNavigate();
@@ -30,6 +51,9 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
 
   return (
     <>
+      <Suspense fallback={null}>
+        {open === "preview" && <DialogPreviewFile />}
+      </Suspense>
       {user ? (
         <div className='[--header-height:calc(--spacing(14))]'>
           <SidebarProvider
@@ -68,7 +92,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
                       files={getShareDocumentData.data?.data.documents || []}
                       documentType='file'
                       viewMode={appearance.directoryLayout}
-                      onFileDoubleClick={() => {}}
+                      onFileDoubleClick={handleFileDoubleClick}
                     />
                   )}
                 </div>
@@ -82,9 +106,11 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
           <header className='bg-background/80 fixed top-0 z-10 w-full border-b backdrop-blur-sm'>
             <div className='container mx-auto flex items-center justify-between px-4 py-3'>
               <div className='flex items-center space-x-4'>
-                <h1 className='from-primary bg-linear-to-r to-red-600 bg-clip-text text-xl font-bold text-transparent'>
-                  ShareDocs
-                </h1>
+                <Link to='/'>
+                  <h1 className='from-primary bg-linear-to-r to-red-600 bg-clip-text text-xl font-bold text-transparent'>
+                    {APP_NAME}
+                  </h1>
+                </Link>
               </div>
 
               <div className='flex items-center space-x-3'>
@@ -153,7 +179,7 @@ export default function Index({ shareId = "" }: { shareId?: string }) {
                     files={getShareDocumentData.data?.data.documents || []}
                     documentType='file'
                     viewMode={appearance.directoryLayout}
-                    onFileDoubleClick={() => {}}
+                    onFileDoubleClick={handleFileDoubleClick}
                   />
                 </div>
               </div>

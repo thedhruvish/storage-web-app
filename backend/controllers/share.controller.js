@@ -7,7 +7,10 @@ import {
   createShareLinkService,
   getShareLinkService,
   deleteShareLinkService,
+  openGustFile,
 } from "../services/share.service.js";
+import { getDocumentById } from "./document.controller.js";
+import { getDocumentSignedUrl } from "../services/document.service.js";
 
 // get directory permission users
 export const getDirectoryPermissionUsers = async (req, res) => {
@@ -88,4 +91,19 @@ export const getShareLink = async (req, res) => {
 export const deleteShareLink = async (req, res) => {
   await deleteShareLinkService(req.params.id);
   return res.status(200).json(new ApiResponse(200, "Success delete"));
+};
+
+export const openGustDocsController = async (req, res) => {
+  const isGust = await openGustFile(req.params.id, req.params.shareId);
+  if (isGust) {
+    const url = await getDocumentSignedUrl(
+      req.params.id,
+      req.query.action === "download",
+    );
+    if (req.query.action === "download") {
+      return res.redirect(url);
+    }
+    return res.status(200).json(new ApiResponse(200, "Preview link", url));
+  }
+  return res.status(200).json(new ApiResponse(404, "Check the you Url"));
 };

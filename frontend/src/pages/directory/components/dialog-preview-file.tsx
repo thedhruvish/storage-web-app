@@ -2,9 +2,9 @@ import { Suspense, lazy } from "react";
 import { useDialogStore } from "@/store/dialogs-store";
 import { DocViewerRenderers } from "@iamjariwala/react-doc-viewer";
 import type { DocRenderer } from "@iamjariwala/react-doc-viewer";
-import { Loader2 } from "lucide-react";
+import { BookOpen, Loader2 } from "lucide-react";
 import { Download, X } from "lucide-react";
-import { useGetFilePreview } from "@/api/directory-api";
+import { useGetFilePreview, useGetGuestFilePreview } from "@/api/directory-api";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useTheme } from "@/components/theme-provider";
@@ -36,9 +36,29 @@ CustomVideoRenderer.weight = 1;
 export default function DialogPreviewFile() {
   const { open, setOpen, currentItem } = useDialogStore();
   const { theme } = useTheme();
-  const { data, isPending, isError, error } = useGetFilePreview(
-    currentItem?._id || ""
+  const {
+    data: authData,
+    isPending: isAuthPending,
+    isError: isAuthError,
+    error: authError,
+  } = useGetFilePreview(
+    currentItem && !currentItem.isGuest ? currentItem._id : ""
   );
+
+  const {
+    data: guestData,
+    isPending: isGuestPending,
+    isError: isGuestError,
+    error: guestError,
+  } = useGetGuestFilePreview(
+    currentItem?.isGuest ? currentItem.shareId || "" : "",
+    currentItem?.isGuest ? currentItem._id || "" : ""
+  );
+
+  const isPending = currentItem?.isGuest ? isGuestPending : isAuthPending;
+  const isError = currentItem?.isGuest ? isGuestError : isAuthError;
+  const error = currentItem?.isGuest ? guestError : authError;
+  const data = currentItem?.isGuest ? guestData : authData;
 
   if (!currentItem || open !== "preview") return null;
 
@@ -49,7 +69,9 @@ export default function DialogPreviewFile() {
   else if (extension === "mov") fileType = "video/quicktime";
   else if (extension === "avi") fileType = "video/x-msvideo";
 
-  const uri = fileType === "pdf" ? `${data?.data}#toolbar=0` : data?.data;
+  const baseUri = data?.data;
+
+  const uri = fileType === "pdf" && baseUri ? `${baseUri}#toolbar=0` : baseUri;
 
   const docs = [
     {
@@ -76,15 +98,33 @@ export default function DialogPreviewFile() {
               variant='outline'
               size='sm'
               onClick={() => {
-                window.open(
-                  `${import.meta.env.VITE_BACKEND_URL}/document/${currentItem._id}?action=download`,
-                  "_blank"
-                );
+                window.open(docs[0].uri, "_blank");
+              }}
+            >
+              <BookOpen className='size-4 mr-2' />
+              Open
+            </Button>
+            <Button
+              variant='outline'
+              size='sm'
+              onClick={() => {
+                if (currentItem.isGuest) {
+                  window.open(
+                    `${import.meta.env.VITE_BACKEND_URL}/permission/open/${currentItem.shareId}/${currentItem._id}?action=download`,
+                    "_blank"
+                  );
+                } else {
+                  window.open(
+                    `${import.meta.env.VITE_BACKEND_URL}/document/${currentItem._id}?action=download`,
+                    "_blank"
+                  );
+                }
               }}
             >
               <Download className='size-4 mr-2' />
               Download
             </Button>
+
             <Button variant='ghost' size='icon' onClick={() => setOpen(null)}>
               <X className='size-4' />
             </Button>

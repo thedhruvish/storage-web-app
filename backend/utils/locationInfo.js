@@ -11,7 +11,7 @@ export const getLocationInfo = async (ip) => {
 
     return {
       city: result.city,
-      regionName: result.region_name,
+      regionName: result?.region_name,
       countryName: result.continent_code,
       countryCode: result.continent_code,
     };

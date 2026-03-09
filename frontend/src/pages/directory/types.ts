@@ -14,6 +14,8 @@ export interface FileItem {
   extension?: string;
   previewUrl?: string;
   trashAt?: string | null;
+  shareId?: string;
+  isGuest?: boolean;
 }
 
 export interface FileGridProps {

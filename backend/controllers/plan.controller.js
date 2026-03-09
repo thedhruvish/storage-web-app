@@ -141,6 +141,8 @@ export const getAllPlansForPublic = async (req, res) => {
       "-createBy -createdAt -updatedAt -__v -isActive",
     );
     await setRedisValue("PLAN", JSON.stringify(plans));
+  } else {
+    plans = JSON.parse(plans);
   }
   res.status(200).json(new ApiResponse(200, "Plans list", plans));
 };

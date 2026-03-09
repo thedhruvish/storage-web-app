@@ -200,7 +200,7 @@ export const verifyPasskeyRegistration = async (
     friendlyName: friendlyName,
   };
   let plainTextCodes;
-  if (user?.twoFactorId._id) {
+  if (user?.twoFactorId?._id) {
     // is exsting mean they alredy setup the TOTP than just update
     await TwoFa.findByIdAndUpdate(user.twoFactorId, {
       $push: {
