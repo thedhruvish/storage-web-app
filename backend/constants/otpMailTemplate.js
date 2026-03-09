@@ -1,5 +1,7 @@
+import { APP_NAME } from "./constant.js";
+
 export const otpTemplate = (otp) => {
-  `<body style="margin:0;padding:0;background-color:#f7f7f7;">
+  return `<body style="margin:0;padding:0;background-color:#f7f7f7;">
     <table
       width="100%"
       cellpadding="0"
@@ -20,7 +22,7 @@ export const otpTemplate = (otp) => {
             <tr>
               <td align="center" style="padding:40px 40px 20px;">
                 <img
-                  src="https://github.com/thedhruvish.png"
+                  src="https://storeone.cloud/favicon.ico"
                   alt="Company Logo"
                   width="120"
                   style="display:block;border:0;"
@@ -88,7 +90,7 @@ export const otpTemplate = (otp) => {
                   Didn’t request this? You can safely ignore this email.
                 </p>
                 <p style="margin:8px 0 0;">
-                  &copy; 2025 Dhruvish Inc. All rights reserved.
+                 <a href=${process.env.FRONTEND_URL}> &copy; 2026 ${APP_NAME} </a> <a herf='dhruvish.in' >(Dhruvish)</a> . All rights reserved.
                 </p>
               </td>
             </tr>

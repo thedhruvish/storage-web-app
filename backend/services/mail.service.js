@@ -9,6 +9,7 @@ import {
   setRedisValue,
 } from "./redis.service.js";
 import { APP_NAME } from "../constants/constant.js";
+import { Resend } from "resend";
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
@@ -16,6 +17,8 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_EMAIL = process.env.SMTP_EMAIL;
 const SMTP_PASS = process.env.SMTP_PASS;
 const SMTP_SECURE = process.env.SMTP_SECURE;
+
+const resend = new Resend(SMTP_PASS);
 
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
@@ -50,13 +53,24 @@ export const sendOtpToMail = async (userId, userEmail) => {
 
   // send to mail
   try {
-    await transporter.sendMail({
+    // await transporter.sendMail({
+    //   from: `${APP_NAME} <${SMTP_EMAIL}>`,
+    //   to: email,
+    //   subject: "Login OTP",
+    //   text: `Your OTP was ${otp}`,
+    //   html: otpTemplate(otp),
+    // });
+    const { data, error } = await resend.emails.send({
       from: `${APP_NAME} <${SMTP_EMAIL}>`,
-      to: email,
+      to: [email],
       subject: "Login OTP",
-      text: `Your OTP was ${otp}`,
+      // text: `Your OTP was ${otp}`,
       html: otpTemplate(otp),
     });
+    if (error) {
+      console.log(error);
+      throw new ApiError(error.statusCode, error.message, error);
+    }
   } catch (error) {
     console.log(error);
     throw new ApiError(500, "Mail send failed");
