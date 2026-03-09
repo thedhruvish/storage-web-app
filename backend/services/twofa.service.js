@@ -228,3 +228,38 @@ export const verifyPasskeyRegistration = async (
       "Please save these recovery codes safely. You will not see them again.",
   };
 };
+
+export const twoFaOnBoarding = async (req, user) => {
+  console.log(user);
+  if (user.twoFactorId?.isEnabled) {
+    return {
+      step: "2FA",
+      data: {
+        isTotp: !!user.twoFactorId.totp?.isVerified,
+        isPasskey: user.twoFactorId.passkeys?.length > 0,
+        userId: user._id,
+      },
+    };
+  }
+  if (user.metaData?.showSetUp2Fa) {
+    User.updateOne(
+      { _id: user._id },
+      {
+        "metaData.showSetUp2Fa": false,
+        "metaData.isPendingVerification": false,
+      },
+    ).catch(console.log);
+  }
+
+  const sessionId = await createAndCheckLimitSession({
+    userId: user._id.toString(),
+    req,
+  });
+
+  return {
+    step: "LOGIN",
+    sessionId,
+    showSetUp2Fa: user.metaData?.showSetUp2Fa === true,
+    userId: user._id,
+  };
+};

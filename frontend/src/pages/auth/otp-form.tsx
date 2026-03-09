@@ -4,7 +4,7 @@ import { AxiosError } from "axios";
 import { formatDuration, intervalToDuration } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { useResendOtp, useVerifyOtp } from "@/api/auth";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,17 @@ export function OtpVerfiyForm({
     toast.promise(
       verfiyOpt.mutateAsync(
         { otp: data.pin, userId },
+
         {
+          onSuccess(res) {
+            const responseData = res.data.data;
+            if (responseData?.showSetUp2Fa) {
+              localStorage.setItem("userId", responseData.userId);
+              navagate({ to: "/auth/2fa/setup" });
+            } else {
+              navagate({ to: "/" });
+            }
+          },
           onError(error) {
             const errorMsg =
               (error as AxiosError<{ message?: string }>).response?.data
@@ -82,8 +92,6 @@ export function OtpVerfiyForm({
       {
         loading: "Verifying OTP...",
         success: () => {
-          localStorage.removeItem("userId");
-          navagate({ to: "/" });
           return "OTP verified successfully";
         },
       }
@@ -192,13 +200,19 @@ export function OtpVerfiyForm({
 
       <p className='text-center text-xs leading-relaxed text-slate-500'>
         By continuing, you agree to our{" "}
-        <a href='#' className='font-semibold text-slate-700 underline'>
+        <Link
+          to='/terms-and-conditions'
+          className='font-semibold text-slate-700 underline'
+        >
           Terms
-        </a>{" "}
+        </Link>{" "}
         and{" "}
-        <a href='#' className='font-semibold text-slate-700 underline'>
+        <Link
+          to='/privacy-policy'
+          className='font-semibold text-slate-700 underline'
+        >
           Privacy Policy
-        </a>
+        </Link>
         .
       </p>
 

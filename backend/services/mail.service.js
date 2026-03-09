@@ -8,43 +8,57 @@ import {
   getRedisValue,
   setRedisValue,
 } from "./redis.service.js";
+import { APP_NAME } from "../constants/constant.js";
 
 const SMTP_HOST = process.env.SMTP_HOST;
 const SMTP_PORT = process.env.SMTP_PORT;
 const SMTP_USER = process.env.SMTP_USER;
+const SMTP_EMAIL = process.env.SMTP_EMAIL;
 const SMTP_PASS = process.env.SMTP_PASS;
+const SMTP_SECURE = process.env.SMTP_SECURE;
 
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
-  secure: false,
+  secure: Boolean(SMTP_SECURE),
   auth: {
     user: SMTP_USER,
     pass: SMTP_PASS,
   },
 });
 
-export const sendOtpToMail = async (userId) => {
-  const user = await User.findById(userId).select({ email: 1 }).lean();
-  if (!user) throw new ApiError(404, "User not found");
+export const sendOtpToMail = async (userId, userEmail) => {
+  let email = null;
+  let senderUserId = null;
+
+  if (userEmail) {
+    email = userEmail;
+    senderUserId = userId;
+  } else {
+    const user = await User.findById(userId).select({ email: 1 }).lean();
+    if (!user) throw new ApiError(404, "User not found");
+    email = user.email;
+    senderUserId = user._id.toString();
+  }
 
   // genrator otp 6 digit
   const otp = randomInt(0, 1_000_000).toString().padStart(6, "0");
 
-  await setRedisValue(`otp:${userId}`, otp, {
+  await setRedisValue(`otp:${senderUserId}`, otp, {
     expiration: { type: "EX", value: 60 },
   });
 
   // send to mail
   try {
     await transporter.sendMail({
-      from: `"Dhruvish Storage-app" <${SMTP_USER}>`,
-      to: user.email,
+      from: `${APP_NAME} <${SMTP_EMAIL}>`,
+      to: email,
       subject: "Login OTP",
+      text: `Your OTP was ${otp}`,
       html: otpTemplate(otp),
     });
   } catch (error) {
-    console.log(err);
+    console.log(error);
     throw new ApiError(500, "Mail send failed");
   }
 };

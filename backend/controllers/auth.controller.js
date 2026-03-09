@@ -28,11 +28,19 @@ import {
 import { SESSION_OPTIONS } from "../constants/constant.js";
 import { getSignedUrlForGetObject } from "../services/s3.service.js";
 import { AVATAR_UPLOAD_FOLDER } from "../constants/s3.constants.js";
+import { twoFaOnBoarding } from "../services/twofa.service.js";
+import User from "../models/User.model.js";
 
 // register user
 export const registerWithEmail = async (req, res) => {
-  await registerWithEmailService(req.body);
-  res.status(201).json(new ApiResponse(201, "User registered successfully"));
+  const userId = await registerWithEmailService(req.body);
+
+  res.status(201).json(
+    new ApiResponse(201, "User registered successfully", {
+      step: "OTP",
+      userId,
+    }),
+  );
 };
 
 // login user
@@ -324,11 +332,17 @@ export const verfiyOtp = async (req, res) => {
   const { otp, userId } = req.body;
 
   await verifyMailOTP(userId, otp);
-  // genrate session
-  const sessionId = await createAndCheckLimitSession({ userId, req });
 
-  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
-  res.status(200).json(new ApiResponse(200, "User login Successfuly"));
+  const user = await User.findById(userId);
+  const result = await twoFaOnBoarding(req, user);
+
+  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  res.status(200).json(
+    new ApiResponse(200, "User login Successfuly", {
+      showSetUp2Fa: true,
+      userId,
+    }),
+  );
 };
 
 // re-send otp

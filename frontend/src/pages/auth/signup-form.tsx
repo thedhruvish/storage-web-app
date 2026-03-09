@@ -58,9 +58,15 @@ export function SigupForm({
     registerMutation.mutate(
       { ...values, turnstileToken },
       {
-        onSuccess: () => {
+        onSuccess: (res) => {
           form.reset();
-          navagate({ to: "/auth/login" });
+          const responseData = res.data.data;
+          if (responseData.step) {
+            localStorage.setItem("userId", responseData.userId);
+            navagate({ to: "/auth/otp-verify" });
+          } else {
+            navagate({ to: "/auth/login" });
+          }
         },
         onError: (error) => {
           toast.error(error.message || "Something went wrong");

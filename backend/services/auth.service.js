@@ -13,6 +13,7 @@ import { sendOtpToMail, verifyMailOTP } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
 import AuthIdentity from "../models/AuthIdentity.model.js";
+import { twoFaOnBoarding } from "./twofa.service.js";
 
 export const registerWithEmailService = async ({
   name,
@@ -21,24 +22,31 @@ export const registerWithEmailService = async ({
   turnstileToken,
 }) => {
   const normalizedEmail = email.toLowerCase().trim();
+  const userId = new mongoose.Types.ObjectId();
 
-  await validTurnstileToken(turnstileToken);
+  await Promise.all([
+    validTurnstileToken(turnstileToken),
+    exstingAuthIdentity({
+      provider: LOGIN_PROVIDER[0],
+      providerId: normalizedEmail,
+    }),
+  ]);
 
-  await exstingAuthIdentity({
-    provider: LOGIN_PROVIDER[0],
-    providerId: normalizedEmail,
-  });
-
-  await createNewUser(
-    {
-      name,
-      email: normalizedEmail,
-      metaData: { showSetUp2Fa: true },
-    },
-    normalizedEmail,
-    LOGIN_PROVIDER[0],
-    password,
-  );
+  await Promise.all([
+    createNewUser(
+      {
+        _id: userId,
+        name,
+        email: normalizedEmail,
+        metaData: { showSetUp2Fa: true, isPendingVerification: true },
+      },
+      normalizedEmail,
+      LOGIN_PROVIDER[0],
+      password,
+    ),
+    sendOtpToMail(userId.toString(), normalizedEmail),
+  ]);
+  return userId;
 };
 
 export const loginWithEmailService = async (req) => {
@@ -57,43 +65,13 @@ export const loginWithEmailService = async (req) => {
   const isValidPwd = await authIdentity.isValidPassword(password);
   if (!isValidPwd) throw new ApiError(401, "Invalids email or password");
 
-  // 2FA flow
-  if (authIdentity.userId.twoFactorId?.isEnabled) {
-    return {
-      step: "2FA",
-      data: {
-        isTotp: !!authIdentity.userId.twoFactorId.totp?.isVerified,
-        isPasskey: authIdentity.userId.twoFactorId.passkeys?.length > 0,
-        userId: authIdentity.userId._id,
-      },
-    };
-  }
-  if (authIdentity.userId.metaData?.showSetUp2Fa) {
-    User.updateOne(
-      { _id: authIdentity.userId._id },
-      {
-        "metaData.showSetUp2Fa": false,
-      },
-    ).catch(console.log);
-  }
-
-  // OTP flow
-  if (process.env.IS_VERFIY_OTP === "true") {
-    await sendOtpToMail(authIdentity.userId._id.toString());
+  if (authIdentity.userId?.metaData?.isPendingVerification) {
+    await sendOtpToMail(authIdentity.userId._id.toString(), email);
     return { step: "OTP", userId: authIdentity.userId._id };
   }
 
-  const sessionId = await createAndCheckLimitSession({
-    userId: authIdentity.userId._id.toString(),
-    req,
-  });
-
-  return {
-    step: "LOGIN",
-    sessionId,
-    showSetUp2Fa: authIdentity.userId.metaData?.showSetUp2Fa === true,
-    userId: authIdentity.userId._id,
-  };
+  // 2FA flow
+  return await twoFaOnBoarding(req, authIdentity.userId);
 };
 
 export const googleIdTokenVerify = async (idToken) => {

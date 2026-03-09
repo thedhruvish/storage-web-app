@@ -7,7 +7,11 @@ import {
   disableStripeProduct,
 } from "../services/stripe.service.js";
 import { createRazorpayPlan } from "../services/razorpay.service.js";
-import { getRedisValue, setRedisValue } from "../services/redis.service.js";
+import {
+  deleteRedisKey,
+  getRedisValue,
+  setRedisValue,
+} from "../services/redis.service.js";
 
 // handle the plances with stripe
 export const getAllPlans = async (req, res) => {
@@ -29,12 +33,15 @@ export const createPlan = async (req, res) => {
     features,
     isPopular,
   } = req.body;
+  await deleteRedisKey("PLAN");
+
   const planId = new mongoose.Types.ObjectId();
   const metadata = {
     totalBytes,
     uploadLimit,
     planId: planId.toString(),
   };
+
   // 1. Create Stripe Product with Monthly Price as default
   const stripeProductPlanPromise = createStripeProduct({
     title,
@@ -112,6 +119,7 @@ export const createPlan = async (req, res) => {
 
 export const togglePlan = async (req, res) => {
   const { id } = req.params;
+  await deleteRedisKey("PLAN");
   const plan = await Plan.findByIdAndUpdate(
     id,
     [
@@ -121,12 +129,16 @@ export const togglePlan = async (req, res) => {
     ],
     { new: true },
   );
-  await disableStripeProduct(plan.productId, plan.isActive);
+  await Promise.all([
+    disableStripeProduct(plan.monthly.stripeId, plan.isActive),
+    disableStripeProduct(plan.yearly.stripeId, plan.isActive),
+  ]);
   res.status(200).json(new ApiResponse(200, "Plan toggle Successfuly"));
 };
 
 export const deletePlan = async (req, res) => {
   const { id } = req.params;
+  await deleteRedisKey("PLAN");
   await Plan.findByIdAndDelete(id);
   // now it now workingg delete for the stripe just delete for the mongo db.
   // await deleteStripeProduct(plan.productId, plan.default_price_id);

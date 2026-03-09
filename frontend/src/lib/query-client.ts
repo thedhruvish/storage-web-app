@@ -47,9 +47,9 @@ export const queryClient = new QueryClient({
           if (error.response?.status === 304) {
             toast.error("Content not modified!");
           }
-          if (error.request?.status === 409) {
-            navigateTo("/account-deleted");
-          }
+          // if (error.request?.status === 409) {
+          //   navigateTo("/account-deleted");
+          // }
         }
       },
     },

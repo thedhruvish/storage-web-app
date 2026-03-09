@@ -21,5 +21,5 @@ export const SESSION_OPTIONS = {
   signed: true,
   maxAge: 24 * 60 * 60 * 1000,
 };
-
+export const APP_NAME='storeone cloud'
 export const CLOUDFRONT_PRIVATE_KEY = process.env.CLOUDFRONT_PRIVATE_KEY;

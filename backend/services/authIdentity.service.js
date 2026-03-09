@@ -1,5 +1,5 @@
 import AuthIdentity from "../models/AuthIdentity.model.js";
-
+import ApiError from "../utils/ApiError.js";
 export const exstingAuthIdentity = async (
   filter,
   errorMessage = "Email Id Already Existing",
