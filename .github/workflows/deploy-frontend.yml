@@ -47,7 +47,7 @@ jobs:
           aws-region: ${{ vars.FRONTEND_AWS_REGION }}
 
       - name: Deploy to S3
-        run: aws s3 sync dist s3://${{ vars.FRONTEND_AWS_S3_BUCKET_NAME }} --delete
+        run: aws s3 sync dist s3://${{ vars.FRONTEND_AWS_S3_BUCKET_NAME }} --delete --exclude "videos/*"
         working-directory: ./frontend
 
       - name: Invalidate CloudFront cache
