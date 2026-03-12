@@ -87,7 +87,7 @@ export function MultiFileUploadDialog({ open }: Props) {
     if (totalSize > user.uploadLimit) {
       openPricingHash();
       toast.error(
-        `You can't Upload more than ${formatFileSize(user.uploadLimit,2)}`
+        `You can't Upload more than ${formatFileSize(user.uploadLimit, 2)}`
       );
       return;
     }

@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { motion } from "framer-motion";
-import { Cloud, HardDrive, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
+import { VideoPlayer } from "@/components/video-player";
 import { fadeInUp, staggerContainer } from "./helper";
 
 export const Hero = () => {
@@ -71,44 +72,7 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.3, type: "spring" }}
           className='mt-20 relative mx-auto'
         >
-          <div className='relative rounded-2xl border border-border bg-card/50 backdrop-blur shadow-2xl overflow-hidden aspect-16/10 max-w-5xl'>
-            <div className='absolute inset-0 bg-grid-pattern opacity-5' />
-            <div className='absolute inset-0 flex items-center justify-center'>
-              <div className='text-center p-10'>
-                <div className='flex gap-4 justify-center mb-8'>
-                  <motion.div
-                    animate={{ y: [0, -10, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 4,
-                      ease: "easeInOut",
-                    }}
-                    className='bg-background border p-4 rounded-xl shadow-lg'
-                  >
-                    <HardDrive className='h-8 w-8 text-primary' />
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [0, -15, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 4,
-                      delay: 0.2,
-                      ease: "easeInOut",
-                    }}
-                    className='bg-background border p-4 rounded-xl shadow-lg border-primary ring-2 ring-primary/20'
-                  >
-                    <Cloud className='h-8 w-8 text-primary' />
-                  </motion.div>
-                </div>
-                <h3 className='text-2xl font-bold mb-2'>
-                  All sources connected
-                </h3>
-                <p className='text-muted-foreground'>
-                  Google Drive and AWS S3 unified.
-                </p>
-              </div>
-            </div>
-          </div>
+          <VideoPlayer />
         </motion.div>
       </div>
     </section>
