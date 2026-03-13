@@ -129,7 +129,7 @@ export function SiteHeader() {
         </div>
 
         <div className='flex-1 flex justify-center px-4'>
-          <SearchForm className='hidden sm:flex w-full max-w-[400px]' />
+          <SearchForm className='hidden sm:flex w-full max-w-100' />
         </div>
 
         <div className='flex items-center gap-2 flex-1 justify-end'>

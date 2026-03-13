@@ -9,7 +9,6 @@ export const permissionMiddleware = (action, isDirectory = true) => {
   return async (req, res, next) => {
     //  check user role is owner than allows all
     if (
-      
       req.user.role === "owner" ||
       (req.user.role === "admin" && action === "read")
     ) {

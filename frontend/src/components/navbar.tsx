@@ -48,7 +48,7 @@ export const Navbar = () => {
             Self Host
           </Link>
           <a
-            href='https://github.com'
+            href={GITHUB_REPO_LINK}
             target='_blank'
             rel='noopener noreferrer'
             className='flex items-center gap-1.5 hover:text-foreground hover:scale-105 transition-all duration-200'

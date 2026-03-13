@@ -35,14 +35,6 @@ export const Footer = () => {
               </li>
               <li>
                 <a
-                  href='/docs'
-                  className='hover:text-primary transition-colors'
-                >
-                  Documentation
-                </a>
-              </li>
-              <li>
-                <a
                   href='/self-host'
                   className='hover:text-primary transition-colors'
                 >
