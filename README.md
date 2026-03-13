@@ -1,10 +1,9 @@
 # STOREONE cloud
 
-![Version](https://img.shields.io/badge/version-beta-blue)
 ![License](https://img.shields.io/badge/license-ISC-green)
 ![Build](https://img.shields.io/badge/build-passing-success)
 
-A modern, full-stack web application for secure file storage, sharing, and management with a Google Drive-like interface.
+An open-source, bring-your-own-storage platform that connects Google Drive and S3-compatible clouds. Store files in your own accounts, stay in control, and avoid vendor lock-in forever.
 
 ## Table of Contents
 
@@ -32,6 +31,10 @@ A modern, full-stack web application for secure file storage, sharing, and manag
 - **Search Functionality**: Quickly find files and folders with powerful search
 - **Recent & Starred Files**: Easy access to your most important and recently used files
 - **Trash Management**: Recover accidentally deleted files from trash
+- **CI/CD Pipeline**: Set up a continuous integration and deployment pipeline
+- **File Sharing**: Securely share files with other users
+- **AWS S3 Integration**: Store files in AWS S3 for scalable and secure storage
+- **Enhanced File Preview**: Support for more file types and formats
 
 ## Tech Stack
 
@@ -57,77 +60,58 @@ A modern, full-stack web application for secure file storage, sharing, and manag
 - **Email Service**: Nodemailer
 - **Security**: bcrypt for password hashing
 - **RBAC**: Role-Based Access Control for user permissions
+- **Caching** : Redis to save a tokens
 
 ## Installation / Setup
 
-### Prerequisites
+### Local Development
+
+#### Prerequisites
 
 - Node.js (v20 or higher)
 - npm or yarn
 - MongoDB instance
 
-### Clone the Repository
+#### Clone the Repository
 
 ```bash
 git clone https://github.com/thedhruvish/storeone.git
 cd storeone
 ```
 
-### Backend Setup
+#### Setup
 
-1. Navigate to the backend directory:
-
-   ```bash
-   cd backend
-   ```
-
-2. Install dependencies:
+1. Create a `.env` file based on the provided example:
 
    ```bash
-   npm install
-   ```
+   cd frontend/
 
-3. Create a `.env` file based on the provided example:
+   cp env.example .env
 
-   ```bash
+   cd backend/
    cp env.example .env
    ```
 
-4. Configure your environment variables in the `.env` file:
-
+2. Configure your environment variables in the `.env` file:
    - Set `MONGO_URL` to your MongoDB connection string
    - Configure OAuth credentials if using social login
    - Set up SMTP details for email functionality
 
-5. Start the development server:
-   ```bash
-   npm run dev
-   ```
+3. Run the script
 
-### Frontend Setup
+```bash
+# Give execute permission (Linux / macOS)
+chmod +x run.sh
 
-1. Navigate to the frontend directory:
+# Start the server
 
-   ```bash
-   cd ../frontend
-   ```
+$ ./run.sh
+● Running
+```
 
-2. Install dependencies:
+### Deployment
 
-   ```bash
-   npm install
-   ```
-
-3. Create a `.env` file based on the provided example:
-
-   ```bash
-   cp env.example .env
-   ```
-
-4. Start the development server:
-   ```bash
-   npm run dev
-   ```
+For detailed production deployment and self-hosting instructions (AWS Lambda, VPS, Nginx, SSL, etc.), please refer to the **[DEPLOY.md](DEPLOY.md)** guide.
 
 ## Usage
 
@@ -154,39 +138,39 @@ cd storeone
 
 ## Screenshots / Demo
 
-### 1. Dashboard View with Dark Mode
+### Video Demo
 
-![Dashboard View](/public/images/img-1.jpg)
+[Watch the StoreOne Demo Video](https://storeone.cloud/videos/storeone-demo.webm)
 
-### 2. File Upload Interface
+![Dashboard View](/public/images/img-1.png)
 
-![File Upload Interface](/public/images/img-2.jpg)
+![Dashboard View](/public/images/img-2.png)
 
-### 3. Dashboard View with Light Mode
+![Trash](/public/images/img-3.png)
 
-![Light mode dashboard](/public/images/img-3.jpg)
+![file sharing dialog](/public/images/img-4.png)
 
-### 4. File Sharing Dialog
+![Profile](/public/images/img-5.png)
 
-![light mode file sharing dialog](/public/images/img-4.jpg)
+![Subscription](/public/images/img-6.png)
 
-### 5. List View
-
-![list view](/public/images/img-5.jpg)
+![Pricing list](/public/images/img-7.png)
 
 ## Project Structure
 
 ```
-├── backend/                # Backend Express application
+├── backend/               # Backend Express application
 │   ├── config/            # Configuration files
 │   ├── controllers/       # Route controllers
 │   ├── middlewares/       # Express middlewares
 │   ├── models/            # Mongoose models
+    ├── lib/               # Library Clients
 │   ├── routes/            # API routes
-│   ├── storage/           # File storage directory
-│   └── utils/             # Utility functions
+│   ├── services/          # Business logic
+│   ├── validators/        # Validation add for the requrest body
 │   ├── .env               # Environment variables
 │   ├── index.js           # Main Entry Point of application
+    └── utils/             # Utility functions
 │
 ├── frontend/              # React frontend application
 │   ├── public/            # Static assets
@@ -224,28 +208,6 @@ Contributions are welcome! Please follow these steps to contribute:
 5. Commit your changes (`git commit -m 'Add some amazing feature'`)
 6. Push to the branch (`git push origin feature/amazing-feature`)
 7. Open a Pull Request
-
-## Roadmap / Future Improvements
-
-- **Dockerization**: Containerize the application for easier deployment
-- **CI/CD Pipeline**: Set up a continuous integration and deployment pipeline
-- **Security Enhancements**: Implement more robust security measures
-- **End-to-End Encryption**: Enhanced security for sensitive files
-- **File Sharing**: Securely share files with other users
-- **Version History**: Track and restore previous versions of files
-- **Advanced Search**: Full-text search within document contents
-- **Integration with Third-Party Services**: Connect with Google Drive(Now support to import data from Google Drive), Dropbox, etc.
-- **Enhanced File Preview**: Support for more file types and formats
-- **Fast to access using cache**: Cache the data to improve the performance
-- **AWS S3 Integration**: Store files in AWS S3 for scalable and secure storage
-
-## Known Issues / Limitations
-
-- Large file uploads (>100MB) may experience timeout issues
-- Limited file preview support for specialized file formats
-- Performance may degrade with extremely large directories (1000+ files)
-- OAuth integration is currently in beta and may have authentication issues
-- Mobile experience needs further optimization
 
 ## License
 
