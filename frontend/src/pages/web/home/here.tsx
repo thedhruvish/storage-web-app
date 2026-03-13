@@ -1,10 +1,17 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { LogIn } from "lucide-react";
+import LiquidButton from "@/components/ui/liquid-button";
+import PillAlert from "@/components/ui/pill-alert";
+import SplashButton from "@/components/ui/splash-button";
+import { useTheme } from "@/components/theme-provider";
 import { VideoPlayer } from "@/components/video-player";
 import { fadeInUp, staggerContainer } from "./helper";
 
 export const Hero = () => {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+
   return (
     <section className='pt-40 pb-32 overflow-hidden relative'>
       <div className='container mx-auto px-6 text-center relative z-10 max-w-5xl'>
@@ -15,13 +22,13 @@ export const Hero = () => {
         >
           <motion.div
             variants={fadeInUp}
-            className='inline-flex items-center gap-2 mb-8 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-semibold cursor-default hover:bg-primary/20 transition-colors'
+            className='items-center gap-2 mb-8 px-4 py-1.5 rounded-full text-primary text-sm font-semibold '
           >
-            <span className='relative flex h-2 w-2'>
-              <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75'></span>
-              <span className='relative inline-flex rounded-full h-2 w-2 bg-primary'></span>
-            </span>
-            Own Storage
+            <PillAlert
+              shortText='Free Try'
+              badgeText='500 MB STORAGE'
+              longText='Your Own Storage, Smarter and Faster.'
+            />
           </motion.div>
 
           <motion.h1
@@ -44,23 +51,35 @@ export const Hero = () => {
 
           <motion.div
             variants={fadeInUp}
-            className='flex flex-col sm:flex-row gap-4 justify-center items-center'
+            className='flex flex-col sm:flex-row gap-6 justify-center items-center'
           >
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to='/auth/signup'
-                className='flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-4 rounded-xl text-lg font-semibold transition-all shadow-xl hover:shadow-primary/25'
+              <LiquidButton
+                direction={"dual"}
+                onClick={() => navigate({ to: "/auth/signup" })}
+                className='text-lg px-10 py-4'
+                // Using Tailwind classes for dynamic hover text color transition
+                initialBgColor={theme === "dark" ? "bg-white" : "bg-black"}
+                text={
+                  theme === "dark"
+                    ? "text-black group-hover:text-white"
+                    : "text-white group-hover:text-black"
+                }
+                fill={theme === "dark" ? "bg-black" : "bg-white"}
               >
                 Upload
-              </Link>
+              </LiquidButton>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Link
-                to={"/pricing"}
-                className='flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-8 py-4 rounded-xl text-lg font-semibold hover:bg-secondary/80 transition-all border border-border'
+              <SplashButton
+                onClick={() => navigate({ to: "/pricing" })}
+                status={theme === "dark" ? "neutral" : "info"}
+                className='text-lg px-10 py-4 normal-case font-semibold tracking-normal flex '
               >
-                <LogIn className='h-5 w-5' /> View Pricing
-              </Link>
+                <div className='flex  gap-2 items-center justify-center'>
+                  <LogIn className='h-5 w-5' /> View Pricing
+                </div>
+              </SplashButton>
             </motion.div>
           </motion.div>
         </motion.div>

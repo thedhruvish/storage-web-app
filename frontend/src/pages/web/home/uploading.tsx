@@ -10,8 +10,11 @@ import {
   Wifi,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import LiquidButton from "@/components/ui/liquid-button";
+import { useTheme } from "@/components/theme-provider";
 
 export const Uploading = () => {
+  const { theme } = useTheme();
   const [phase, setPhase] = useState<
     "idle" | "encrypting" | "uploading" | "success"
   >("idle");
@@ -66,17 +69,21 @@ export const Uploading = () => {
               Experience our optimized pipeline. Files are encrypted locally
               before transmission, ensuring speed without compromising security.
             </p>
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+
+            <LiquidButton
               onClick={startDemo}
               disabled={phase !== "idle"}
               className={cn(
-                "group relative flex items-center gap-2 overflow-hidden rounded-xl bg-primary px-8 py-4 font-semibold text-primary-foreground shadow-xl transition-all",
-                phase === "idle"
-                  ? "hover:bg-primary/90 hover:shadow-primary/30"
-                  : "cursor-not-allowed opacity-50"
+                "text-lg px-8 py-4 rounded-xl",
+                phase !== "idle" && "opacity-50 cursor-not-allowed"
               )}
+              initialBgColor={theme === "dark" ? "bg-white" : "bg-black"}
+              text={
+                theme === "dark"
+                  ? "text-black group-hover:text-white"
+                  : "text-white group-hover:text-black"
+              }
+              fill={theme === "dark" ? "bg-black" : "bg-white"}
             >
               <AnimatePresence mode='wait'>
                 {phase === "idle" && (
@@ -87,7 +94,7 @@ export const Uploading = () => {
                     exit={{ opacity: 0, y: -10 }}
                     className='flex items-center gap-2'
                   >
-                    <Upload className='h-5 w-5 transition-transform group-hover:-translate-y-1' />
+                    <Upload className='h-5 w-5' />
                     <span>Start Demo Upload</span>
                   </motion.div>
                 )}
@@ -98,12 +105,12 @@ export const Uploading = () => {
                     animate={{ opacity: 1 }}
                     className='flex items-center gap-2'
                   >
-                    <motion.div className='h-5 w-5 rounded-full border-2 border-primary-foreground border-t-transparent animate-spin' />
+                    <motion.div className='h-5 w-5 rounded-full border-2 border-current border-t-transparent animate-spin' />
                     <span>Processing...</span>
                   </motion.div>
                 )}
               </AnimatePresence>
-            </motion.button>
+            </LiquidButton>
           </motion.div>
 
           {/* Animation Card */}

@@ -1,9 +1,14 @@
 import { GITHUB_REPO_LINK } from "@/contansts";
 import { motion } from "framer-motion";
 import { ArrowRight, Github } from "lucide-react";
+import LiquidButton from "@/components/ui/liquid-button";
+import SplashButton from "@/components/ui/splash-button";
+import { useTheme } from "@/components/theme-provider";
 import { fadeInUp } from "./helper";
 
 export const SelfHostSection = () => {
+  const { theme } = useTheme();
+
   return (
     <section id='self-host' className='py-24 bg-background'>
       <div className='container mx-auto px-6'>
@@ -31,27 +36,33 @@ export const SelfHostSection = () => {
             </p>
 
             <div className='flex flex-col sm:flex-row gap-4'>
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href={GITHUB_REPO_LINK}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='flex items-center justify-center gap-2 bg-primary text-primary-foreground px-8 py-3 rounded-lg font-medium transition-all shadow-lg hover:shadow-primary/25'
+              <LiquidButton
+                onClick={() => window.open(GITHUB_REPO_LINK, "_blank")}
+                direction='horizontal'
+                className='px-8 py-3 rounded-xl'
+                initialBgColor={theme === "dark" ? "bg-white" : "bg-black"}
+                text={
+                  theme === "dark"
+                    ? "text-black group-hover:text-white"
+                    : "text-white group-hover:text-black"
+                }
+                fill={theme === "dark" ? "bg-black" : "bg-white"}
+                icon={Github}
               >
-                <Github className='h-5 w-5' /> Star on GitHub
-              </motion.a>
+                Star on GitHub
+              </LiquidButton>
 
-              <motion.a
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                href={`${GITHUB_REPO_LINK}#installation`}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='flex items-center justify-center gap-2 bg-secondary text-secondary-foreground px-8 py-3 rounded-lg font-medium hover:bg-secondary/80 transition-all border border-border'
+              <SplashButton
+                onClick={() =>
+                  window.open(`${GITHUB_REPO_LINK}#installation`, "_blank")
+                }
+                status={theme === "dark" ? "neutral" : "info"}
+                className='px-8 py-3 rounded-xl normal-case tracking-normal font-semibold'
               >
-                Read Docs <ArrowRight className='h-4 w-4' />
-              </motion.a>
+                <div className='flex justify-center items-center'>
+                  Read Docs <ArrowRight className='ml-2 h-4 w-4' />
+                </div>
+              </SplashButton>
             </div>
           </motion.div>
 

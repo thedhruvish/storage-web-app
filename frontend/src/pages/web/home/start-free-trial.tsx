@@ -1,8 +1,13 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { ArrowRight } from "lucide-react";
+import LiquidButton from "@/components/ui/liquid-button";
+import { useTheme } from "@/components/theme-provider";
 
 export const StartFreeTrial = () => {
+  const navigate = useNavigate();
+  const { theme } = useTheme();
+
   return (
     <section className='py-24 relative overflow-hidden'>
       <div className='container mx-auto px-6 '>
@@ -26,18 +31,22 @@ export const StartFreeTrial = () => {
               and stay in control — no credit card required.
             </p>
 
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              className='inline-block'
-            >
-              <Link
-                to='/auth/signup'
-                className='inline-flex items-center gap-2 bg-primary text-primary-foreground px-10 py-4 rounded-xl text-lg font-semibold shadow-xl hover:shadow-primary/30 transition-all'
+            <div className='flex justify-center'>
+              <LiquidButton
+                onClick={() => navigate({ to: "/auth/signup" })}
+                direction='ink'
+                className='px-10 py-4 rounded-xl text-lg'
+                initialBgColor={theme === "dark" ? "bg-white" : "bg-black"}
+                text={
+                  theme === "dark"
+                    ? "text-black group-hover:text-white"
+                    : "text-white group-hover:text-black"
+                }
+                fill={theme === "dark" ? "bg-black" : "bg-white"}
               >
-                Start Free Trial <ArrowRight className='h-5 w-5' />
-              </Link>
-            </motion.div>
+                Start Free Trial <ArrowRight className='ml-2 h-5 w-5' />
+              </LiquidButton>
+            </div>
 
             <p className='mt-4 text-sm text-muted-foreground'>
               No credit card required · Cancel anytime

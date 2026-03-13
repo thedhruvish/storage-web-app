@@ -127,11 +127,11 @@ export const Footer = () => {
           <span>
             Built by{" "}
             <a
-              href='https://dhruvish.in'
+              href={`https://dhruvish.in?utm_source=${APP_NAME}`}
               target='_blank'
               className='font-medium text-foreground'
             >
-              Dhruvish
+              Dhruvish Lathiya
             </a>
           </span>
         </div>

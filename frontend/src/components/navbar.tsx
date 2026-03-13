@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { APP_NAME } from "@/contansts";
+import { APP_NAME, GITHUB_REPO_LINK } from "@/contansts";
 import { useUserStore } from "@/store/user-store";
 import { motion } from "framer-motion";
 import { Cloud, Moon, Sun, UserPlus, Menu, Github } from "lucide-react";
@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
+import LiquidButton from "./ui/liquid-button";
 
 export const Navbar = () => {
   const { theme, setTheme } = useTheme();
@@ -72,7 +73,7 @@ export const Navbar = () => {
 
           {/* GitHub link for mobile */}
           <a
-            href='https://github.com'
+            href={GITHUB_REPO_LINK}
             target='_blank'
             rel='noopener noreferrer'
             className='md:hidden relative h-9 w-9 rounded-full hover:bg-secondary flex items-center justify-center transition-colors'
@@ -101,9 +102,15 @@ export const Navbar = () => {
                 </Link>
                 <Link
                   to='/auth/signup'
-                  className='flex items-center gap-2 bg-primary text-primary-foreground px-6 py-2.5 rounded-full text-sm font-medium transition-all duration-300 hover:shadow-lg hover:shadow-primary/25 hover:-translate-y-0.5 active:scale-95'
+                  className='flex items-center gap-2  px-6 py-2.5 border-none text-sm font-medium  '
                 >
-                  <UserPlus className='h-4 w-4' /> Register
+                  <LiquidButton
+                    fill={theme === "dark" ? "#000" : "#fff"}
+                    initialBgColor={theme !== "dark" ? "#000" : "#fff"}
+                    text='#FFA500'
+                  >
+                    <UserPlus className='h-4 w-4' /> Register
+                  </LiquidButton>
                 </Link>
               </>
             )}
@@ -128,7 +135,7 @@ export const Navbar = () => {
                       Pricing
                     </Link>
                     <a
-                      href='https://github.com'
+                      href={GITHUB_REPO_LINK}
                       target='_blank'
                       rel='noopener noreferrer'
                       className='flex items-center gap-2 text-lg font-medium hover:text-primary transition-colors'
