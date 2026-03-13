@@ -41,7 +41,12 @@ export const Navbar = () => {
           >
             Pricing
           </Link>
-
+          <Link
+            to='/self-host'
+            className='hover:text-foreground hover:scale-105 transition-all duration-200'
+          >
+            Self Host
+          </Link>
           <a
             href='https://github.com'
             target='_blank'
@@ -51,13 +56,6 @@ export const Navbar = () => {
             <Github className='h-4 w-4' />
             GitHub
           </a>
-
-          {/* <Link
-            to='/self-host'
-            className='hover:text-foreground hover:scale-105 transition-all duration-200'
-          >
-            Self Host
-          </Link> */}
         </div>
 
         <div className='flex items-center gap-2 sm:gap-4'>
