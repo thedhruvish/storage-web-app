@@ -199,7 +199,7 @@ export function UsersList() {
       ),
       cell: ({ row }) => (
         <a
-          href={`directory/${row.original.rootDirId}`}
+          href={`app/directory/${row.original.rootDirId}`}
           target='_blank'
           rel='noopener noreferrer'
           className='text-blue-600 underline hover:text-blue-800'

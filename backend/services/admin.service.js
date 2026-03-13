@@ -1,4 +1,6 @@
 import User from "../models/User.model.js";
+import Document from "../models/Document.model.js";
+import Directory from "../models/Directory.model.js";
 import { deleteAllUserSessions } from "../services/redis.service.js";
 import { buildS3DeleteKeys, bulkDeleteS3Objects } from "./s3.service.js";
 
