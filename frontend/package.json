@@ -12,8 +12,9 @@
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "check": "prettier",
-    "format": "prettier --write . && eslint --fix",
-    "fix": "npm run format && npm run lint:fix "
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "fix": "npm run format && npm run lint:fix && npm run typecheck"
   },
   "dependencies": {
     "@googleworkspace/drive-picker-element": "^0.6.5",

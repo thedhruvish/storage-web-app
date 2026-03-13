@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Gift, ArrowRight, Star, Rocket, Zap } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Gift, ArrowRight } from "lucide-react";
 
 /**
  * PillAlert Component
@@ -15,7 +15,7 @@ const PillAlert = ({
   color = "#00945b",
 }) => {
   const [isTriggered, setIsTriggered] = useState(false);
-  const timeoutRef = useRef(null);
+  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleMouseEnter = () => {
     setIsTriggered(true);
@@ -71,7 +71,7 @@ const PillAlert = ({
         <div className='relative z-10 bg-[#ffff] dark:bg-[#0f0f0f]  rounded-full flex items-center p-[5px] h-full w-full max-w-full'>
           {/* Badge */}
           <span
-            className='flex items-center gap-1 text-white text-xs font-bold px-[14px] py-[6px] rounded-full whitespace-nowrap shrink-0 mr-1'
+            className='flex items-center gap-1 text-white text-xs font-bold px-3.5 py-1.5 rounded-full whitespace-nowrap shrink-0 mr-1'
             style={{
               backgroundColor: color,
               fontFamily: "Montserrat, sans-serif",
