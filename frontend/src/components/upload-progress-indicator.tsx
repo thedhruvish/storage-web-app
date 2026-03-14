@@ -14,7 +14,6 @@ import {
   File as FileIcon,
   Loader2,
   RefreshCw,
-  Trash2,
   X,
 } from "lucide-react";
 import { Button } from "./ui/button";
@@ -73,7 +72,7 @@ export function UploadProgressIndicator() {
             onClick={clearCompleted}
             disabled={isUploading}
           >
-            <Trash2 className='h-4 w-4' />
+            <X className='h-4 w-4' />
           </Button>
         </div>
       </div>
