@@ -5,7 +5,6 @@ import { useDialogStore } from "@/store/dialogs-store";
 import { useDirectoryStore } from "@/store/directory-store";
 import {
   Download,
-  Filter,
   FolderPlus,
   Grid3X3,
   Import,
@@ -14,7 +13,6 @@ import {
   Plus,
   RotateCcw,
   Share,
-  SortAsc,
   Trash2,
   Upload,
   X,
@@ -414,14 +412,6 @@ export function FileToolbar({
         </div>
 
         <div className='flex flex-wrap items-center gap-2'>
-          <Button variant='outline' size='icon'>
-            <SortAsc className='h-4 w-4' />
-          </Button>
-
-          <Button variant='outline' size='icon'>
-            <Filter className='h-4 w-4' />
-          </Button>
-
           <Separator orientation='vertical' className='hidden h-6 sm:block' />
 
           <div className='flex items-center rounded-md border'>

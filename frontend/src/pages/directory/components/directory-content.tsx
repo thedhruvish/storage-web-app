@@ -196,6 +196,7 @@ export function DirectoryContent({
           documentType='folder'
           viewMode={appearance.directoryLayout}
           onFileDoubleClick={handleFileDoubleClick}
+          showHeader={true}
         />
       )}
 
@@ -210,6 +211,7 @@ export function DirectoryContent({
           documentType='file'
           viewMode={appearance.directoryLayout}
           onFileDoubleClick={handleFileDoubleClick}
+          showHeader={!files.directories || files.directories.length === 0}
         />
       )}
     </div>

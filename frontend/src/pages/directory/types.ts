@@ -24,4 +24,5 @@ export interface FileGridProps {
 
   viewMode: "grid" | "list";
   onFileDoubleClick: (file: FileItem) => void;
+  showHeader?: boolean;
 }

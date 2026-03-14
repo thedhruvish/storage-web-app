@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import { useDialogStore } from "@/store/dialogs-store";
 import { useDirectoryStore } from "@/store/directory-store";
@@ -24,6 +24,7 @@ import {
 import { toast } from "sonner";
 import { usestarredToggle, useRestore } from "@/api/directory-api";
 import { getFileIconName } from "@/utils/file-icon-helper";
+import { formatFileSize } from "@/utils/functions";
 import { truncateFileName } from "@/utils/truncateFileName";
 import {
   ContextMenu,
@@ -118,10 +119,50 @@ export function FileGrid({
   viewMode,
   documentType,
   onFileDoubleClick,
+  showHeader = false,
 }: FileGridProps) {
   const { setOpen, setCurrentItem } = useDialogStore();
   const { selectedFiles, toggleSelection } = useDirectoryStore();
   const starredMutation = usestarredToggle();
+  const clickTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
+    new Map()
+  );
+
+  useEffect(() => {
+    return () => {
+      clickTimeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      clickTimeoutsRef.current.clear();
+    };
+  }, []);
+
+  const handleSingleClick = (e: React.MouseEvent, fileId: string) => {
+    e.stopPropagation();
+
+    // Clear any existing timeout for this specific file
+    if (clickTimeoutsRef.current.has(fileId)) {
+      clearTimeout(clickTimeoutsRef.current.get(fileId));
+    }
+
+    const isMetaKey = e.ctrlKey || e.metaKey;
+    const isShiftKey = e.shiftKey;
+
+    const timeout = setTimeout(() => {
+      toggleSelection(fileId, isMetaKey, isShiftKey);
+      clickTimeoutsRef.current.delete(fileId);
+    }, 250);
+
+    clickTimeoutsRef.current.set(fileId, timeout);
+  };
+
+  const handleDoubleClick = (file: FileItem) => {
+    // Clear any pending single-click action for this specific file
+    if (clickTimeoutsRef.current.has(file._id)) {
+      clearTimeout(clickTimeoutsRef.current.get(file._id));
+      clickTimeoutsRef.current.delete(file._id);
+    }
+    onFileDoubleClick(file);
+  };
 
   const handleOpenDialog = (
     type: Parameters<typeof setOpen>[0],
@@ -267,11 +308,8 @@ export function FileGrid({
                     ? "bg-primary/10 border-primary"
                     : "hover:bg-accent border-transparent"
                 }`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleSelection(file._id, e.ctrlKey || e.metaKey, e.shiftKey);
-                }}
-                onDoubleClick={() => onFileDoubleClick(file)}
+                onClick={(e) => handleSingleClick(e, file._id)}
+                onDoubleClick={() => handleDoubleClick(file)}
               >
                 <div className='flex w-full flex-col items-center'>
                   <div className='relative'>
@@ -291,10 +329,18 @@ export function FileGrid({
                       </motion.div>
                     )}
                   </div>
-                  {/* --- THIS IS THE MODIFIED LINE --- */}
-                  <span className='mt-2 h-10 text-center text-sm break-all line-clamp-2'>
-                    {truncateFileName(file.name)}
-                  </span>
+                  <div className='mt-2 flex flex-col items-center w-full px-1'>
+                    <span className='w-full text-center text-sm font-medium truncate'>
+                      {truncateFileName(file.name)}
+                    </span>
+                    <span className='text-[11px] text-muted-foreground'>
+                      {file.metaData?.size !== undefined
+                        ? formatFileSize(file.metaData.size)
+                        : documentType === "folder"
+                          ? "Folder"
+                          : "-"}
+                    </span>
+                  </div>
                 </div>
                 <FileDropdownMenu
                   file={file}
@@ -314,11 +360,11 @@ export function FileGrid({
 
   return (
     <div className='space-y-1'>
-      {documentType === "folder" && (
+      {showHeader && (
         <div className='text-muted-foreground grid grid-cols-12 gap-4 border-b px-4 py-2 text-sm font-medium'>
           <div className='col-span-6'>Name</div>
-          <div className='col-span-2'>Size</div>
-          <div className='col-span-3'>Modified</div>
+          <div className='col-span-2 text-right'>Size</div>
+          <div className='col-span-3 text-right'>Modified</div>
           <div className='col-span-1'></div>
         </div>
       )}
@@ -331,11 +377,8 @@ export function FileGrid({
                   ? "bg-primary/10"
                   : "hover:bg-accent"
               }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleSelection(file._id, e.ctrlKey || e.metaKey, e.shiftKey);
-              }}
-              onDoubleClick={() => onFileDoubleClick(file)}
+              onClick={(e) => handleSingleClick(e, file._id)}
+              onDoubleClick={() => handleDoubleClick(file)}
             >
               <div className='col-span-6 flex items-center gap-3'>
                 <div className='relative'>
@@ -346,10 +389,12 @@ export function FileGrid({
                 </div>
                 <span className='truncate'>{file.name}</span>
               </div>
-              <div className='text-muted-foreground col-span-2 flex items-center text-sm'>
-                {file.metaData?.size || "-"}
+              <div className='text-muted-foreground col-span-2 flex items-center justify-end text-sm'>
+                {file.metaData?.size !== undefined
+                  ? formatFileSize(file.metaData.size)
+                  : "-"}
               </div>
-              <div className='text-muted-foreground col-span-3 flex items-center text-sm'>
+              <div className='text-muted-foreground col-span-3 flex items-center justify-end text-sm'>
                 {formatDistanceToNow(new Date(file.createdAt), {
                   addSuffix: true,
                 })}
