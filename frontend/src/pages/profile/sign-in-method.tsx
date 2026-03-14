@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useUser } from "@/store/user-store";
 import { useGoogleLogin, type CodeResponse } from "@react-oauth/google";
-import { Github, Lock, Loader2 } from "lucide-react";
+import { Github, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import GIcon from "@/assets/icons/g-Icon";
 import {
@@ -44,6 +44,7 @@ const passwordSchema = z.object({
 function SignInMethods({ authenticate }: { authenticate: Authenticate[] }) {
   const { user } = useUser();
   const [isPasswordDialogOpen, setIsPasswordDialogOpen] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [isGoogleConnected, setIsGoogleConnected] = useState(false);
   const connectGoogleMutation = useConnectGoogle();
   const disconnectMutation = useDisconnectLinkedAccount();
@@ -70,6 +71,7 @@ function SignInMethods({ authenticate }: { authenticate: Authenticate[] }) {
       setTimeout(() => {
         setStep("form");
         setOtpInput("");
+        setShowPassword(false);
         form.reset();
       }, 300);
     }
@@ -381,7 +383,7 @@ function SignInMethods({ authenticate }: { authenticate: Authenticate[] }) {
                 </Button>
               ) : (
                 <Button size='sm' className='w-full sm:w-auto'>
-                  Connect
+                  {/* Connect */} comming soon
                 </Button>
               )}
             </div>
@@ -446,11 +448,24 @@ function SignInMethods({ authenticate }: { authenticate: Authenticate[] }) {
                     <FormItem>
                       <FormLabel>Password</FormLabel>
                       <FormControl>
-                        <Input
-                          placeholder='••••••••'
-                          type='password'
-                          {...field}
-                        />
+                        <div className='relative'>
+                          <Input
+                            placeholder='••••••••'
+                            type={showPassword ? "text" : "password"}
+                            {...field}
+                          />
+                          <button
+                            type='button'
+                            className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className='h-4 w-4' />
+                            ) : (
+                              <Eye className='h-4 w-4' />
+                            )}
+                          </button>
+                        </div>
                       </FormControl>
                       <FormMessage />
                     </FormItem>

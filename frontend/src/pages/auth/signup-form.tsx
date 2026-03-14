@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useTurnstile } from "react-turnstile";
 import { toast } from "sonner";
+import { Eye, EyeOff } from "lucide-react";
 import { useRegisterMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -33,6 +34,7 @@ export function SigupForm({
 }: React.ComponentProps<"div">) {
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileLoading, setTurnstileLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const turnstile = useTurnstile();
   const navagate = useNavigate();
 
@@ -51,6 +53,7 @@ export function SigupForm({
       email: "",
       password: "",
     },
+    mode: "onChange",
   });
 
   function onSubmit(values: FormData) {
@@ -139,7 +142,23 @@ export function SigupForm({
                       <FormItem>
                         <FormLabel>Password</FormLabel>
                         <FormControl>
-                          <Input type='password' {...field} />
+                          <div className='relative'>
+                            <Input
+                              type={showPassword ? "text" : "password"}
+                              {...field}
+                            />
+                            <button
+                              type='button'
+                              className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? (
+                                <EyeOff className='h-4 w-4' />
+                              ) : (
+                                <Eye className='h-4 w-4' />
+                              )}
+                            </button>
+                          </div>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -180,8 +199,15 @@ export function SigupForm({
         </CardContent>
       </Card>
       <div className='text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4'>
-        By clicking continue, you agree to our <a href='#'>Terms of Service</a>{" "}
-        and <a href='#'>Privacy Policy</a>.
+        By clicking continue, you agree to our{" "}
+        <a href='/terms-and-conditions' target='_blank'>
+          Terms of Service
+        </a>{" "}
+        and{" "}
+        <a href='/privacy-policy' target='_blank'>
+          Privacy Policy
+        </a>
+        .
       </div>
     </div>
   );

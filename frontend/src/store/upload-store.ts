@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { create } from "zustand";
 import axiosClient from "@/api/axios-client";
 import { queryClient } from "@/lib/query-client";
+import { useUserStore } from "./user-store";
 
 // --- Types ---
 
@@ -66,9 +67,20 @@ export const useUploadStore = create<UploadState>((set) => ({
  * Core function to handle the entire lifecycle of a single file upload.
  * It strictly checks initialization before proceeding to upload.
  */
-const processFile = async (fileItem: UploadableFile, directoryId: string) => {
+const processFile = async (fileItem: UploadableFile, dirId: string) => {
   const store = useUploadStore.getState();
+  const user = useUserStore.getState().user;
   let currentMongoId: string | undefined;
+  let directoryId;
+  let isRoot = false;
+
+  if (directoryId) {
+    directoryId = dirId;
+  } else {
+    isRoot = true;
+    directoryId = user?.rootDirId;
+  }
+
   try {
     // A. Init Step: Check storage limits and get signed URL
     // If this fails, code jumps immediately to catch block
@@ -130,6 +142,9 @@ const processFile = async (fileItem: UploadableFile, directoryId: string) => {
   } finally {
     queryClient.invalidateQueries({ queryKey: [STORAGE_SIZE_API_KEY] });
     queryClient.invalidateQueries({ queryKey: ["directorys", directoryId] });
+    if (isRoot) {
+      queryClient.invalidateQueries({ queryKey: ["directorys"] });
+    }
     const currentFiles = useUploadStore.getState().files;
     const stillUploading = currentFiles.some((f) => f.status === "uploading");
     store.setGlobalUploading(stillUploading);

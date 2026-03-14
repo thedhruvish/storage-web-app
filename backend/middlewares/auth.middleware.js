@@ -1,20 +1,21 @@
 import ApiError from "../utils/ApiError.js";
 import User from "../models/User.model.js";
 import { getRedisValue, setRedisValue } from "../services/redis.service.js";
+import { CLEAR_COOKIE_OPTIONS } from "../constants/constant.js";
 
 export const checkAuth = async (req, res, next) => {
   const { sessionId } = req.signedCookies;
 
   // check valid id
   if (!sessionId) {
-    res.clearCookie("sessionId");
+    res.clearCookie("sessionId", CLEAR_COOKIE_OPTIONS);
     return res.status(401).json(new ApiError(401, "Unauthorized 1"));
   }
 
   const userId = await getRedisValue(`session:${sessionId}`);
 
   if (!userId) {
-    res.clearCookie("sessionId");
+    res.clearCookie("sessionId", CLEAR_COOKIE_OPTIONS);
     return res.status(401).json(new ApiError(401, "Unauthorized 2"));
   }
 
@@ -24,7 +25,7 @@ export const checkAuth = async (req, res, next) => {
   } else {
     user = await User.findById(userId);
     if (!user) {
-      res.clearCookie("sessionId");
+      res.clearCookie("sessionId", CLEAR_COOKIE_OPTIONS);
       return res.status(401).json(new ApiError(401, "Unauthorized 2"));
     }
     await setRedisValue(

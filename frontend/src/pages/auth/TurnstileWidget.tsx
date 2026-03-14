@@ -18,6 +18,7 @@ export function TurnstileWidget({
     <Turnstile
       sitekey={import.meta.env.VITE_CLOUDFLARE_TURNSTILE_SITE_KEY}
       fixedSize={true}
+      size='flexible'
       retry={"auto"}
       theme={theme == "dark" ? "dark" : "light"}
       onUnsupported={() => {

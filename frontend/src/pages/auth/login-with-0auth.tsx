@@ -30,7 +30,7 @@ const LoginWithOauth = () => {
               });
             } else {
               navagate({
-                to: "/app",
+                to: "/app/directory",
                 replace: true,
               });
             }

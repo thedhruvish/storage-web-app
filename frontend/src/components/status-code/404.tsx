@@ -80,7 +80,10 @@ export default function Error404({
               </li>
               <li className='flex items-center'>
                 <span className='h-2 w-2 bg-green-500 rounded-full mr-2'></span>
-                <Link to={"/"} className='text-blue-600 hover:underline'>
+                <Link
+                  to={"/app/shared-with-me"}
+                  className='text-blue-600 hover:underline'
+                >
                   Shared with Me
                 </Link>
               </li>

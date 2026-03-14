@@ -20,6 +20,20 @@ export const SESSION_OPTIONS = {
   secure: true,
   signed: true,
   maxAge: 24 * 60 * 60 * 1000,
+  sameSite: "Strict",
+  domain: process.env.DOMAIN_NAME
+    ? `.${process.env.DOMAIN_NAME}`
+    : ".storeone.cloud",
+};
+
+export const CLEAR_COOKIE_OPTIONS = {
+  httpOnly: true,
+  secure: true,
+  signed: true,
+  sameSite: "Strict",
+  domain: process.env.DOMAIN_NAME
+    ? `.${process.env.DOMAIN_NAME}`
+    : ".storeone.cloud",
 };
 export const APP_NAME = "storeone cloud";
 export const CLOUDFRONT_PRIVATE_KEY = process.env.CLOUDFRONT_PRIVATE_KEY;

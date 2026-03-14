@@ -25,7 +25,10 @@ import {
   exstingAuthIdentity,
   getOneAuthIdentity,
 } from "../services/authIdentity.service.js";
-import { SESSION_OPTIONS } from "../constants/constant.js";
+import {
+  CLEAR_COOKIE_OPTIONS,
+  SESSION_OPTIONS,
+} from "../constants/constant.js";
 import { getSignedUrlForGetObject } from "../services/s3.service.js";
 import { AVATAR_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 import { twoFaOnBoarding } from "../services/twofa.service.js";
@@ -109,6 +112,7 @@ export const getCureentUser = async (req, res) => {
       picture: avatarUrl,
       ...user,
       totalUsedBytes: directory?.metaData?.size,
+      rootDirId: directory._id,
     }),
   );
 };
@@ -132,11 +136,7 @@ export const logout = async (req, res) => {
     userId,
     sessionId,
   });
-  res.clearCookie("sessionId", {
-    httpOnly: true,
-    secure: true,
-    signed: true,
-  });
+  res.clearCookie("sessionId", CLEAR_COOKIE_OPTIONS);
   res.status(200).json(new ApiResponse(200, "User logout Successfuly"));
 };
 
