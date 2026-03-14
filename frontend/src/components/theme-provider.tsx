@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect } from "react";
 import { useAppearance } from "@/store/appearance-store";
 
 type Theme = "dark" | "light" | "system";
@@ -22,17 +22,18 @@ const ThemeProviderContext = createContext<ThemeProviderState>(initialState);
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const { setAppearance, appearance } = useAppearance();
 
-  const [theme, _setTheme] = useState<Theme>(appearance.theme);
+  const theme = appearance.theme;
 
   useEffect(() => {
     const root = window.document.documentElement;
     const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    const applyTheme = (theme: Theme) => {
-      root.classList.remove("light", "dark"); // Remove existing theme classes
+    const applyTheme = (currentTheme: Theme) => {
+      root.classList.remove("light", "dark");
       const systemTheme = mediaQuery.matches ? "dark" : "light";
-      const effectiveTheme = theme === "system" ? systemTheme : theme;
-      root.classList.add(effectiveTheme); // Add the new theme class
+      const effectiveTheme =
+        currentTheme === "system" ? systemTheme : currentTheme;
+      root.classList.add(effectiveTheme);
     };
 
     const handleChange = () => {
@@ -48,9 +49,8 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
     return () => mediaQuery.removeEventListener("change", handleChange);
   }, [theme]);
 
-  const setTheme = (theme: Theme) => {
-    setAppearance({ theme });
-    _setTheme(theme);
+  const setTheme = (newTheme: Theme) => {
+    setAppearance({ theme: newTheme });
   };
 
   const value = {

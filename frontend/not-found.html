@@ -645,10 +645,10 @@
       };
     </script>
   </head>
-  <body class="bg-slate-50 text-foreground transition-colors duration-300">
-    <div class="min-h-screen flex flex-col items-center justify-center p-4">
+  <body class="text-foreground bg-slate-50 transition-colors duration-300">
+    <div class="flex min-h-screen flex-col items-center justify-center p-4">
       <!-- App Header -->
-      <div class="flex items-center mb-8">
+      <div class="mb-8 flex items-center">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           width="24"
@@ -661,7 +661,7 @@
           stroke-linejoin="round"
           data-lucide="download-cloud"
           aria-hidden="true"
-          class="lucide lucide-download-cloud h-8 w-8 mr-3 text-foreground"
+          class="lucide lucide-download-cloud text-foreground mr-3 h-8 w-8"
         >
           <path d="M12 13v8l-4-4"></path>
           <path d="m12 21 4-4"></path>
@@ -676,11 +676,11 @@
 
       <!-- Main Error Card -->
       <div
-        class="w-full max-w-md bg-white rounded-lg border shadow-lg overflow-hidden"
+        class="w-full max-w-md overflow-hidden rounded-lg border bg-white shadow-lg"
       >
         <div class="p-6 pt-8">
-          <div class="flex justify-center mb-4">
-            <div class="p-3 rounded-full bg-purple-50">
+          <div class="mb-4 flex justify-center">
+            <div class="rounded-full bg-purple-50 p-3">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -704,16 +704,16 @@
             </div>
           </div>
 
-          <h1 class="text-2xl font-bold text-center mb-2">
+          <h1 class="mb-2 text-center text-2xl font-bold">
             404 - Page Not Found
           </h1>
-          <p class="text-muted-foreground text-center mb-6">
+          <p class="text-muted-foreground mb-6 text-center">
             The page you're looking for doesn't exist or has been moved.
           </p>
 
           <!-- Quick Links -->
-          <div class="p-4 rounded-lg mb-6 bg-slate-50">
-            <h2 class="font-medium mb-3 flex items-center text-sm">
+          <div class="mb-6 rounded-lg bg-slate-50 p-4">
+            <h2 class="mb-3 flex items-center text-sm font-medium">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 width="24"
@@ -726,7 +726,7 @@
                 stroke-linejoin="round"
                 data-lucide="folder"
                 aria-hidden="true"
-                class="lucide lucide-folder h-4 w-4 mr-2"
+                class="lucide lucide-folder mr-2 h-4 w-4"
               >
                 <path
                   d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"
@@ -734,9 +734,9 @@
               </svg>
               Popular Sections
             </h2>
-            <ul class="text-sm space-y-2">
+            <ul class="space-y-2 text-sm">
               <li class="flex items-center">
-                <span class="h-2 w-2 bg-blue-500 rounded-full mr-2"></span>
+                <span class="mr-2 h-2 w-2 rounded-full bg-blue-500"></span>
                 <a
                   href="https://storeone.cloud/app"
                   class="text-blue-600 hover:underline"
@@ -744,7 +744,7 @@
                 >
               </li>
               <li class="flex items-center">
-                <span class="h-2 w-2 bg-green-500 rounded-full mr-2"></span>
+                <span class="mr-2 h-2 w-2 rounded-full bg-green-500"></span>
                 <a
                   href="https://storeone.cloud/app/shared-with-me"
                   class="text-blue-600 hover:underline"
@@ -755,10 +755,10 @@
           </div>
 
           <!-- Action Buttons -->
-          <div class="flex flex-col sm:flex-row gap-3">
+          <div class="flex flex-col gap-3 sm:flex-row">
             <button
               onclick="window.history.back()"
-              class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="border-input bg-background hover:bg-accent hover:text-accent-foreground focus-visible:ring-ring inline-flex h-10 flex-1 items-center justify-center rounded-md border px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -772,7 +772,7 @@
                 stroke-linejoin="round"
                 data-lucide="arrow-left"
                 aria-hidden="true"
-                class="lucide lucide-arrow-left mr-2 h-4 w-4 __web-inspector-hide-shortcut__"
+                class="lucide lucide-arrow-left __web-inspector-hide-shortcut__ mr-2 h-4 w-4"
               >
                 <path d="m12 19-7-7 7-7"></path>
                 <path d="M19 12H5"></path>
@@ -781,7 +781,7 @@
             </button>
             <button
               onclick="window.location.href = '/'"
-              class="flex-1 inline-flex items-center justify-center rounded-md text-sm font-medium bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              class="bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:ring-ring inline-flex h-10 flex-1 items-center justify-center rounded-md px-4 py-2 text-sm font-medium transition-colors focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none"
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -807,14 +807,14 @@
           </div>
 
           <!-- Support Info -->
-          <p class="text-xs text-muted-foreground text-center mt-6">
+          <p class="text-muted-foreground mt-6 text-center text-xs">
             Can't find what you're looking for? Contact info@StoreOne.cloud
           </p>
         </div>
       </div>
 
       <!-- Footer -->
-      <footer class="mt-8 text-center text-sm text-muted-foreground">
+      <footer class="text-muted-foreground mt-8 text-center text-sm">
         <p>&copy; <span id="year"></span> StoreOne. All rights reserved.</p>
       </footer>
     </div>

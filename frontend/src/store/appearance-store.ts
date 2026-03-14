@@ -16,7 +16,7 @@ type AppearanceStore = {
 const defaultAppearance: Appearance = {
   sidebar: true,
   directoryLayout: "grid",
-  theme: "light",
+  theme: "system",
 };
 
 export const useAppearanceStore = create<AppearanceStore>()(
