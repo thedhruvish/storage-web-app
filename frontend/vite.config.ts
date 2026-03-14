@@ -42,52 +42,69 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // cleanupOutdatedCaches: true,
-        // clientsClaim: true,
-        // skipWaiting: true,
         maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
-
-        // globPatterns: ["**/*.{js,css,html,ico,png,svg,woff2}"],
-
-        // runtimeCaching: [
-        //   // ✅ HTML pages (only visited page is fetched)
-        //   {
-        //     urlPattern: ({ request }) => request.mode === "navigate",
-        //     handler: "NetworkFirst",
-        //     options: {
-        //       cacheName: "pages-cache",
-        //       expiration: {
-        //         maxEntries: 20,
-        //         maxAgeSeconds: 60 * 60 * 24, // 1 day
-        //       },
-        //     },
-        //   },
-        //   {
-        //     urlPattern: ({ request }) =>
-        //       request.destination === "script" ||
-        //       request.destination === "style",
-        //     handler: "CacheFirst",
-        //     options: {
-        //       cacheName: "assets-cache",
-        //       expiration: {
-        //         maxEntries: 100,
-        //         maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
-        //       },
-        //     },
-        //   },
-
-        //   {
-        //     urlPattern: ({ request }) => request.destination === "font",
-        //     handler: "CacheFirst",
-        //     options: {
-        //       cacheName: "media-cache",
-        //       expiration: {
-        //         maxEntries: 100,
-        //         maxAgeSeconds: 60 * 60 * 24 * 60, // 60 days
-        //       },
-        //     },
-        //   },
-        // ],
+        globPatterns: [], // Disable pre-caching of all assets to prevent bulk downloads
+        runtimeCaching: [
+          {
+            // Do not cache any files from domains starting with assets.*
+            urlPattern: ({ url }) => url.hostname.startsWith("assets."),
+            handler: "NetworkOnly",
+          },
+          {
+            // HTML pages: Try network first, fallback to cache if offline
+            urlPattern: ({ request }) => request.mode === "navigate",
+            handler: "NetworkFirst",
+            options: {
+              cacheName: "pages-cache",
+              expiration: {
+                maxEntries: 50,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+              cacheableResponse: {
+                statuses: [0, 200],
+              },
+            },
+          },
+          {
+            // Scripts and Styles: Cache when visited, update in background
+            urlPattern: ({ request }) =>
+              request.destination === "script" ||
+              request.destination === "style" ||
+              request.destination === "worker",
+            handler: "StaleWhileRevalidate",
+            options: {
+              cacheName: "assets-cache",
+              expiration: {
+                maxEntries: 150,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            // Images: Cache first, then network
+            urlPattern: ({ request }) => request.destination === "image",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "images-cache",
+              expiration: {
+                maxEntries: 100,
+                maxAgeSeconds: 60 * 60 * 24 * 30, // 30 days
+              },
+            },
+          },
+          {
+            // Fonts: Cache first, very long expiration
+            urlPattern: ({ request }) => request.destination === "font",
+            handler: "CacheFirst",
+            options: {
+              cacheName: "fonts-cache",
+              expiration: {
+                maxEntries: 20,
+                maxAgeSeconds: 60 * 60 * 24 * 365, // 1 year
+              },
+            },
+          },
+        ],
       },
     }),
   ],

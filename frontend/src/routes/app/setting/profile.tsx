@@ -8,6 +8,7 @@ import {
   ProfilePageSkeleton,
 } from "@/pages/profile/profile-skeleton";
 import { SecuritySettings } from "@/pages/profile/security-settings";
+import { StorageSettings } from "@/pages/profile/storage-settings";
 import { useGetInfoOnSetting } from "@/api/setting-api";
 import { Button } from "@/components/ui/button";
 import {
@@ -79,6 +80,7 @@ function RouteComponent() {
             activeSessionId={userData.sessionId}
           />
           <BackupData />
+          <StorageSettings />
           <DangerZone />
         </div>
       </div>
