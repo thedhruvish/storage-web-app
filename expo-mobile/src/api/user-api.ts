@@ -36,7 +36,7 @@ export const useGetRealStorage = () => {
     queryFn: async () => {
       const response = await axiosClient.get("/sso/storage");
 
-      return response;
+      return response.data;
     },
   });
 };

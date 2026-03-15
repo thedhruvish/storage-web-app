@@ -1,13 +1,257 @@
-import { Link } from "expo-router";
-import { View, StyleSheet } from "react-native";
-import { Text } from "@/components/ui";
+import React from "react";
+import { View, StyleSheet, ScrollView, Alert, Linking, Share, Platform } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
+import { useTheme } from "@/hooks/use-theme";
+import { Text, MenuItem, Button, Badge } from "@/components/ui";
+import { useUserStore } from "@/store/user-store";
+import { useLogout } from "@/api/auth-api";
+import { useGetInfoOnSetting } from "@/api/setting-api";
+import { useGetRealStorage } from "@/api/user-api";
+import { formatFileSize } from "@/utils/format-bytes";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const PRICING_URL = "https://storeone.cloud/pricing";
+const WEBSITE_URL = "https://storeone.cloud";
+const LINKEDIN_URL = "https://linkedin.com/company/storeone";
+const X_URL = "https://x.com/storeone";
+const APP_SHARE_MESSAGE = "Check out StoreOne - Your secure cloud storage! " + WEBSITE_URL;
 
 export default function SettingScreen() {
+  const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
+  const logout = useLogout();
+  const { user } = useUserStore();
+
+  const { data: settingInfo } = useGetInfoOnSetting();
+  const { data: storageInfo } = useGetRealStorage();
+
+  const handleLogout = () => {
+    Alert.alert("Logout", "Are you sure you want to logout?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Logout", style: "destructive", onPress: () => logout() },
+    ]);
+  };
+
+  const handleUpgrade = () => {
+    Linking.openURL(PRICING_URL);
+  };
+
+  const handleShareApp = async () => {
+    try {
+      await Share.share({
+        message: APP_SHARE_MESSAGE,
+        url: WEBSITE_URL,
+      });
+    } catch (error) {
+      console.error("Error sharing app:", error);
+    }
+  };
+
+  const openLink = (url: string) => {
+    Linking.openURL(url).catch((err) => console.error("Couldn't load page", err));
+  };
+
+  const usedStorage = storageInfo?.data?.size || 0;
+  const maxStorage = user?.maxStorageBytes || 1024 * 1024 * 1024; // Default 1GB
+  const storagePercentage = Math.min((usedStorage / maxStorage) * 100, 100);
+
+  const Separator = () => (
+    <View style={[styles.separator, { backgroundColor: colors.border, marginLeft: 56 }]} />
+  );
+
   return (
-    <View style={styles.container}>
-      <Link href={"/(auth)/login"}>
-        <Text variant="h2">Setting Screen</Text>
-      </Link>
+    <View style={[styles.container, { backgroundColor: colors.background, paddingTop: insets.top }]}>
+      <View style={[styles.titleBar, { paddingHorizontal: spacing.md, paddingVertical: spacing.sm }]}>
+        <Text variant="h2" weight="bold">Settings</Text>
+      </View>
+
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Profile Header */}
+        <View style={[styles.header, { padding: spacing.lg }]}>
+          <View style={styles.profileInfo}>
+            <Image
+              source={settingInfo?.data?.user?.avatarUrl || user?.profile}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={200}
+            />
+            <View style={styles.nameContainer}>
+              <Text variant="h3" weight="bold">
+                {settingInfo?.data?.user?.name || user?.name}
+              </Text>
+              <Text variant="bodySmall" color="secondaryText">
+                {settingInfo?.data?.user?.email || user?.email}
+              </Text>
+              {settingInfo?.data?.user?.isPremium && (
+                <View style={styles.premiumBadge}>
+                  <Badge label="PRO" variant="success" size="sm" />
+                </View>
+              )}
+            </View>
+          </View>
+        </View>
+
+        {/* Storage Usage Section */}
+        <View style={[styles.card, { marginHorizontal: spacing.md, backgroundColor: colors.secondaryBackground, padding: spacing.md }]}>
+          <View style={styles.sectionHeader}>
+            <View style={styles.storageLabelRow}>
+              <Ionicons name="cloud-outline" size={18} color={colors.primary} style={{ marginRight: 6 }} />
+              <Text variant="label" weight="semibold">Storage</Text>
+            </View>
+            <Button 
+              title="Upgrade" 
+              variant="primary" 
+              size="sm" 
+              onPress={handleUpgrade}
+              style={{ minHeight: 32, height: 32, borderRadius: 8, paddingVertical: 0 }}
+              textStyle={{ fontSize: 12 }}
+            />
+          </View>
+          
+          <View style={[styles.progressBarContainer, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.progressBar,
+                {
+                  width: `${storagePercentage}%`,
+                  backgroundColor: storagePercentage > 90 ? colors.error : colors.primary,
+                },
+              ]}
+            />
+          </View>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', marginTop: 8 }}>
+            <Text variant="caption" color="secondaryText">
+              {storagePercentage.toFixed(1)}% used
+            </Text>
+            <Text variant="caption" color="secondaryText">
+              {formatFileSize(usedStorage)} / {formatFileSize(maxStorage)}
+            </Text>
+          </View>
+        </View>
+
+        {/* ACCOUNT Section */}
+        <View style={[styles.menuWrapper, { marginTop: spacing.xl }]}>
+          <Text variant="label" color="secondaryText" style={[styles.menuSectionTitle, { marginLeft: spacing.lg }]}>
+            ACCOUNT
+          </Text>
+          <View style={[styles.card, { marginHorizontal: spacing.md, backgroundColor: colors.secondaryBackground }]}>
+            <MenuItem
+              label="Edit Profile"
+              subLabel="Change your name, email, or avatar"
+              leftIcon="person-outline"
+              onPress={() => {}}
+            />
+            <Separator />
+            <MenuItem
+              label="Security Settings"
+              subLabel="Two-factor authentication, Passkeys"
+              leftIcon="shield-checkmark-outline"
+              onPress={() => {}}
+            />
+            <Separator />
+            <MenuItem
+              label="Link a Device"
+              subLabel="Connect your desktop or other devices"
+              leftIcon="phone-portrait-outline"
+              onPress={() => {}}
+            />
+          </View>
+        </View>
+
+        {/* PREFERENCES Section */}
+        <View style={[styles.menuWrapper, { marginTop: spacing.xl }]}>
+          <Text variant="label" color="secondaryText" style={[styles.menuSectionTitle, { marginLeft: spacing.lg }]}>
+            PREFERENCES
+          </Text>
+          <View style={[styles.card, { marginHorizontal: spacing.md, backgroundColor: colors.secondaryBackground }]}>
+            <MenuItem
+              label="Plans & Pricing"
+              subLabel="Upgrade or change your plan"
+              leftIcon="card-outline"
+              onPress={handleUpgrade}
+            />
+            <Separator />
+            <MenuItem
+              label="Backup Data"
+              subLabel="Export your data"
+              leftIcon="cloud-download-outline"
+              onPress={() => {}}
+            />
+            <Separator />
+            <MenuItem
+              label="Storage Settings"
+              subLabel="Manage your storage preference"
+              leftIcon="cloud-upload-outline"
+              onPress={() => {}}
+            />
+          </View>
+        </View>
+
+        {/* COMMUNITY Section */}
+        <View style={[styles.menuWrapper, { marginTop: spacing.xl }]}>
+          <Text variant="label" color="secondaryText" style={[styles.menuSectionTitle, { marginLeft: spacing.lg }]}>
+            COMMUNITY
+          </Text>
+          <View style={[styles.card, { marginHorizontal: spacing.md, backgroundColor: colors.secondaryBackground }]}>
+            <MenuItem
+              label="Share App"
+              subLabel="Invite your friends to StoreOne"
+              leftIcon="share-social-outline"
+              onPress={handleShareApp}
+            />
+            <Separator />
+            <MenuItem
+              label="Website"
+              subLabel="Visit our official website"
+              leftIcon="globe-outline"
+              onPress={() => openLink(WEBSITE_URL)}
+            />
+            <Separator />
+            <MenuItem
+              label="LinkedIn"
+              subLabel="Follow us on LinkedIn"
+              leftIcon="logo-linkedin"
+              onPress={() => openLink(LINKEDIN_URL)}
+            />
+            <Separator />
+            <MenuItem
+              label="X (Twitter)"
+              subLabel="Get latest updates on X"
+              leftIcon="logo-twitter"
+              onPress={() => openLink(X_URL)}
+            />
+          </View>
+        </View>
+
+        {/* SYSTEM Section */}
+        <View style={[styles.menuWrapper, { marginTop: spacing.xl }]}>
+          <Text variant="label" color="secondaryText" style={[styles.menuSectionTitle, { marginLeft: spacing.lg }]}>
+            SYSTEM
+          </Text>
+          <View style={[styles.card, { marginHorizontal: spacing.md, backgroundColor: colors.secondaryBackground }]}>
+            <MenuItem
+              label="Danger Zone"
+              subLabel="Delete or deactivate account"
+              leftIcon="warning-outline"
+              variant="danger"
+              onPress={() => {}}
+            />
+          </View>
+        </View>
+
+        <View style={{ padding: spacing.lg, marginTop: spacing.xl, marginBottom: spacing.xl }}>
+          <Button
+            variant="outline"
+            title="Logout"
+            onPress={handleLogout}
+            leftIcon={<Ionicons name="log-out-outline" size={20} color={colors.error} />}
+            textStyle={{ color: colors.error }}
+            style={{ borderColor: colors.error, borderRadius: 16 }}
+          />
+        </View>
+      </ScrollView>
     </View>
   );
 }
@@ -15,7 +259,65 @@ export default function SettingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
+  },
+  titleBar: {
     justifyContent: "center",
+  },
+  header: {
+    alignItems: "center",
+  },
+  profileInfo: {
+    flexDirection: "row",
+    alignItems: "center",
+    width: "100%",
+  },
+  avatar: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginRight: 16,
+  },
+  nameContainer: {
+    flex: 1,
+  },
+  premiumBadge: {
+    marginTop: 4,
+    alignSelf: "flex-start",
+  },
+  card: {
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  storageLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  progressBarContainer: {
+    height: 10,
+    borderRadius: 5,
+    width: "100%",
+    overflow: "hidden",
+  },
+  progressBar: {
+    height: "100%",
+  },
+  menuWrapper: {
+    width: "100%",
+  },
+  menuSectionTitle: {
+    marginBottom: 8,
+    fontSize: 12,
+    letterSpacing: 1,
+    fontWeight: "600",
+  },
+  separator: {
+    height: StyleSheet.hairlineWidth,
+    opacity: 0.5,
   },
 });
