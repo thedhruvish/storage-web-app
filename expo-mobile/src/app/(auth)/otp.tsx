@@ -8,8 +8,8 @@ import {
   ScrollView,
 } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
-import { useResendOtp, useVerifyOtp } from "@/api/authApi";
+import { useTheme } from "@/hooks/use-theme";
+import { useResendOtp, useVerifyOtp } from "@/api/auth-api";
 import { Text, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

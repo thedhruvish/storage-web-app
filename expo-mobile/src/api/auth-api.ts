@@ -1,8 +1,8 @@
-import { showGlobalDialog } from "@/components/Dialog";
+import { showGlobalDialog } from "@/components/dialog";
 import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import apiClient from "./axiosClient";
-import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handleToken";
+import apiClient from "./axios-client";
+import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 
 export const authApi = {
   login: async (data: any) => {

@@ -8,7 +8,7 @@ import {
   TextStyle,
   TouchableOpacity,
 } from 'react-native';
-import { useTheme } from '@/hooks/useTheme';
+import { useTheme } from '@/hooks/use-theme';
 import Text from './Text';
 
 export interface TextInputProps extends RNTextInputProps {

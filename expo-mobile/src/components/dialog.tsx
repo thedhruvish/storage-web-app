@@ -59,7 +59,7 @@ export function useDialog() {
   return context;
 }
 
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/hooks/use-theme";
 import { Modal, StyleSheet, View } from "react-native";
 import { Text, Button } from "./ui";
 

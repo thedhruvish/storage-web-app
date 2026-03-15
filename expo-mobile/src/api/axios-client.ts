@@ -1,4 +1,4 @@
-import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handleToken";
+import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { useRouter } from "expo-router";
 

@@ -8,12 +8,12 @@ import {
   TextInput as RNTextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
-import { useTheme } from "@/hooks/useTheme";
-import { GoogleSignInButton } from "@/components/GoogleSignInButton";
-import { useRegister, useGoogleLogin } from "@/api/authApi";
+import { useTheme } from "@/hooks/use-theme";
+import { GoogleSignInButton } from "@/components/google-signIn-button";
+import { useRegister, useGoogleLogin } from "@/api/auth-api";
 import { Ionicons } from "@expo/vector-icons";
 import { z } from "zod";
-import { showGlobalDialog } from "@/components/Dialog";
+import { showGlobalDialog } from "@/components/dialog";
 import { Text, TextInput, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 

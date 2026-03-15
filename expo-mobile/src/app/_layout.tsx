@@ -1,8 +1,8 @@
-import { DialogProvider } from "@/components/Dialog";
+import { DialogProvider } from "@/components/dialog";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-import { useTheme } from "@/hooks/useTheme";
+import { useTheme } from "@/hooks/use-theme";
 
 const queryClient = new QueryClient();
 
