@@ -6,7 +6,7 @@ export const emailAndPWDValidation = z.object({
 });
 
 export const loginWithEmailValidation = emailAndPWDValidation.extend({
-  turnstileToken: z.string("Turnstile Token is required"),
+  turnstileToken: z.string().optional(),
 });
 
 export const verifyConnectEmail = emailAndPWDValidation.extend({

@@ -8,33 +8,51 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
+  Alert,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
+import { useRegister, useGoogleLogin } from "@/api/authService";
+import { Ionicons } from "@expo/vector-icons";
 
 export default function RegisterScreen() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const registerMutation = useRegister();
+  const googleLoginMutation = useGoogleLogin();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = () => {
-    console.log("Register:", { name, email, password });
-    router.replace("/(tabs)");
+    if (password.length < 6) {
+      Alert.alert("Error", "Password must be at least 6 characters long");
+      return;
+    }
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match");
+      return;
+    }
+    registerMutation.mutate({ name, email, password });
   };
 
   const handleGoogleSuccess = (userInfo: any) => {
-    console.log("Google Success:", userInfo);
-    router.replace("/(tabs)");
+    if (userInfo.idToken) {
+      googleLoginMutation.mutate(userInfo.idToken);
+    }
   };
 
   const handleGoogleError = (error: any) => {
     console.error("Google Error:", error);
   };
+
+  const isLoading = registerMutation.isPending || googleLoginMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -64,6 +82,7 @@ export default function RegisterScreen() {
               placeholderTextColor={colors.secondaryText}
               value={name}
               onChangeText={setName}
+              editable={!isLoading}
             />
           </View>
 
@@ -83,43 +102,92 @@ export default function RegisterScreen() {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              editable={!isLoading}
             />
           </View>
 
           <View style={[styles.inputGroup, { gap: spacing.sm }]}>
             <Text style={[styles.label, { color: colors.text }]}>Password</Text>
-            <TextInput
-              style={[styles.input, { 
-                color: colors.text, 
-                borderColor: colors.separator, 
-                backgroundColor: colors.secondaryBackground,
-                paddingHorizontal: spacing.md,
-                borderRadius: spacing.borderRadius,
-              }]}
-              placeholder="Create a password"
-              placeholderTextColor={colors.secondaryText}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-            />
+            <View
+              style={[
+                styles.inputWrapper,
+                {
+                  borderColor: colors.separator,
+                  backgroundColor: colors.secondaryBackground,
+                  borderRadius: spacing.borderRadius,
+                },
+              ]}
+            >
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: colors.text,
+                    paddingHorizontal: spacing.md,
+                    flex: 1,
+                  },
+                ]}
+                placeholder="Create a password"
+                placeholderTextColor={colors.secondaryText}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={!showPassword}
+                editable={!isLoading}
+              />
+              <TouchableOpacity
+                onPress={() => setShowPassword(!showPassword)}
+                style={{ paddingHorizontal: spacing.sm }}
+              >
+                <Ionicons
+                  name={showPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color={colors.secondaryText}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <View style={[styles.inputGroup, { gap: spacing.sm }]}>
-            <Text style={[styles.label, { color: colors.text }]}>Confirm Password</Text>
-            <TextInput
-              style={[styles.input, { 
-                color: colors.text, 
-                borderColor: colors.separator, 
-                backgroundColor: colors.secondaryBackground,
-                paddingHorizontal: spacing.md,
-                borderRadius: spacing.borderRadius,
-              }]}
-              placeholder="Confirm your password"
-              placeholderTextColor={colors.secondaryText}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-            />
+            <Text style={[styles.label, { color: colors.text }]}>
+              Confirm Password
+            </Text>
+            <View
+              style={[
+                styles.inputWrapper,
+                {
+                  borderColor: colors.separator,
+                  backgroundColor: colors.secondaryBackground,
+                  borderRadius: spacing.borderRadius,
+                },
+              ]}
+            >
+              <TextInput
+                style={[
+                  styles.input,
+                  {
+                    color: colors.text,
+                    paddingHorizontal: spacing.md,
+                    flex: 1,
+                  },
+                ]}
+                placeholder="Confirm your password"
+                placeholderTextColor={colors.secondaryText}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry={!showConfirmPassword}
+                editable={!isLoading}
+              />
+              <TouchableOpacity
+                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                style={{ paddingHorizontal: spacing.sm }}
+              >
+                <Ionicons
+                  name={showConfirmPassword ? "eye-off" : "eye"}
+                  size={24}
+                  color={colors.secondaryText}
+                />
+              </TouchableOpacity>
+            </View>
           </View>
 
           <TouchableOpacity
@@ -128,10 +196,16 @@ export default function RegisterScreen() {
               height: 50,
               borderRadius: spacing.borderRadius,
               marginTop: spacing.sm,
+              opacity: isLoading ? 0.7 : 1,
             }]}
             onPress={handleRegister}
+            disabled={isLoading}
           >
-            <Text style={styles.buttonText}>Register</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Register</Text>
+            )}
           </TouchableOpacity>
 
           <View style={[styles.dividerContainer, { marginVertical: spacing.md }]}>
@@ -152,7 +226,7 @@ export default function RegisterScreen() {
 
           <View style={[styles.footer, { marginTop: spacing.lg }]}>
             <Text style={{ color: colors.secondaryText }}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => router.push("/login")}>
+            <TouchableOpacity onPress={() => router.push("/login")} disabled={isLoading}>
               <Text style={{ color: colors.link, fontWeight: "bold" }}>Login</Text>
             </TouchableOpacity>
           </View>
@@ -189,9 +263,13 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     marginLeft: 4,
   },
-  input: {
+  inputWrapper: {
     height: 50,
     borderWidth: 1,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  input: {
     fontSize: 16,
   },
   registerButton: {

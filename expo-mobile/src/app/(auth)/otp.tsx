@@ -8,13 +8,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  ActivityIndicator,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
+import { useVerifyOtp } from "@/api/authService";
 
 export default function OTPScreen() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const verifyOtpMutation = useVerifyOtp();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const inputRefs = useRef<Array<TextInput | null>>([]);
 
@@ -52,10 +55,13 @@ export default function OTPScreen() {
   const handleVerify = () => {
     const otpString = otp.join('');
     if (otpString.length === 6) {
-      console.log("Verifying OTP:", otpString);
-      router.replace("/(tabs)");
+      // Note: You might need to pass the email here as well depending on your API
+      // For this example, I'm assuming the email is stored or available
+      verifyOtpMutation.mutate({ email: 'user@example.com', code: otpString });
     }
   };
+
+  const isLoading = verifyOtpMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -92,6 +98,7 @@ export default function OTPScreen() {
               maxLength={index === 0 ? 6 : 1} // Index 0 handles potential paste
               textAlign="center"
               selectionColor={colors.tint}
+              editable={!isLoading}
             />
           ))}
         </View>
@@ -104,18 +111,22 @@ export default function OTPScreen() {
                 backgroundColor: colors.tint,
                 borderRadius: spacing.borderRadius,
                 marginTop: spacing.xl,
-                opacity: otp.join('').length === 6 ? 1 : 0.6,
+                opacity: (otp.join('').length === 6 && !isLoading) ? 1 : 0.6,
               },
             ]}
             onPress={handleVerify}
-            disabled={otp.join('').length !== 6}
+            disabled={otp.join('').length !== 6 || isLoading}
           >
-            <Text style={styles.buttonText}>Verify</Text>
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.buttonText}>Verify</Text>
+            )}
           </TouchableOpacity>
 
           <View style={[styles.resendContainer, { marginTop: spacing.lg }]}>
             <Text style={{ color: colors.secondaryText }}>Didn't receive the code? </Text>
-            <TouchableOpacity onPress={() => console.log("Resending OTP...")}>
+            <TouchableOpacity onPress={() => console.log("Resending OTP...")} disabled={isLoading}>
               <Text style={{ color: colors.link, fontWeight: "bold" }}>Resend</Text>
             </TouchableOpacity>
           </View>
