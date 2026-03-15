@@ -6,7 +6,7 @@ import { useRouter } from "expo-router";
  * Update this URL with your actual backend API base URL
  */
 const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-const apiClient = axios.create({
+const axiosClient = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
   headers: {
@@ -16,7 +16,7 @@ const apiClient = axios.create({
 });
 
 // Request Interceptor
-apiClient.interceptors.request.use(
+axiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
     const token = handleToken.getToken(AUTH_TOKEN_NAME);
     if (token) {
@@ -29,9 +29,8 @@ apiClient.interceptors.request.use(
     return Promise.reject(error);
   },
 );
-
 // Response Interceptor
-apiClient.interceptors.response.use(
+axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response) {
@@ -56,4 +55,4 @@ apiClient.interceptors.response.use(
   },
 );
 
-export default apiClient;
+export default axiosClient;
