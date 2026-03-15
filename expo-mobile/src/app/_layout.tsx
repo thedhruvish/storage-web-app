@@ -7,13 +7,24 @@ import { useTheme } from "@/hooks/use-theme";
 const queryClient = new QueryClient();
 
 export default function RootLayout() {
-  const { colorScheme } = useTheme();
+  const { isDark, colors } = useTheme();
 
   return (
     <QueryClientProvider client={queryClient}>
       <DialogProvider>
-        <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-        <Stack>
+        <StatusBar style={isDark ? "light" : "dark"} />
+        <Stack
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: colors.background,
+            },
+            headerTintColor: colors.text,
+            headerTitleStyle: {
+              fontWeight: 'bold',
+            },
+            headerShadowVisible: false,
+          }}
+        >
           <Stack.Screen name="(auth)" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="index" options={{ headerShown: false }} />

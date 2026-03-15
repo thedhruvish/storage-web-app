@@ -19,7 +19,44 @@ export type SystemColorKey =
 
 export type SystemColors = Record<SystemColorKey, string>;
 
-function getNativeDefault(): SystemColors {
+function getNativeDefault(isDark: boolean): SystemColors {
+  const defaults = {
+    light: {
+      background: "#FFFFFF",
+      secondaryBackground: "#F2F2F7",
+      text: "#000000",
+      secondaryText: "#666666",
+      separator: "#E0E0E0",
+      link: "#007AFF",
+      tint: "#007AFF",
+      primary: "#007AFF",
+      error: "#FF3B30",
+      success: "#34C759",
+      warning: "#FF9500",
+      border: "#C7C7CC",
+      card: "#FFFFFF",
+      notification: "#FF3B30",
+    },
+    dark: {
+      background: "#000000",
+      secondaryBackground: "#1C1C1E",
+      text: "#FFFFFF",
+      secondaryText: "#8E8E93",
+      separator: "#38383A",
+      link: "#0A84FF",
+      tint: "#0A84FF",
+      primary: "#0A84FF",
+      error: "#FF453A",
+      success: "#32D74B",
+      warning: "#FF9F0A",
+      border: "#38383A",
+      card: "#1C1C1E",
+      notification: "#FF375F",
+    }
+  };
+
+  const selectedTheme = isDark ? defaults.dark : defaults.light;
+
   return Platform.select({
     ios: {
       background: Color.ios.systemBackground,
@@ -55,28 +92,13 @@ function getNativeDefault(): SystemColors {
       notification: Color.android.dynamic.primary,
     },
 
-    default: {
-      background: "#FFFFFF",
-      secondaryBackground: "#F2F2F7",
-      text: "#000000",
-      secondaryText: "#666666",
-      separator: "#E0E0E0",
-      link: "#007AFF",
-      tint: "#007AFF",
-      primary: "#007AFF",
-      error: "#FF3B30",
-      success: "#34C759",
-      warning: "#FF9500",
-      border: "#C7C7CC",
-      card: "#FFFFFF",
-      notification: "#FF3B30",
-    },
+    default: selectedTheme,
   }) as SystemColors;
 }
 
 export const Colors = {
-  light: getNativeDefault(),
-  dark: getNativeDefault(),
+  light: getNativeDefault(false),
+  dark: getNativeDefault(true),
 };
 
 export const Spacing = {
