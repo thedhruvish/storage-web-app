@@ -1,8 +1,9 @@
 import React from 'react';
-import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import { useTheme } from "@/hooks/useTheme";
+import { Text, Button } from './ui';
 
 interface GoogleSignInButtonProps {
   onSuccess: (userInfo: any) => void;
@@ -32,18 +33,14 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
   };
 
   return (
-    <TouchableOpacity 
-      style={[styles.button, { borderColor: colors.separator }]}
+    <Button
+      variant="outline"
       onPress={signIn}
-      activeOpacity={0.7}
-    >
-      <View style={styles.content}>
-        <Ionicons name="logo-google" size={20} color={colors.text} />
-        <Text style={[styles.text, { color: colors.text }]}>
-          Continue with Google
-        </Text>
-      </View>
-    </TouchableOpacity>
+      size="lg"
+      leftIcon={<Ionicons name="logo-google" size={20} color={colors.text} />}
+      title="Continue with Google"
+      style={{ width: '100%' }}
+    />
   );
 }
 

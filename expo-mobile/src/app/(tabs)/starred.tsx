@@ -1,9 +1,10 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Text } from "@/components/ui";
 
 export default function StarredScreen() {
   return (
     <View style={styles.container}>
-      <Text>Starred Screen</Text>
+      <Text variant="h2">Starred Screen</Text>
     </View>
   );
 }

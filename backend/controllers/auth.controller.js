@@ -68,11 +68,14 @@ export const loginWithEmail = async (req, res) => {
     );
   }
 
-  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  }
 
   res.status(200).json(
     new ApiResponse(200, "Login successful", {
       showSetUp2Fa: result.showSetUp2Fa,
+      sessionId: req.isMobile ? result.sessionId : undefined,
     }),
   );
 };
@@ -336,11 +339,15 @@ export const verfiyOtp = async (req, res) => {
   const user = await User.findById(userId);
   const result = await twoFaOnBoarding(req, user);
 
-  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  }
+
   res.status(200).json(
     new ApiResponse(200, "User login Successfuly", {
       showSetUp2Fa: true,
       userId,
+      sessionId: req.isMobile ? result.sessionId : undefined,
     }),
   );
 };

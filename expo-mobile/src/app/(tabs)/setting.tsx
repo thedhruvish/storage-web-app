@@ -1,11 +1,12 @@
 import { Link } from "expo-router";
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Text } from "@/components/ui";
 
 export default function SettingScreen() {
   return (
     <View style={styles.container}>
-      <Link href={"/(auth)/otp"}>
-        <Text>Setting Screen</Text>
+      <Link href={"/(auth)/login"}>
+        <Text variant="h2">Setting Screen</Text>
       </Link>
     </View>
   );

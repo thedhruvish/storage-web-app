@@ -60,7 +60,8 @@ export function useDialog() {
 }
 
 import { useTheme } from "@/hooks/useTheme";
-import { Modal, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
+import { Text, Button } from "./ui";
 
 function CommonDialog({
   visible,
@@ -94,37 +95,26 @@ function CommonDialog({
           ]}
         >
           <Text
-            style={[
-              styles.title,
-              { color: colors.text, marginBottom: spacing.sm },
-            ]}
+            variant="h3"
+            style={{ marginBottom: spacing.sm }}
           >
             {options.title}
           </Text>
           <Text
-            style={[
-              styles.message,
-              { color: colors.secondaryText, marginBottom: spacing.lg },
-            ]}
+            variant="body"
+            color="secondaryText"
+            style={{ marginBottom: spacing.lg }}
           >
             {options.message}
           </Text>
 
-          <TouchableOpacity
-            style={[
-              styles.button,
-              {
-                backgroundColor: colors.tint,
-                borderRadius: spacing.borderRadius / 2,
-              },
-            ]}
+          <Button
+            title="OK"
             onPress={() => {
               options.onConfirm?.();
               onClose();
             }}
-          >
-            <Text style={styles.buttonText}>OK</Text>
-          </TouchableOpacity>
+          />
         </View>
       </View>
     </Modal>

@@ -18,6 +18,7 @@ import webhookRoute from "./routes/webhook.route.js";
 import userRoute from "./routes/user.route.js";
 import recentRoute from "./routes/recent.route.js";
 import { startCronJobs } from "./cron-job/index.js";
+import { deviceCheck } from "./middlewares/devicecheck.middleware.js";
 
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
 
@@ -69,6 +70,7 @@ app.use("/wh", webhookRoute);
 
 // parser data into json and add req.body
 app.use(express.json());
+app.use(deviceCheck);
 
 // health
 app.get("/health", (req, res) => {

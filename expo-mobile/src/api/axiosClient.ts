@@ -1,10 +1,11 @@
+import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handleToken";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
+import { useRouter } from "expo-router";
 
 /**
  * Update this URL with your actual backend API base URL
  */
 const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
-
 const apiClient = axios.create({
   baseURL: BASE_URL,
   timeout: 10000,
@@ -17,9 +18,10 @@ const apiClient = axios.create({
 // Request Interceptor
 apiClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    // if (token) {
-    //   config.headers.Authorization = `Bearer ${token}`;
-    // }
+    const token = handleToken.getToken(AUTH_TOKEN_NAME);
+    if (token) {
+      config.headers.Token = token;
+    }
     config.headers["X-Platform"] = "mobile";
     return config;
   },
@@ -37,8 +39,10 @@ apiClient.interceptors.response.use(
       // that falls out of the range of 2xx
       console.error("API Error Response:", error.response.data);
 
-      if (error.response.status === 401) {
-        // Handle unauthorized (e.g., redirect to login)
+      if (error.response.status === 401 || error.response.status === 403) {
+        const router = useRouter();
+        handleToken.deleteToken(AUTH_TOKEN_NAME);
+        router.replace("/(auth)/login");
       }
     } else if (error.request) {
       // The request was made but no response was received

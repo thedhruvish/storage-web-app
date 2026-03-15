@@ -50,7 +50,7 @@ export const useLoginWithGithub = () => {
 export const useVerifyOtp = () => {
   return useMutation({
     mutationFn: (data: { otp: string; userId: string }) =>
-      axiosClient.post("/sso/otp-verify", data),
+      axiosClient.post("/sso/verify-otp", data),
   });
 };
 

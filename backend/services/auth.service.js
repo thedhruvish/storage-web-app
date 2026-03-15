@@ -23,15 +23,13 @@ export const registerWithEmailService = async ({
 }) => {
   const normalizedEmail = email.toLowerCase().trim();
   const userId = new mongoose.Types.ObjectId();
-
-  await Promise.all([
-    validTurnstileToken(turnstileToken),
-    exstingAuthIdentity({
-      provider: LOGIN_PROVIDER[0],
-      providerId: normalizedEmail,
-    }),
-  ]);
-
+  if (!req.isMobile) {
+    await validTurnstileToken(turnstileToken);
+  }
+  await exstingAuthIdentity({
+    provider: LOGIN_PROVIDER[0],
+    providerId: normalizedEmail,
+  });
   await Promise.all([
     createNewUser(
       {
@@ -51,8 +49,9 @@ export const registerWithEmailService = async ({
 
 export const loginWithEmailService = async (req) => {
   const { email, password, turnstileToken } = req.body;
-  await validTurnstileToken(turnstileToken);
-
+  if (!req.isMobile) {
+    await validTurnstileToken(turnstileToken);
+  }
   const authIdentity = await getOneAuthIdentity({
     providerEmail: email,
     provider: LOGIN_PROVIDER[0],

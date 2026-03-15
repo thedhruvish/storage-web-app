@@ -1,30 +1,52 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
+  TextInput as RNTextInput,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
 } from "react-native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
-import { useVerifyOtp } from "@/api/authService";
+import { useResendOtp, useVerifyOtp } from "@/api/authApi";
+import { Text, Button } from "@/components/ui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OTPScreen() {
   const router = useRouter();
+  const { userId } = useLocalSearchParams<{ userId: string }>();
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const verifyOtpMutation = useVerifyOtp();
-  const [otp, setOtp] = useState(['', '', '', '', '', '']);
-  const inputRefs = useRef<Array<TextInput | null>>([]);
+  const resendOtpMutation = useResendOtp();
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  const [timer, setTimer] = useState(120); // 2 minutes in seconds
+  const [canResend, setCanResend] = useState(false);
+  const inputRefs = useRef<Array<RNTextInput | null>>([]);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    if (timer > 0) {
+      interval = setInterval(() => {
+        setTimer((prev) => prev - 1);
+      }, 1000);
+    } else {
+      setCanResend(true);
+    }
+    return () => clearInterval(interval);
+  }, [timer]);
+
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
+  };
 
   const handleOTPChange = (value: string, index: number) => {
     if (value.length > 1) {
       // Handle paste
-      const pastedData = value.slice(0, 6).split('');
+      const pastedData = value.slice(0, 6).split("");
       const newOtp = [...otp];
       pastedData.forEach((char, i) => {
         if (i < 6) newOtp[i] = char;
@@ -41,44 +63,79 @@ export default function OTPScreen() {
     setOtp(newOtp);
 
     // Auto focus next
-    if (value !== '' && index < 5) {
+    if (value !== "" && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
   const handleKeyPress = (e: any, index: number) => {
-    if (e.nativeEvent.key === 'Backspace' && otp[index] === '' && index > 0) {
+    if (e.nativeEvent.key === "Backspace" && otp[index] === "" && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handleVerify = () => {
-    const otpString = otp.join('');
-    if (otpString.length === 6) {
-      // Note: You might need to pass the email here as well depending on your API
-      // For this example, I'm assuming the email is stored or available
-      verifyOtpMutation.mutate({ email: 'user@example.com', code: otpString });
+    const otpString = otp.join("");
+    if (otpString.length === 6 && userId) {
+      verifyOtpMutation.mutate({ userId, otp: otpString });
+    }
+  };
+
+  const handleResendOtp = () => {
+    if (userId && canResend && !resendOtpMutation.isPending) {
+      setCanResend(false);
+      setTimer(120); // Reset timer immediately to prevent multiple clicks
+      resendOtpMutation.mutate(userId, {
+        onError: () => {
+        },
+      });
     }
   };
 
   const isLoading = verifyOtpMutation.isPending;
+  const isResending = resendOtpMutation.isPending;
+
+  if (!userId) {
+    return (
+      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]}>
+        <Text variant="body" color="text">User was not Found</Text>
+      </View>
+    );
+  }
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
-      <ScrollView contentContainerStyle={[styles.scrollContent, { padding: spacing.lg }]}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.scrollContent,
+          { 
+            paddingHorizontal: spacing.lg,
+            paddingTop: insets.top + spacing.lg,
+            paddingBottom: insets.bottom + spacing.lg
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
         <View style={[styles.header, { marginBottom: spacing.xxl }]}>
-          <Text style={[styles.title, { color: colors.text }]}>Verification</Text>
-          <Text style={[styles.subtitle, { color: colors.secondaryText, marginTop: spacing.xs }]}>
+          <Text variant="h2" align="center">
+            Verification
+          </Text>
+          <Text
+            variant="body"
+            color="secondaryText"
+            align="center"
+            style={{ marginTop: spacing.xs }}
+          >
             Enter the 6-digit code sent to your email
           </Text>
         </View>
 
         <View style={[styles.otpContainer, { gap: spacing.sm }]}>
           {otp.map((digit, index) => (
-            <TextInput
+            <RNTextInput
               key={index}
               ref={(ref) => (inputRefs.current[index] = ref)}
               style={[
@@ -104,31 +161,32 @@ export default function OTPScreen() {
         </View>
 
         <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={[
-              styles.verifyButton,
-              {
-                backgroundColor: colors.tint,
-                borderRadius: spacing.borderRadius,
-                marginTop: spacing.xl,
-                opacity: (otp.join('').length === 6 && !isLoading) ? 1 : 0.6,
-              },
-            ]}
+          <Button
+            title="Verify"
             onPress={handleVerify}
-            disabled={otp.join('').length !== 6 || isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Verify</Text>
-            )}
-          </TouchableOpacity>
+            loading={isLoading}
+            disabled={otp.join("").length !== 6 || isLoading}
+            size="lg"
+            style={{ marginTop: spacing.xl, width: '100%' }}
+          />
 
           <View style={[styles.resendContainer, { marginTop: spacing.lg }]}>
-            <Text style={{ color: colors.secondaryText }}>Didn't receive the code? </Text>
-            <TouchableOpacity onPress={() => console.log("Resending OTP...")} disabled={isLoading}>
-              <Text style={{ color: colors.link, fontWeight: "bold" }}>Resend</Text>
-            </TouchableOpacity>
+            <Text color="secondaryText">
+              Didn't receive the code?{" "}
+            </Text>
+            <Button
+              variant="ghost"
+              onPress={handleResendOtp}
+              disabled={!canResend || resendOtpMutation.isPending}
+              style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+            >
+              <Text
+                color={canResend ? "link" : "secondaryText"}
+                weight="bold"
+              >
+                {canResend ? "Resend" : `Resend in ${formatTime(timer)}`}
+              </Text>
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -147,14 +205,6 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
   },
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 16,
-    textAlign: "center",
-  },
   otpContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -170,17 +220,6 @@ const styles = StyleSheet.create({
   actionContainer: {
     width: "100%",
     alignItems: "center",
-  },
-  verifyButton: {
-    width: "100%",
-    height: 50,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
   },
   resendContainer: {
     flexDirection: "row",

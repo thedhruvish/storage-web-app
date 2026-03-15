@@ -60,7 +60,7 @@ router.post(
 router.post("/login", validateInput(loginWithEmailValidation), loginWithEmail);
 
 // send otp verify
-router.post("/otp-verify", validateInput(verfiyOtpValidation), verfiyOtp);
+router.post("/verify-otp", validateInput(verfiyOtpValidation), verfiyOtp);
 
 // Re-send otp
 router.post("/resend-otp", validateInput(reSendOtpValidation), reSendOtp);

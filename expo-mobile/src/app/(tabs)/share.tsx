@@ -1,9 +1,10 @@
-import { Text, View, StyleSheet } from "react-native";
+import { View, StyleSheet } from "react-native";
+import { Text } from "@/components/ui";
 
 export default function ShareScreen() {
   return (
     <View style={styles.container}>
-      <Text>Share Screen</Text>
+      <Text variant="h2">Share Screen</Text>
     </View>
   );
 }

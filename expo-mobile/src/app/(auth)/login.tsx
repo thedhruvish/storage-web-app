@@ -1,39 +1,51 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Switch,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
-  Alert,
+  TextInput as RNTextInput,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/useTheme";
 import { GoogleSignInButton } from "@/components/GoogleSignInButton";
-import { useLogin, useGoogleLogin } from "@/api/authService";
+import { useLogin, useGoogleLogin } from "@/api/authApi";
 import { Ionicons } from "@expo/vector-icons";
+import { z } from "zod";
+import { showGlobalDialog } from "@/components/Dialog";
+import { Text, TextInput, Button } from "@/components/ui";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+const loginSchema = z.object({
+  email: z.string().min(1, "Email is required").email("Invalid email format"),
+  password: z.string().min(6, "Password must be at least 6 characters long"),
+});
 
 export default function LoginScreen() {
   const router = useRouter();
   const { colors, spacing } = useTheme();
+  const insets = useSafeAreaInsets();
   const loginMutation = useLogin();
   const googleLoginMutation = useGoogleLogin();
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@gmail.com");
+  const [password, setPassword] = useState("admin@123");
   const [showPassword, setShowPassword] = useState(false);
 
+  const passwordRef = useRef<RNTextInput>(null);
+
   const handleLogin = () => {
-    if (password.length < 6) {
-      Alert.alert("Error", "Password must be at least 6 characters long");
-      return;
+    const { success, error } = loginSchema.safeParse({ email, password });
+    if (success) {
+      loginMutation.mutate({ email, password });
+    } else {
+      showGlobalDialog({
+        title: "Input Validation Failed",
+        type: "error",
+        message: error.issues[0].message,
+      });
     }
-    loginMutation.mutate({ email, password });
   };
 
   const handleGoogleSuccess = (userInfo: any) => {
@@ -50,111 +62,83 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       style={[styles.container, { backgroundColor: colors.background }]}
     >
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { padding: spacing.lg }]}
+        contentContainerStyle={[
+          styles.scrollContent,
+          { 
+            paddingHorizontal: spacing.lg,
+            paddingTop: insets.top + spacing.lg,
+            paddingBottom: insets.bottom + spacing.lg
+          }
+        ]}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={[styles.header, { marginBottom: spacing.xxl }]}>
-          <Text style={[styles.title, { color: colors.text }]}>
+          <Text variant="h1" align="center">
             Welcome Back
           </Text>
           <Text
-            style={[
-              styles.subtitle,
-              { color: colors.secondaryText, marginTop: spacing.xs },
-            ]}
+            variant="body"
+            color="secondaryText"
+            align="center"
+            style={{ marginTop: spacing.xs }}
           >
             Sign in to your account
           </Text>
         </View>
 
         <View style={[styles.form, { gap: spacing.md }]}>
-          <View style={[styles.inputGroup, { gap: spacing.sm }]}>
-            <Text style={[styles.label, { color: colors.text }]}>Email</Text>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  color: colors.text,
-                  borderColor: colors.separator,
-                  backgroundColor: colors.secondaryBackground,
-                  paddingHorizontal: spacing.md,
-                  borderRadius: spacing.borderRadius,
-                },
-              ]}
-              placeholder="Enter your email"
-              placeholderTextColor={colors.secondaryText}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              editable={!isLoading}
-            />
-          </View>
+          <TextInput
+            label="Email"
+            placeholder="Enter your email"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+            editable={!isLoading}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
+            blurOnSubmit={false}
+            leftIcon={<Ionicons name="mail-outline" size={20} color={colors.secondaryText} />}
+          />
 
-          <View style={[styles.inputGroup, { gap: spacing.sm }]}>
-            <Text style={[styles.label, { color: colors.text }]}>Password</Text>
-            <View
-              style={[
-                styles.inputWrapper,
-                {
-                  borderColor: colors.separator,
-                  backgroundColor: colors.secondaryBackground,
-                  borderRadius: spacing.borderRadius,
-                },
-              ]}
-            >
-              <TextInput
-                style={[
-                  styles.input,
-                  {
-                    color: colors.text,
-                    paddingHorizontal: spacing.md,
-                    flex: 1,
-                  },
-                ]}
-                placeholder="Enter your password"
-                placeholderTextColor={colors.secondaryText}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry={!showPassword}
-                editable={!isLoading}
-              />
-              <TouchableOpacity
+          <TextInput
+            ref={passwordRef}
+            label="Password"
+            placeholder="Enter your password"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry={!showPassword}
+            editable={!isLoading}
+            returnKeyType="done"
+            onSubmitEditing={handleLogin}
+            leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.secondaryText} />}
+            rightIcon={
+              <Button
+                variant="ghost"
                 onPress={() => setShowPassword(!showPassword)}
-                style={{ paddingHorizontal: spacing.sm }}
+                style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
               >
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
                   size={24}
                   color={colors.secondaryText}
                 />
-              </TouchableOpacity>
-            </View>
-          </View>
+              </Button>
+            }
+          />
 
-          <TouchableOpacity
-            style={[
-              styles.loginButton,
-              {
-                backgroundColor: colors.tint,
-                height: 50,
-                borderRadius: spacing.borderRadius,
-                marginTop: spacing.sm,
-                opacity: isLoading ? 0.7 : 1,
-              },
-            ]}
+          <Button
+            title="Login"
             onPress={handleLogin}
+            loading={isLoading}
             disabled={isLoading}
-          >
-            {isLoading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Login</Text>
-            )}
-          </TouchableOpacity>
+            size="lg"
+            style={{ marginTop: spacing.sm }}
+          />
 
           <View
             style={[styles.dividerContainer, { marginVertical: spacing.md }]}
@@ -163,14 +147,12 @@ export default function LoginScreen() {
               style={[styles.divider, { backgroundColor: colors.separator }]}
             />
             <Text
-              style={[
-                styles.dividerText,
-                {
-                  color: colors.secondaryText,
-                  backgroundColor: colors.background,
-                  paddingHorizontal: spacing.sm,
-                },
-              ]}
+              variant="caption"
+              color="secondaryText"
+              style={{
+                backgroundColor: colors.background,
+                paddingHorizontal: spacing.sm,
+              }}
             >
               OR
             </Text>
@@ -182,17 +164,19 @@ export default function LoginScreen() {
           />
 
           <View style={[styles.footer, { marginTop: spacing.lg }]}>
-            <Text style={{ color: colors.secondaryText }}>
+            <Text color="secondaryText">
               Don't have an account?{" "}
             </Text>
-            <TouchableOpacity
+            <Button
+              variant="ghost"
               onPress={() => router.push("/register")}
               disabled={isLoading}
+              style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
             >
-              <Text style={{ color: colors.link, fontWeight: "bold" }}>
+              <Text color="link" weight="bold">
                 Register
               </Text>
-            </TouchableOpacity>
+            </Button>
           </View>
         </View>
       </ScrollView>
@@ -211,39 +195,7 @@ const styles = StyleSheet.create({
   header: {
     alignItems: "center",
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: 16,
-  },
   form: {},
-  inputGroup: {},
-  label: {
-    fontSize: 14,
-    fontWeight: "600",
-    marginLeft: 4,
-  },
-  inputWrapper: {
-    height: 50,
-    borderWidth: 1,
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  input: {
-    fontSize: 16,
-  },
-
-  loginButton: {
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "bold",
-  },
   dividerContainer: {
     alignItems: "center",
     justifyContent: "center",
@@ -251,11 +203,6 @@ const styles = StyleSheet.create({
   divider: {
     width: "100%",
     height: 1,
-  },
-  dividerText: {
-    position: "absolute",
-    fontSize: 12,
-    fontWeight: "bold",
   },
   footer: {
     flexDirection: "row",
