@@ -31,6 +31,11 @@ export const authApi = {
     const response = await axiosClient.post("/sso/google", { idToken });
     return response.data;
   },
+
+  logout: async () => {
+    const response = await axiosClient.post("/sso/logout");
+    return response.data;
+  },
 };
 
 export function useLogin() {
@@ -43,7 +48,7 @@ export function useLogin() {
       console.log("Login success:", data);
 
       if (data.data.sessionId) {
-        handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
+        await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           // PROACTIVELY FETCH USER BEFORE REDIRECT
@@ -107,10 +112,11 @@ export function useVerifyOtp() {
     onSuccess: async (data) => {
       console.log("OTP verified:", data);
       if (data.data.sessionId) {
-        handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
+        await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           const userResponse = await getCurrentUser();
+          console.log(userResponse);
           if (userResponse.data) {
             setUser(userResponse.data);
           }
@@ -154,7 +160,7 @@ export function useGoogleLogin() {
     onSuccess: async (data) => {
       console.log("Google login success:", data);
       if (data.data.sessionId) {
-        handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
+        await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           const userResponse = await getCurrentUser();
@@ -190,12 +196,23 @@ export function useGoogleLogin() {
 
 export function useLogout() {
   const router = useRouter();
-  const { logout } = useUserStore();
+  const { logout: clearStore } = useUserStore();
 
-  return () => {
-    logout();
-    router.replace("/(auth)/login");
-  };
+  return useMutation({
+    mutationFn: authApi.logout,
+    onSuccess: async () => {
+      await handleToken.deleteToken(AUTH_TOKEN_NAME);
+      clearStore();
+      router.replace("/(auth)/login");
+    },
+    onError: async (error: any) => {
+      console.error("Logout failed:", error);
+      // Even if API fails, clear local state and redirect
+      await handleToken.deleteToken(AUTH_TOKEN_NAME);
+      clearStore();
+      router.replace("/(auth)/login");
+    },
+  });
 }
 
 // handle the tokens

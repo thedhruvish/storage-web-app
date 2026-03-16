@@ -6,12 +6,12 @@ import { useTheme } from "@/hooks/use-theme";
 import { Text, MenuItem } from "@/components/ui";
 import { useDangerZone } from "@/api/setting-api";
 import { showGlobalDialog } from "@/components/dialog";
-import { useUserStore } from "@/store/user-store";
+import { useLogout } from "@/api/auth-api";
 
 export default function DangerZoneScreen() {
   const { colors, spacing } = useTheme();
   const dangerMutation = useDangerZone();
-  const logout = useUserStore((state) => state.logout);
+  const logout = useLogout();
   const router = useRouter();
 
   const handleAction = (method: "deactivate" | "wipe" | "delete") => {
@@ -34,8 +34,7 @@ export default function DangerZoneScreen() {
               onSuccess: () => {
                 showGlobalDialog({ title: "Action Complete", message: "Your request has been processed.", type: "success" });
                 if (method !== "wipe") {
-                  logout();
-                  router.replace("/(auth)/login");
+                  logout.mutate();
                 }
               },
               onError: (error: any) => {

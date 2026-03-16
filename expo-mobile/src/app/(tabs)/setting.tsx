@@ -3,13 +3,13 @@ import {
   View,
   StyleSheet,
   ScrollView,
-  Alert,
   Linking,
   Share,
   Platform,
   TouchableOpacity,
   Modal,
   Pressable,
+  RefreshControl,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -18,10 +18,10 @@ import { useTheme } from "@/hooks/use-theme";
 import { Text, MenuItem, Button, Badge } from "@/components/ui";
 import { useUserStore } from "@/store/user-store";
 import { useLogout } from "@/api/auth-api";
-import { useGetInfoOnSetting } from "@/api/setting-api";
-import { useGetRealStorage } from "@/api/user-api";
+import { useGetRealStorage, getCurrentUser } from "@/api/user-api";
 import { formatFileSize } from "@/utils/format-bytes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useDialog } from "@/components/dialog";
 
 const PRICING_URL = "https://storeone.cloud/pricing";
 const WEBSITE_URL = "https://storeone.cloud";
@@ -35,17 +35,38 @@ export default function SettingScreen() {
   const insets = useSafeAreaInsets();
   const logout = useLogout();
   const router = useRouter();
-  const { user } = useUserStore();
+  const { user, setUser } = useUserStore();
+  const { showDialog } = useDialog();
   const [isMenuVisible, setIsMenuVisible] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  const { data: settingInfo } = useGetInfoOnSetting();
-  const { data: storageInfo } = useGetRealStorage();
+  const { data: storageInfo, refetch: refetchStorage } = useGetRealStorage();
+
+  const onRefresh = async () => {
+    setRefreshing(true);
+    try {
+      // Refresh user data and storage info in parallel
+      const [userRes] = await Promise.all([getCurrentUser(), refetchStorage()]);
+
+      if (userRes.data) {
+        setUser(userRes.data);
+      }
+    } catch (error) {
+      console.error("Failed to refresh settings:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   const handleLogout = () => {
-    Alert.alert("Logout", "Are you sure you want to logout?", [
-      { text: "Cancel", style: "cancel" },
-      { text: "Logout", style: "destructive", onPress: () => logout() },
-    ]);
+    showDialog({
+      title: "Logout",
+      message: "Are you sure you want to logout?",
+      confirmText: "Logout",
+      cancelText: "Cancel",
+      type: "warning",
+      onConfirm: () => logout.mutate(),
+    });
   };
 
   const handleUpgrade = () => {
@@ -189,24 +210,29 @@ export default function SettingScreen() {
         </Pressable>
       </Modal>
 
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+        }
+      >
         {/* Profile Header */}
         <View style={[styles.header, { padding: spacing.lg }]}>
           <View style={styles.profileInfo}>
             <Image
-              source={settingInfo?.data?.user?.avatarUrl || user?.profile}
+              source={user?.picture}
               style={styles.avatar}
               contentFit="cover"
               transition={200}
             />
             <View style={styles.nameContainer}>
               <Text variant="h3" weight="bold">
-                {settingInfo?.data?.user?.name || user?.name}
+                {user?.name}
               </Text>
               <Text variant="bodySmall" color="secondaryText">
-                {settingInfo?.data?.user?.email || user?.email}
+                {user?.email}
               </Text>
-              {settingInfo?.data?.user?.isPremium && (
+              {user?.role === "premium" && (
                 <View style={styles.premiumBadge}>
                   <Badge label="PRO" variant="success" size="sm" />
                 </View>

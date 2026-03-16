@@ -1,6 +1,6 @@
 import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
-import { useRouter } from "expo-router";
+import { router } from "expo-router";
 
 /**
  * Update this URL with your actual backend API base URL
@@ -34,12 +34,9 @@ axiosClient.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response) {
-      // The request was made and the server responded with a status code
-      // that falls out of the range of 2xx
       console.error("API Error Response:", error.response.data);
 
       if (error.response.status === 401 || error.response.status === 403) {
-        const router = useRouter();
         handleToken.deleteToken(AUTH_TOKEN_NAME);
         router.replace("/(auth)/login");
       }

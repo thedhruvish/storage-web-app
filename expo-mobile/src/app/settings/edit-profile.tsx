@@ -1,18 +1,16 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, ActivityIndicator } from "react-native";
+import { View, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import { Stack, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { useTheme } from "@/hooks/use-theme";
-import { Text, TextInput, Button } from "@/components/ui";
+import { TextInput, Button } from "@/components/ui";
 import { useUserStore } from "@/store/user-store";
 import { useUserInfoUpdate } from "@/api/user-api";
 import { showGlobalDialog } from "@/components/dialog";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function EditProfileScreen() {
   const { colors, spacing } = useTheme();
-  const insets = useSafeAreaInsets();
   const { user, setUser } = useUserStore();
   const router = useRouter();
   const updateMutation = useUserInfoUpdate();
@@ -21,7 +19,11 @@ export default function EditProfileScreen() {
 
   const handleUpdate = () => {
     if (!name.trim()) {
-      showGlobalDialog({ title: "Error", message: "Name cannot be empty", type: "error" });
+      showGlobalDialog({
+        title: "Error",
+        message: "Name cannot be empty",
+        type: "error",
+      });
       return;
     }
 
@@ -32,7 +34,11 @@ export default function EditProfileScreen() {
           if (user) {
             setUser({ ...user, name });
           }
-          showGlobalDialog({ title: "Success", message: "Profile updated successfully", type: "success" });
+          showGlobalDialog({
+            title: "Success",
+            message: "Profile updated successfully",
+            type: "success",
+          });
           router.back();
         },
         onError: (error: any) => {
@@ -42,21 +48,25 @@ export default function EditProfileScreen() {
             type: "error",
           });
         },
-      }
+      },
     );
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: "Edit Profile", headerTransparent: false }} />
+      <Stack.Screen
+        options={{ title: "Edit Profile", headerTransparent: false }}
+      />
       <ScrollView contentContainerStyle={{ padding: spacing.lg }}>
         <View style={styles.avatarSection}>
           <Image
-            source={user?.profile}
+            source={user?.picture}
             style={styles.avatar}
             contentFit="cover"
           />
-          <TouchableOpacity style={[styles.editBadge, { backgroundColor: colors.primary }]}>
+          <TouchableOpacity
+            style={[styles.editBadge, { backgroundColor: colors.primary }]}
+          >
             <Ionicons name="camera" size={20} color="white" />
           </TouchableOpacity>
         </View>
@@ -67,14 +77,26 @@ export default function EditProfileScreen() {
             placeholder="Enter your name"
             value={name}
             onChangeText={setName}
-            leftIcon={<Ionicons name="person-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
           />
 
           <TextInput
             label="Email Address"
             value={user?.email || ""}
             editable={false}
-            leftIcon={<Ionicons name="mail-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
             containerStyle={{ opacity: 0.7 }}
           />
 

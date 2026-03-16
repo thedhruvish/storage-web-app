@@ -133,7 +133,12 @@ export const getUseStorage = async (req, res) => {
 
 // logout user
 export const logout = async (req, res) => {
-  const { sessionId } = req.signedCookies;
+  let sessionId;
+  if (req.isMobile) {
+    sessionId = req.headers.token;
+  } else {
+    sessionId = req.signedCookies?.sessionId;
+  }
   const userId = req.user._id.toString();
   await deleteSingleUserSession({
     userId,
@@ -476,7 +481,12 @@ export const deleteSession = async (req, res) => {
       sessionId,
     });
   } else {
-    const { sessionId } = req.signedCookies;
+    let sessionId;
+    if (req.isMobile) {
+      sessionId = req.headers.token;
+    } else {
+      sessionId = req.signedCookies?.sessionId;
+    }
 
     await deleteAllUserSessions(userId, sessionId);
   }

@@ -1,10 +1,16 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
+import { Modal, StyleSheet, View, TouchableOpacity } from "react-native";
+import { useTheme } from "@/hooks/use-theme";
+import { Text, Button } from "./ui";
 
 type DialogOptions = {
   title: string;
   message: string;
-  type?: "error" | "success" | "info";
+  type?: "error" | "success" | "info" | "warning";
+  confirmText?: string;
+  cancelText?: string;
   onConfirm?: () => void;
+  onCancel?: () => void;
 };
 
 type DialogContextType = {
@@ -14,7 +20,7 @@ type DialogContextType = {
 
 const DialogContext = createContext<DialogContextType | undefined>(undefined);
 
-// Global reference for use outside of React components (like in axios/services)
+// Global reference for use outside of React components
 let globalShowDialog: (options: DialogOptions) => void = () => {};
 
 export const showGlobalDialog = (options: DialogOptions) => {
@@ -59,10 +65,6 @@ export function useDialog() {
   return context;
 }
 
-import { useTheme } from "@/hooks/use-theme";
-import { Modal, StyleSheet, View } from "react-native";
-import { Text, Button } from "./ui";
-
 function CommonDialog({
   visible,
   options,
@@ -74,12 +76,24 @@ function CommonDialog({
 }) {
   const { colors, spacing } = useTheme();
 
+  const handleConfirm = () => {
+    options.onConfirm?.();
+    onClose();
+  };
+
+  const handleCancel = () => {
+    options.onCancel?.();
+    onClose();
+  };
+
+  const isConfirmation = !!options.onCancel || !!options.cancelText;
+
   return (
     <Modal
       transparent
       visible={visible}
       animationType="fade"
-      onRequestClose={onClose}
+      onRequestClose={handleCancel}
     >
       <View style={styles.overlay}>
         <View
@@ -88,33 +102,43 @@ function CommonDialog({
             {
               backgroundColor: colors.background,
               padding: spacing.lg,
-              borderRadius: spacing.borderRadius,
-              borderColor: colors.separator,
+              borderRadius: 24,
+              borderColor: colors.border,
               borderWidth: 1,
             },
           ]}
         >
           <Text
             variant="h3"
-            style={{ marginBottom: spacing.sm }}
+            weight="bold"
+            style={{ marginBottom: spacing.sm, textAlign: "center" }}
           >
             {options.title}
           </Text>
           <Text
             variant="body"
             color="secondaryText"
-            style={{ marginBottom: spacing.lg }}
+            style={{ marginBottom: spacing.xl, textAlign: "center" }}
           >
             {options.message}
           </Text>
 
-          <Button
-            title="OK"
-            onPress={() => {
-              options.onConfirm?.();
-              onClose();
-            }}
-          />
+          <View style={[styles.buttonContainer, { gap: spacing.md }]}>
+            {isConfirmation && (
+              <Button
+                title={options.cancelText || "Cancel"}
+                variant="secondary"
+                onPress={handleCancel}
+                style={styles.flexButton}
+              />
+            )}
+            <Button
+              title={options.confirmText || "OK"}
+              variant={options.type === "error" || options.type === "warning" ? "primary" : "primary"}
+              onPress={handleConfirm}
+              style={styles.flexButton}
+            />
+          </View>
         </View>
       </View>
     </Modal>
@@ -124,36 +148,25 @@ function CommonDialog({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
-    padding: 20,
+    padding: 24,
   },
   container: {
     width: "100%",
-    maxWidth: 400,
-    elevation: 5,
+    maxWidth: 340,
+    elevation: 10,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
   },
-  title: {
-    fontSize: 20,
-    fontWeight: "bold",
+  buttonContainer: {
+    flexDirection: "row",
+    width: "100%",
   },
-  message: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  button: {
-    height: 45,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  buttonText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "600",
+  flexButton: {
+    flex: 1,
   },
 });
