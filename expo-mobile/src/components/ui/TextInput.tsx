@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef } from 'react';
 import {
   TextInput as RNTextInput,
   TextInputProps as RNTextInputProps,
@@ -20,7 +20,7 @@ export interface TextInputProps extends RNTextInputProps {
   inputStyle?: TextStyle;
 }
 
-const TextInput: React.FC<TextInputProps> = ({
+const TextInput = forwardRef<RNTextInput, TextInputProps>(({
   label,
   error,
   leftIcon,
@@ -31,7 +31,7 @@ const TextInput: React.FC<TextInputProps> = ({
   onBlur,
   secureTextEntry,
   ...props
-}) => {
+}, ref) => {
   const { colors, spacing } = useTheme();
   const [isFocused, setIsFocused] = useState(false);
   const [isPasswordVisible, setIsPasswordVisible] = useState(!secureTextEntry);
@@ -67,6 +67,7 @@ const TextInput: React.FC<TextInputProps> = ({
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         
         <RNTextInput
+          ref={ref}
           style={[
             styles.input,
             { color: colors.text, paddingVertical: spacing.sm },
@@ -89,7 +90,9 @@ const TextInput: React.FC<TextInputProps> = ({
       )}
     </View>
   );
-};
+});
+
+TextInput.displayName = 'TextInput';
 
 const styles = StyleSheet.create({
   container: {

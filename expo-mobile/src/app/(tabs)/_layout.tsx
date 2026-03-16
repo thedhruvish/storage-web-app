@@ -11,12 +11,12 @@ export default function TabLayout() {
 
       <NativeTabs.Trigger name="starred">
         <NativeTabs.Trigger.Label>Starred</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="star.fill" md="star" />
+        <NativeTabs.Trigger.Icon sf="star.fill" md="star_outline" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="share">
-        <NativeTabs.Trigger.Label>Share</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="person.2.fill" md="people" />
+        <NativeTabs.Trigger.Label>Shared</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf="person.2.fill" md="people_outline" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="setting">
