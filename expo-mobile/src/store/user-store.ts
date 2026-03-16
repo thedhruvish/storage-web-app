@@ -1,5 +1,7 @@
 import { create } from "zustand";
 import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
+import { createJSONStorage, persist } from "zustand/middleware";
+import AsyncStorage from "expo-sqlite/kv-store";
 
 export type User = {
   _id: string;
@@ -18,11 +20,19 @@ interface UserStore {
   logout: () => void;
 }
 
-export const useUserStore = create<UserStore>((set) => ({
-  user: null,
-  setUser: (user) => set({ user }),
-  logout: () => {
-    handleToken.deleteToken(AUTH_TOKEN_NAME);
-    set({ user: null });
-  },
-}));
+export const useUserStore = create<UserStore>()(
+  persist(
+    (set) => ({
+      user: null,
+      setUser: (user) => set({ user }),
+      logout: () => {
+        handleToken.deleteToken(AUTH_TOKEN_NAME);
+        set({ user: null });
+      },
+    }),
+    {
+      name: "user-storage",
+      storage: createJSONStorage(() => AsyncStorage),
+    },
+  ),
+);

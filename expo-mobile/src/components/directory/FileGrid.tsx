@@ -1,5 +1,5 @@
 import React, { useMemo } from "react";
-import { StyleSheet, useWindowDimensions, View } from "react-native";
+import { RefreshControl, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { Text } from "@/components/ui";
@@ -14,6 +14,8 @@ export const FileGrid = ({
   onFileDoubleClick,
   onMenuPress,
   showHeader = false,
+  onRefresh,
+  refreshing = false,
 }: FileGridProps) => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -87,6 +89,11 @@ export const FileGrid = ({
         ListHeaderComponent={ListHeader}
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
+        refreshControl={
+          onRefresh ? (
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          ) : undefined
+        }
         contentContainerStyle={[
           viewMode === "grid" ? styles.gridContent : styles.listContent,
           {

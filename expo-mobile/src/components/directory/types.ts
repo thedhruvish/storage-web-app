@@ -24,4 +24,6 @@ export interface FileGridProps {
   onFileDoubleClick: (file: FileItem) => void;
   onMenuPress?: (file: FileItem) => void;
   showHeader?: boolean;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }

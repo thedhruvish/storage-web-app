@@ -4,6 +4,7 @@ import { useRouter, Stack } from "expo-router";
 import { useGetAllDirectoryList } from "@/api/directory-api";
 import { DirectoryContent } from "@/components/directory/DirectoryContent";
 import { FileActionMenu } from "@/components/directory/FileActionMenu";
+import { SearchBarHeader } from "@/components/SearchBarHeader";
 import type { FileItem } from "@/components/directory/types";
 import { useAppearance } from "@/store/appearance-store";
 import { useDirectoryStore } from "@/store/directory-store";
@@ -20,12 +21,19 @@ export default function StarredScreen() {
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
-  const { data, isLoading, isError } = useGetAllDirectoryList("", {
+  const { data, isLoading, isError, refetch } = useGetAllDirectoryList("", {
     isStarred: true,
     search: undefined,
     extensions: undefined,
     size: undefined,
   });
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const files = useMemo(() => {
     return {
@@ -53,7 +61,12 @@ export default function StarredScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <View style={[styles.selectionBar, { paddingTop: insets.top + 8, backgroundColor: colors.secondaryBackground }]}>
+        <View
+          style={[
+            styles.selectionBar,
+            { paddingTop: insets.top + 8, backgroundColor: colors.secondaryBackground },
+          ]}
+        >
           <View style={styles.selectionLeft}>
             <TouchableOpacity onPress={clearSelection} style={styles.selectionCloseBtn}>
               <MaterialIcons name="close" size={24} color={colors.text} />
@@ -83,20 +96,11 @@ export default function StarredScreen() {
           </View>
         </View>
       ) : (
-        <View style={[styles.headerWrapper, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity
-            style={[styles.searchPill, { backgroundColor: colors.secondaryBackground }]}
-            onPress={() => router.push("/search")}
-            activeOpacity={0.9}
-          >
-            <Text style={[styles.searchPlaceholder, { color: colors.secondaryText }]}>
-              Search in Drive
-            </Text>
-          </TouchableOpacity>
+        <View style={{ paddingTop: insets.top + 8 }}>
+          <SearchBarHeader />
         </View>
       )}
 
-      {/* Section Header */}
       <View style={styles.sectionHeader}>
         <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>Starred</Text>
         <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
@@ -122,6 +126,8 @@ export default function StarredScreen() {
         onFileDoubleClick={handleFilePress}
         onMenuPress={(file) => setMenuFile(file)}
         emptyMessage="No starred files"
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
 
       <FileActionMenu
@@ -134,9 +140,7 @@ export default function StarredScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
+  container: { flex: 1 },
   selectionBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -144,36 +148,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingBottom: 12,
   },
-  selectionLeft: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  selectionCloseBtn: {
-    padding: 8,
-  },
-  selectionActions: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  selectionActionBtn: {
-    padding: 8,
-    marginLeft: 4,
-  },
-  headerWrapper: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  searchPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 48,
-    borderRadius: 24,
-    paddingHorizontal: 16,
-  },
-  searchPlaceholder: {
-    flex: 1,
-    fontSize: 16,
-  },
+  selectionLeft: { flexDirection: "row", alignItems: "center" },
+  selectionCloseBtn: { padding: 8 },
+  selectionActions: { flexDirection: "row", alignItems: "center" },
+  selectionActionBtn: { padding: 8, marginLeft: 4 },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -181,15 +159,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     marginBottom: 8,
   },
-  sectionTitle: {
-    fontSize: 14,
-  },
-  toggleContainer: {
-    flexDirection: "row",
-    padding: 4,
-    borderRadius: 12,
-  },
-  toggleItem: {
-    padding: 6,
-  },
+  sectionTitle: { fontSize: 14 },
+  toggleContainer: { flexDirection: "row", padding: 4, borderRadius: 12 },
+  toggleItem: { padding: 6 },
 });

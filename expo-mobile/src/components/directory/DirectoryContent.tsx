@@ -14,6 +14,8 @@ interface DirectoryContentProps {
   onFileDoubleClick: (file: FileItem) => void;
   onMenuPress?: (file: FileItem) => void;
   emptyMessage?: string;
+  onRefresh?: () => void;
+  refreshing?: boolean;
 }
 
 export const DirectoryContent = ({
@@ -23,6 +25,8 @@ export const DirectoryContent = ({
   onFileDoubleClick,
   onMenuPress,
   emptyMessage = "This folder is empty",
+  onRefresh,
+  refreshing = false,
 }: DirectoryContentProps) => {
   const { directoryLayout } = useAppearance();
   const { colors } = useTheme();
@@ -71,6 +75,8 @@ export const DirectoryContent = ({
         onFileDoubleClick={onFileDoubleClick}
         onMenuPress={onMenuPress}
         showHeader={allFiles.length > 0}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
     </View>
   );

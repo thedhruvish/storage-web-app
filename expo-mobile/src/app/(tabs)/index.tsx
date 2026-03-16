@@ -4,6 +4,7 @@ import { useRouter, Stack } from "expo-router";
 import { useGetAllDirectoryList } from "@/api/directory-api";
 import { DirectoryContent } from "@/components/directory/DirectoryContent";
 import { FileActionMenu } from "@/components/directory/FileActionMenu";
+import { SearchBarHeader } from "@/components/SearchBarHeader";
 import type { FileItem } from "@/components/directory/types";
 import { useAppearance } from "@/store/appearance-store";
 import { useDirectoryStore } from "@/store/directory-store";
@@ -20,12 +21,19 @@ export default function Index() {
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
-  const { data, isLoading, isError } = useGetAllDirectoryList("", {
+  const { data, isLoading, isError, refetch } = useGetAllDirectoryList("", {
     isStarred: undefined,
     search: undefined,
     extensions: undefined,
     size: undefined,
   });
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const files = useMemo(() => {
     return {
@@ -36,7 +44,6 @@ export default function Index() {
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
-      console.log("file", file);
       if (file.extension) {
         console.log("preview file", file);
       } else {
@@ -54,10 +61,20 @@ export default function Index() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        /* ===== SELECTION ACTION BAR ===== */
-        <View style={[styles.selectionBar, { paddingTop: insets.top + 8, backgroundColor: colors.secondaryBackground }]}>
+        <View
+          style={[
+            styles.selectionBar,
+            {
+              paddingTop: insets.top + 8,
+              backgroundColor: colors.secondaryBackground,
+            },
+          ]}
+        >
           <View style={styles.selectionLeft}>
-            <TouchableOpacity onPress={clearSelection} style={styles.selectionCloseBtn}>
+            <TouchableOpacity
+              onPress={clearSelection}
+              style={styles.selectionCloseBtn}
+            >
               <MaterialIcons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text variant="h3" style={{ color: colors.text, marginLeft: 12 }}>
@@ -85,35 +102,44 @@ export default function Index() {
           </View>
         </View>
       ) : (
-        /* ===== NORMAL HEADER ===== */
-        <View style={[styles.headerSearchWrapper, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity
-            style={[styles.searchPill, { backgroundColor: colors.secondaryBackground }]}
-            onPress={() => router.push("/search")}
-            activeOpacity={0.9}
-          >
-            <Text style={[styles.searchPlaceholder, { color: colors.secondaryText }]}>
-              Search in Drive
-            </Text>
-          </TouchableOpacity>
+        <View style={{ paddingTop: insets.top + 8 }}>
+          <SearchBarHeader />
         </View>
       )}
 
       {/* Section Header */}
       <View style={styles.sectionHeader}>
-        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>Files</Text>
-        <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
+        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>
+          Files
+        </Text>
+        <View
+          style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}
+        >
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
-            style={[styles.toggleItem, directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 },
+            ]}
           >
-            <MaterialIcons name="view-list" size={20} color={directoryLayout === "list" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="view-list"
+              size={20}
+              color={directoryLayout === "list" ? colors.text : colors.secondaryText}
+            />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("grid")}
-            style={[styles.toggleItem, directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 },
+            ]}
           >
-            <MaterialIcons name="grid-view" size={20} color={directoryLayout === "grid" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="grid-view"
+              size={20}
+              color={directoryLayout === "grid" ? colors.text : colors.secondaryText}
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -124,21 +150,26 @@ export default function Index() {
         isError={isError}
         onFileDoubleClick={handleFilePress}
         onMenuPress={(file) => setMenuFile(file)}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
       />
 
       {/* FABs */}
       {!isSelectionMode && (
         <View style={styles.fabContainer}>
-          <TouchableOpacity style={[styles.fabSecondary, { backgroundColor: colors.secondaryBackground }]}>
+          <TouchableOpacity
+            style={[styles.fabSecondary, { backgroundColor: colors.secondaryBackground }]}
+          >
             <MaterialIcons name="camera-alt" size={24} color={colors.text} />
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.fabPrimary, { backgroundColor: "#443a34" }]}>
+          <TouchableOpacity
+            style={[styles.fabPrimary, { backgroundColor: "#443a34" }]}
+          >
             <MaterialIcons name="add" size={32} color="#fff" />
           </TouchableOpacity>
         </View>
       )}
 
-      {/* Three-dot Action Menu */}
       <FileActionMenu
         visible={menuFile !== null}
         file={menuFile}
@@ -152,7 +183,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  /* Selection Bar */
   selectionBar: {
     flexDirection: "row",
     alignItems: "center",
@@ -174,22 +204,6 @@ const styles = StyleSheet.create({
   selectionActionBtn: {
     padding: 8,
     marginLeft: 4,
-  },
-  /* Normal Header */
-  headerSearchWrapper: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  searchPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    height: 48,
-    borderRadius: 24,
-    paddingHorizontal: 16,
-  },
-  searchPlaceholder: {
-    flex: 1,
-    fontSize: 16,
   },
   sectionHeader: {
     flexDirection: "row",
