@@ -1,15 +1,19 @@
-import React from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert } from "react-native";
+import React, { useState } from "react";
+import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Platform } from "react-native";
 import { Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
+import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useTheme } from "@/hooks/use-theme";
-import { Text, Badge } from "@/components/ui";
+import { Text } from "@/components/ui";
 import { useGetInfoOnSetting } from "@/api/setting-api";
 import { showGlobalDialog } from "@/components/dialog";
+import { SessionItem } from "@/components/link-device/SessionItem";
+import { Scanner } from "@/components/link-device/Scanner";
 
 export default function LinkDeviceScreen() {
   const { colors, spacing } = useTheme();
   const { data: info, isLoading, refetch } = useGetInfoOnSetting();
+  const [isScannerVisible, setIsScannerVisible] = useState(false);
 
   const sessions = info?.data?.sessionHistory || [];
   const activeSessionId = info?.data?.sessionId;
@@ -30,90 +34,91 @@ export default function LinkDeviceScreen() {
         text: "Revoke", 
         style: "destructive", 
         onPress: () => {
-          // Implement revoke session API call here if available
           showGlobalDialog({ title: "Coming Soon", message: "Session management is being improved.", type: "info" });
         }
       },
     ]);
   };
 
-  const getDeviceIcon = (os: string = "") => {
-    const osLower = os.toLowerCase();
-    if (osLower.includes("ios") || osLower.includes("android")) return "phone-portrait-outline";
-    if (osLower.includes("windows") || osLower.includes("mac") || osLower.includes("linux")) return "desktop-outline";
-    return "globe-outline";
-  };
-
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ title: "Link a Device", headerTransparent: false }} />
-      <ScrollView contentContainerStyle={{ padding: spacing.md }}>
-        
-        <View style={[styles.infoCard, { backgroundColor: colors.primary + "10", borderColor: colors.primary + "30" }]}>
-          <Ionicons name="qr-code-outline" size={32} color={colors.primary} />
+      
+      <ScrollView 
+        contentContainerStyle={[styles.scrollContent, { padding: spacing.md }]}
+        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
+      >
+        <Animated.View 
+          entering={FadeIn.duration(600)}
+          style={[styles.infoCard, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}
+        >
+          <View style={[styles.infoIconContainer, { backgroundColor: colors.primary }]}>
+            <Ionicons name="qr-code-outline" size={32} color="white" />
+          </View>
           <View style={{ flex: 1, marginLeft: 16 }}>
-            <Text weight="bold" color="primary">Desktop Linking</Text>
-            <Text variant="bodySmall" color="primary">
+            <Text weight="bold" variant="h3" color="primary">Desktop Linking</Text>
+            <Text variant="bodySmall" color="secondaryText" style={{ marginTop: 4 }}>
               Scan the QR code on StoreOne Web to securely link your account to a new device.
             </Text>
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={{ marginTop: spacing.xl }}>
-          <Text variant="label" color="secondaryText" style={styles.sectionTitle}>
-            ACTIVE SESSIONS ({sessions.length})
-          </Text>
+        <Animated.View 
+          entering={FadeInDown.delay(200).duration(500)}
+          style={{ marginTop: spacing.xl }}
+        >
+          <View style={styles.sectionHeader}>
+            <Text variant="label" color="secondaryText" style={styles.sectionTitle}>
+              ACTIVE SESSIONS ({sessions.length})
+            </Text>
+            {isLoading && <Text variant="caption" color="primary">Updating...</Text>}
+          </View>
+          
           <View style={[styles.card, { backgroundColor: colors.secondaryBackground }]}>
-            {sessions.map((session: any, index: number) => {
-              const isCurrent = session.sessionId === activeSessionId;
-              return (
-                <View key={index}>
-                  <View style={styles.sessionRow}>
-                    <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
-                      <Ionicons 
-                        name={getDeviceIcon(session.os)} 
-                        size={24} 
-                        color={isCurrent ? colors.primary : colors.text} 
-                      />
-                    </View>
-                    <View style={{ flex: 1, marginLeft: 12 }}>
-                      <View style={{ flexDirection: "row", alignItems: "center" }}>
-                        <Text weight="semibold">{session.browser || "Unknown Browser"} on {session.os || "Unknown OS"}</Text>
-                        {isCurrent && (
-                          <Badge label="Current" variant="success" size="sm" style={{ marginLeft: 8 }} />
-                        )}
-                      </View>
-                      <Text variant="caption" color="secondaryText">
-                        {session.ip} • {typeof session.location === 'object' ? `${session.location.city}, ${session.location.countryCode}` : (session.location || "Unknown Location")}
-                      </Text>
-                      <Text variant="caption" color="secondaryText">
-                        Last active: {new Date(session.createdAt).toLocaleString()}
-                      </Text>
-                    </View>
-                    {!isCurrent && (
-                      <TouchableOpacity onPress={() => handleRevokeSession(session.sessionId)}>
-                        <Ionicons name="log-out-outline" size={20} color={colors.error} />
-                      </TouchableOpacity>
-                    )}
-                  </View>
+            {sessions.length > 0 ? (
+              sessions.map((session: any, index: number) => (
+                <View key={session.sessionId || index}>
+                  <SessionItem 
+                    session={session}
+                    isCurrent={session.sessionId === activeSessionId}
+                    index={index}
+                    onRevoke={handleRevokeSession}
+                  />
                   {index < sessions.length - 1 && (
                     <View style={[styles.separator, { backgroundColor: colors.border }]} />
                   )}
                 </View>
-              );
-            })}
+              ))
+            ) : (
+              <View style={styles.emptyContainer}>
+                <Ionicons name="shield-checkmark-outline" size={48} color={colors.secondaryText} />
+                <Text color="secondaryText" style={{ marginTop: 12 }}>No other active sessions found.</Text>
+              </View>
+            )}
           </View>
-        </View>
+          
+          <Text variant="caption" color="secondaryText" style={styles.footerHint}>
+            Make sure you are on the official StoreOne website before scanning.
+          </Text>
+        </Animated.View>
+      </ScrollView>
 
+      {/* Fixed Bottom Button Container */}
+      <View style={[styles.bottomContainer, { backgroundColor: colors.background }]}>
         <TouchableOpacity 
-          style={[styles.qrButton, { backgroundColor: colors.primary, marginTop: spacing.xl }]}
-          onPress={() => showGlobalDialog({ title: "Scanner", message: "QR Scanner will open here.", type: "info" })}
+          style={[styles.qrButton, { backgroundColor: colors.primary }]}
+          onPress={() => setIsScannerVisible(true)}
+          activeOpacity={0.8}
         >
           <Ionicons name="scan-outline" size={24} color="white" />
-          <Text weight="bold" style={{ color: "white", marginLeft: 12 }}>Scan QR Code</Text>
+          <Text weight="bold" style={{ color: "white", marginLeft: 12 }}>Link a Device</Text>
         </TouchableOpacity>
+      </View>
 
-      </ScrollView>
+      <Scanner 
+        isVisible={isScannerVisible} 
+        onClose={() => setIsScannerVisible(false)} 
+      />
     </View>
   );
 }
@@ -122,44 +127,76 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  scrollContent: {
+    paddingBottom: 100, // Space for the fixed button
+  },
   infoCard: {
     flexDirection: "row",
-    padding: 16,
-    borderRadius: 16,
+    padding: 20,
+    borderRadius: 24,
     borderWidth: 1,
     alignItems: "center",
   },
-  card: {
-    borderRadius: 16,
-    overflow: "hidden",
-  },
-  sectionTitle: {
-    marginLeft: 12,
-    marginBottom: 8,
-    fontSize: 12,
-    letterSpacing: 1,
-  },
-  sessionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-  },
-  iconContainer: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
+  infoIconContainer: {
+    width: 60,
+    height: 60,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+  },
+  card: {
+    borderRadius: 20,
+    overflow: "hidden",
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    marginBottom: 8,
+  },
+  sectionTitle: {
+    fontSize: 12,
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   separator: {
     height: StyleSheet.hairlineWidth,
     marginLeft: 76,
   },
+  bottomContainer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    padding: 20,
+    paddingBottom: Platform.OS === "ios" ? 34 : 20, // Handle safe area for iOS
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: "rgba(0,0,0,0.05)",
+  },
   qrButton: {
     flexDirection: "row",
     height: 56,
-    borderRadius: 16,
+    borderRadius: 28, // Rounded pill shape
     justifyContent: "center",
     alignItems: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  emptyContainer: {
+    padding: 40,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  footerHint: {
+    textAlign: "center",
+    marginTop: 24,
+    paddingHorizontal: 40,
+    opacity: 0.6,
   },
 });
+
+
