@@ -12,39 +12,49 @@ export const FileGrid = ({
   documentType,
   viewMode,
   onFileDoubleClick,
+  onMenuPress,
   showHeader = false,
 }: FileGridProps) => {
   const { width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
   const { selectedFiles, toggleSelection } = useDirectoryStore();
 
+  const isSelectionActive = selectedFiles.size > 0;
+
   const numColumns = useMemo(() => {
     if (viewMode === "list") return 1;
-    // Calculate columns based on width. Assuming a min width of 120 per item.
     return Math.max(2, Math.floor(width / 150));
   }, [viewMode, width]);
 
-  const handlePress = (fileId: string) => {
-    toggleSelection(fileId, false, false);
+  const handlePress = (file: FileItem) => {
+    if (isSelectionActive) {
+      console.log("toogle section")
+      // In selection mode, tap toggles selection
+      toggleSelection(file._id);
+    } else {
+      console.log("open file")  
+      // Not in selection mode, tap navigates/opens
+      onFileDoubleClick(file);
+    }
   };
 
   const handleLongPress = (file: FileItem) => {
-    // Open context menu equivalent or actions later.
-    // For now, toggle selection as meta key equivalent.
-    toggleSelection(file._id, true, false);
+    // Long press always toggles selection (enters/expands selection mode)
+    toggleSelection(file._id);
   };
 
   const renderItem = ({ item }: { item: FileItem }) => {
     const isSelected = selectedFiles.has(item._id);
-
+    console.log(item);
     return (
       <FileItemView
         file={item}
-        documentType={item.type || documentType || "file"}
+        documentType={item.extension ? "file" : "folder"}
         viewMode={viewMode}
         isSelected={isSelected}
-        onPress={() => handlePress(item._id)}
+        onPress={() => handlePress(item)}
         onLongPress={() => handleLongPress(item)}
+        onMenuPress={() => onMenuPress?.(item)}
       />
     );
   };

@@ -12,6 +12,7 @@ interface DirectoryContentProps {
   isLoading: boolean;
   isError: boolean;
   onFileDoubleClick: (file: FileItem) => void;
+  onMenuPress?: (file: FileItem) => void;
   emptyMessage?: string;
 }
 
@@ -20,6 +21,7 @@ export const DirectoryContent = ({
   isLoading,
   isError,
   onFileDoubleClick,
+  onMenuPress,
   emptyMessage = "This folder is empty",
 }: DirectoryContentProps) => {
   const { directoryLayout } = useAppearance();
@@ -67,6 +69,7 @@ export const DirectoryContent = ({
         files={allFiles}
         viewMode={directoryLayout}
         onFileDoubleClick={onFileDoubleClick}
+        onMenuPress={onMenuPress}
         showHeader={allFiles.length > 0}
       />
     </View>

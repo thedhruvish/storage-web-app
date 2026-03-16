@@ -1,6 +1,6 @@
 import React, { useMemo, useCallback, useState } from "react";
 import { View, StyleSheet, TouchableOpacity } from "react-native";
-import { useRouter, Stack } from "expo-router";
+import { useLocalSearchParams, useRouter, Stack } from "expo-router";
 import { useGetAllDirectoryList } from "@/api/directory-api";
 import { DirectoryContent } from "@/components/directory/DirectoryContent";
 import { FileActionMenu } from "@/components/directory/FileActionMenu";
@@ -12,7 +12,8 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
 
-export default function Index() {
+export default function DirectoryScreen() {
+  const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { directoryLayout, setDirectoryLayout } = useAppearance();
   const { selectedFiles, clearSelection } = useDirectoryStore();
@@ -20,7 +21,7 @@ export default function Index() {
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
-  const { data, isLoading, isError } = useGetAllDirectoryList("", {
+  const { data, isLoading, isError } = useGetAllDirectoryList(id || "", {
     isStarred: undefined,
     search: undefined,
     extensions: undefined,
@@ -31,12 +32,12 @@ export default function Index() {
     return {
       directories: data?.data?.directories || [],
       documents: data?.data?.documents || [],
+      parent: data?.data?.path || null,
     };
   }, [data]);
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
-      console.log("file", file);
       if (file.extension) {
         console.log("preview file", file);
       } else {
@@ -48,7 +49,7 @@ export default function Index() {
 
   const selectionCount = selectedFiles.size;
   const isSelectionMode = selectionCount > 0;
-
+  console.log(files)
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ headerShown: false }} />
@@ -86,22 +87,24 @@ export default function Index() {
         </View>
       ) : (
         /* ===== NORMAL HEADER ===== */
-        <View style={[styles.headerSearchWrapper, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity
-            style={[styles.searchPill, { backgroundColor: colors.secondaryBackground }]}
-            onPress={() => router.push("/search")}
-            activeOpacity={0.9}
-          >
-            <Text style={[styles.searchPlaceholder, { color: colors.secondaryText }]}>
-              Search in Drive
-            </Text>
+        <View style={[styles.headerContainer, { paddingTop: insets.top + 8 }]}>
+          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+            <MaterialIcons name="arrow-back" size={24} color={colors.text} />
+          </TouchableOpacity>
+          <Text variant="h3" style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+            {files.parent ? files.parent.name : "Files"}
+          </Text>
+          <TouchableOpacity onPress={() => router.push("/search")} style={styles.searchIconBtn}>
+            <MaterialIcons name="search" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
       )}
 
       {/* Section Header */}
       <View style={styles.sectionHeader}>
-        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>Files</Text>
+        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>
+          {files.parent ? files.parent.name : "Files"}
+        </Text>
         <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
@@ -125,18 +128,6 @@ export default function Index() {
         onFileDoubleClick={handleFilePress}
         onMenuPress={(file) => setMenuFile(file)}
       />
-
-      {/* FABs */}
-      {!isSelectionMode && (
-        <View style={styles.fabContainer}>
-          <TouchableOpacity style={[styles.fabSecondary, { backgroundColor: colors.secondaryBackground }]}>
-            <MaterialIcons name="camera-alt" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.fabPrimary, { backgroundColor: "#443a34" }]}>
-            <MaterialIcons name="add" size={32} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      )}
 
       {/* Three-dot Action Menu */}
       <FileActionMenu
@@ -176,27 +167,30 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   /* Normal Header */
-  headerSearchWrapper: {
-    paddingHorizontal: 16,
-    paddingBottom: 8,
-  },
-  searchPill: {
+  headerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    height: 48,
-    borderRadius: 24,
-    paddingHorizontal: 16,
+    paddingHorizontal: 12,
+    paddingBottom: 8,
   },
-  searchPlaceholder: {
+  backButton: {
+    padding: 8,
+    marginRight: 4,
+  },
+  headerTitle: {
     flex: 1,
-    fontSize: 16,
+    fontSize: 18,
+    marginLeft: 4,
+  },
+  searchIconBtn: {
+    padding: 8,
   },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 16,
-    marginBottom: 8,
+    marginVertical: 12,
   },
   sectionTitle: {
     fontSize: 14,
@@ -208,36 +202,5 @@ const styles = StyleSheet.create({
   },
   toggleItem: {
     padding: 6,
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    right: 16,
-    alignItems: "center",
-  },
-  fabPrimary: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    marginTop: 16,
-  },
-  fabSecondary: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
   },
 });

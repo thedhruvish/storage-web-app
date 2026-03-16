@@ -4,7 +4,7 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { Text } from "@/components/ui";
 import { useTheme } from "@/hooks/use-theme";
 import { getFileIconName } from "@/utils/file-icon-helper";
-import { formatFileSize, truncateFileName } from "@/utils/functions";
+import { formatFileSize } from "@/utils/functions";
 import type { FileItem } from "./types";
 import { formatDistanceToNow } from "date-fns";
 
@@ -15,9 +15,15 @@ interface FileItemViewProps {
   isSelected: boolean;
   onPress: () => void;
   onLongPress?: () => void;
+  onMenuPress?: () => void;
 }
 
-const getFileIcon = (documentType: string, file: FileItem, size: number, tintColor: string) => {
+const getFileIcon = (
+  documentType: string,
+  file: FileItem,
+  size: number,
+  tintColor: string,
+) => {
   if (documentType === "folder") {
     return <MaterialIcons name="folder" size={size} color={tintColor} />;
   }
@@ -31,7 +37,9 @@ const getFileIcon = (documentType: string, file: FileItem, size: number, tintCol
     case "word":
       return <MaterialIcons name="description" size={size} color="#2563eb" />;
     case "pdf":
-      return <MaterialIcons name="picture-as-pdf" size={size} color="#dc2626" />;
+      return (
+        <MaterialIcons name="picture-as-pdf" size={size} color="#dc2626" />
+      );
     case "image":
       return <MaterialIcons name="image" size={size} color="#16a34a" />;
     case "video":
@@ -47,7 +55,9 @@ const getFileIcon = (documentType: string, file: FileItem, size: number, tintCol
     case "code":
       return <MaterialIcons name="code" size={size} color="#4f46e5" />;
     default:
-      return <MaterialIcons name="insert-drive-file" size={size} color="#666" />;
+      return (
+        <MaterialIcons name="insert-drive-file" size={size} color="#666" />
+      );
   }
 };
 
@@ -58,6 +68,7 @@ export const FileItemView = ({
   isSelected,
   onPress,
   onLongPress,
+  onMenuPress,
 }: FileItemViewProps) => {
   const { colors } = useTheme();
 
@@ -66,7 +77,7 @@ export const FileItemView = ({
       <TouchableOpacity
         style={[
           styles.gridContainer,
-          { 
+          {
             borderColor: colors.separator,
             backgroundColor: colors.background,
           },
@@ -89,7 +100,7 @@ export const FileItemView = ({
           ) : (
             getFileIcon(documentType, file, 48, colors.tint)
           )}
-          
+
           {file.isStarred && (
             <View style={styles.starBadgeGrid}>
               <MaterialIcons name="star" size={12} color="#eab308" />
@@ -98,21 +109,27 @@ export const FileItemView = ({
         </View>
 
         <View style={styles.gridTextWrapper}>
-          <Text
-            variant="body"
-            style={[styles.gridNameText, { color: colors.text }]}
-            numberOfLines={1}
-            ellipsizeMode="middle"
-          >
-            {file.name}
-          </Text>
-          <Text variant="caption" style={[styles.gridSubText, { color: colors.secondaryText }]}>
-            {file.metaData?.size !== undefined
-              ? formatFileSize(file.metaData.size)
-              : documentType === "folder"
-              ? "Folder"
-              : "-"}
-          </Text>
+          <View style={styles.gridNameRow}>
+            <Text
+              variant="body"
+              style={[styles.gridNameText, { color: colors.text }]}
+              numberOfLines={1}
+              ellipsizeMode="middle"
+            >
+              {file.name}
+            </Text>
+            <TouchableOpacity
+              onPress={onMenuPress}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              style={styles.gridMenuButton}
+            >
+              <MaterialIcons
+                name="more-vert"
+                size={18}
+                color={colors.secondaryText}
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </TouchableOpacity>
     );
@@ -135,22 +152,35 @@ export const FileItemView = ({
       <View style={styles.listIconWrapper}>
         {getFileIcon(documentType, file, 24, colors.tint)}
         {file.isStarred && (
-          <View style={[styles.starBadgeList, { backgroundColor: colors.background }]}>
+          <View
+            style={[
+              styles.starBadgeList,
+              { backgroundColor: colors.background },
+            ]}
+          >
             <MaterialIcons name="star" size={10} color="#eab308" />
           </View>
         )}
       </View>
 
       <View style={styles.listMainContent}>
-        <Text variant="body" style={{ color: colors.text }} numberOfLines={1} ellipsizeMode="tail">
+        <Text
+          variant="body"
+          style={{ color: colors.text }}
+          numberOfLines={1}
+          ellipsizeMode="tail"
+        >
           {file.name}
         </Text>
-        <Text variant="caption" style={[styles.listSubText, { color: colors.secondaryText }]}>
+        <Text
+          variant="caption"
+          style={[styles.listSubText, { color: colors.secondaryText }]}
+        >
           {file.metaData?.size !== undefined
             ? formatFileSize(file.metaData.size)
             : documentType === "folder"
-            ? "Folder"
-            : "-"}
+              ? "Folder"
+              : "-"}
           {" • "}
           {file.createdAt
             ? formatDistanceToNow(new Date(file.createdAt), {
@@ -159,6 +189,19 @@ export const FileItemView = ({
             : ""}
         </Text>
       </View>
+
+      {/* Three-dot menu for list view */}
+      <TouchableOpacity
+        style={styles.listMenuButton}
+        onPress={onMenuPress}
+        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+      >
+        <MaterialIcons
+          name="more-vert"
+          size={20}
+          color={colors.secondaryText}
+        />
+      </TouchableOpacity>
     </TouchableOpacity>
   );
 };
@@ -173,6 +216,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     alignItems: "center",
+  },
+  gridMenuButton: {
+    padding: 4,
   },
   gridIconWrapper: {
     width: 100,
@@ -202,12 +248,16 @@ const styles = StyleSheet.create({
   },
   gridTextWrapper: {
     marginTop: 8,
+    width: "100%",
+  },
+  gridNameRow: {
+    flexDirection: "row",
     alignItems: "center",
     width: "100%",
   },
   gridNameText: {
+    flex: 1,
     textAlign: "center",
-    width: "100%",
   },
   gridSubText: {
     marginTop: 2,
@@ -237,5 +287,9 @@ const styles = StyleSheet.create({
   },
   listSubText: {
     marginTop: 4,
+  },
+  listMenuButton: {
+    padding: 8,
+    marginLeft: 8,
   },
 });

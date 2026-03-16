@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, StyleSheet, TouchableOpacity, FlatList } from "react-native";
+import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -7,21 +7,45 @@ import { useTheme } from "@/hooks/use-theme";
 import { TextInput, Text } from "@/components/ui";
 import { useGetAllDirectoryList } from "@/api/directory-api";
 import { DirectoryContent } from "@/components/directory/DirectoryContent";
+import { FileActionMenu } from "@/components/directory/FileActionMenu";
 import type { FileItem } from "@/components/directory/types";
+
+const FILE_TYPE_OPTIONS = [
+  { label: "Documents", value: "pdf,doc,docx,txt,rtf" },
+  { label: "Images", value: "jpg,jpeg,png,gif,svg,webp" },
+  { label: "Videos", value: "mp4,avi,mov,mkv,webm" },
+  { label: "Audio", value: "mp3,wav,ogg,flac,aac" },
+  { label: "Archives", value: "zip,rar,7z,tar,gz" },
+  { label: "Spreadsheets", value: "xls,xlsx,csv" },
+];
+
+const SIZE_OPTIONS = [
+  { label: "Any size", value: "any" },
+  { label: "< 1 MB", value: "less_1048576" },
+  { label: "< 10 MB", value: "less_10485760" },
+  { label: "< 100 MB", value: "less_104857600" },
+  { label: "> 100 MB", value: "greater_104857600" },
+];
 
 export default function SearchScreen() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [searchQuery, setSearchQuery] = useState("");
+  const [isStarred, setIsStarred] = useState(false);
+  const [selectedType, setSelectedType] = useState<string | undefined>(
+    undefined,
+  );
+  const [selectedSize, setSelectedSize] = useState<string | undefined>(
+    undefined,
+  );
+  const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
   const { data, isLoading, isError } = useGetAllDirectoryList("", {
-    isStarred: undefined,
+    isStarred: isStarred || undefined,
     search: searchQuery || undefined,
-    extensions: undefined,
-    size: undefined,
-  }, {
-    enabled: searchQuery.length > 0
+    extensions: selectedType || undefined,
+    size: selectedSize || undefined,
   });
 
   const files = React.useMemo(() => {
@@ -31,30 +55,42 @@ export default function SearchScreen() {
     };
   }, [data]);
 
-  const handleFileDoubleClick = useCallback(
-    (file: FileItem) => {
-      if (file.extension) {
-        // Preview file
-        console.log("preview file", file);
-      } else {
-        router.push(`/(tabs)/directory/${file._id}`);
-      }
-    },
-    [router]
-  );
+  const handleFilePress = (file: FileItem) => {
+    console.log("file", file);
+    console.log("now it run ");
+    if (file.extension) {
+      console.log("preview file", file);
+    } else {
+      console.log("fility");
+      router.push(`/directory/${file._id}`);
+    }
+  };
+
+  const hasActiveFilters = isStarred || !!selectedType || !!selectedSize;
+  const hasQuery = searchQuery.length > 0;
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Stack.Screen options={{ headerShown: false }} />
-      
-      <View style={[styles.header, { paddingTop: insets.top + 8, backgroundColor: colors.background }]}>
-        <TouchableOpacity 
+
+      {/* Header */}
+      <View
+        style={[
+          styles.header,
+          {
+            paddingTop: insets.top + 8,
+            backgroundColor: colors.background,
+            borderBottomColor: colors.separator,
+          },
+        ]}
+      >
+        <TouchableOpacity
           onPress={() => router.back()}
           style={styles.backButton}
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
-        
+
         <View style={styles.searchWrapper}>
           <TextInput
             autoFocus
@@ -66,20 +102,132 @@ export default function SearchScreen() {
           />
         </View>
 
-        {searchQuery.length > 0 && (
-          <TouchableOpacity 
-            onPress={() => setSearchQuery("")}
+        {(hasQuery || hasActiveFilters) && (
+          <TouchableOpacity
+            onPress={() => {
+              setSearchQuery("");
+              setIsStarred(false);
+              setSelectedType(undefined);
+              setSelectedSize(undefined);
+            }}
             style={styles.clearButton}
           >
-            <MaterialIcons name="close" size={24} color={colors.secondaryText} />
+            <MaterialIcons
+              name="close"
+              size={24}
+              color={colors.secondaryText}
+            />
           </TouchableOpacity>
         )}
       </View>
 
-      {searchQuery.length === 0 ? (
+      {/* Filter Chips */}
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chipRow}
+      >
+        {/* Starred chip */}
+        <TouchableOpacity
+          style={[
+            styles.chip,
+            { borderColor: colors.separator },
+            isStarred && {
+              backgroundColor: colors.tint + "20",
+              borderColor: colors.tint,
+            },
+          ]}
+          onPress={() => setIsStarred(!isStarred)}
+        >
+          <MaterialIcons
+            name={isStarred ? "star" : "star-outline"}
+            size={16}
+            color={isStarred ? colors.tint : colors.secondaryText}
+            style={{ marginRight: 4 }}
+          />
+          <Text
+            variant="caption"
+            style={{
+              color: isStarred ? colors.tint : colors.secondaryText,
+              fontWeight: "600",
+            }}
+          >
+            Starred
+          </Text>
+        </TouchableOpacity>
+
+        {/* Type chips */}
+        {FILE_TYPE_OPTIONS.map((opt) => {
+          const active = selectedType === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              style={[
+                styles.chip,
+                { borderColor: colors.separator },
+                active && {
+                  backgroundColor: colors.tint + "20",
+                  borderColor: colors.tint,
+                },
+              ]}
+              onPress={() => setSelectedType(active ? undefined : opt.value)}
+            >
+              <Text
+                variant="caption"
+                style={{
+                  color: active ? colors.tint : colors.secondaryText,
+                  fontWeight: "600",
+                }}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+
+        {/* Size chips */}
+        {SIZE_OPTIONS.map((opt) => {
+          const active = selectedSize === opt.value;
+          return (
+            <TouchableOpacity
+              key={opt.value}
+              style={[
+                styles.chip,
+                { borderColor: colors.separator },
+                active && {
+                  backgroundColor: colors.tint + "20",
+                  borderColor: colors.tint,
+                },
+              ]}
+              onPress={() => setSelectedSize(active ? undefined : opt.value)}
+            >
+              <Text
+                variant="caption"
+                style={{
+                  color: active ? colors.tint : colors.secondaryText,
+                  fontWeight: "600",
+                }}
+              >
+                {opt.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+
+      {/* Results */}
+      {!hasQuery && !hasActiveFilters ? (
         <View style={styles.emptyContainer}>
-          <MaterialIcons name="search" size={64} color={colors.secondaryText} style={{ opacity: 0.2 }} />
-          <Text variant="body" style={{ color: colors.secondaryText, marginTop: 16 }}>
+          <MaterialIcons
+            name="search"
+            size={64}
+            color={colors.secondaryText}
+            style={{ opacity: 0.2 }}
+          />
+          <Text
+            variant="body"
+            style={{ color: colors.secondaryText, marginTop: 16 }}
+          >
             Search for files, folders and more
           </Text>
         </View>
@@ -88,10 +236,17 @@ export default function SearchScreen() {
           files={files}
           isLoading={isLoading}
           isError={isError}
-          onFileDoubleClick={handleFileDoubleClick}
+          onFileDoubleClick={handleFilePress}
+          onMenuPress={(file) => setMenuFile(file)}
           emptyMessage="No results found"
         />
       )}
+
+      <FileActionMenu
+        visible={menuFile !== null}
+        file={menuFile}
+        onClose={() => setMenuFile(null)}
+      />
     </View>
   );
 }
@@ -104,12 +259,12 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 8,
-    paddingBottom: 12,
+    paddingBottom: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   backButton: {
     padding: 8,
+    alignSelf: "center",
   },
   searchWrapper: {
     flex: 1,
@@ -125,6 +280,21 @@ const styles = StyleSheet.create({
   },
   clearButton: {
     padding: 8,
+  },
+  chipRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+  },
+  chip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    height: 32,
+    borderRadius: 16,
+    borderWidth: 1,
+    marginRight: 8,
   },
   emptyContainer: {
     flex: 1,
