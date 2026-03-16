@@ -56,12 +56,9 @@ export default function SearchScreen() {
   }, [data]);
 
   const handleFilePress = (file: FileItem) => {
-    console.log("file", file);
-    console.log("now it run ");
     if (file.extension) {
       console.log("preview file", file);
     } else {
-      console.log("fility");
       router.push(`/directory/${file._id}`);
     }
   };
@@ -86,7 +83,7 @@ export default function SearchScreen() {
       >
         <TouchableOpacity
           onPress={() => router.back()}
-          style={styles.backButton}
+          style={styles.iconButton}
         >
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
@@ -110,7 +107,7 @@ export default function SearchScreen() {
               setSelectedType(undefined);
               setSelectedSize(undefined);
             }}
-            style={styles.clearButton}
+            style={styles.iconButton}
           >
             <MaterialIcons
               name="close"
@@ -121,99 +118,97 @@ export default function SearchScreen() {
         )}
       </View>
 
-      {/* Filter Chips */}
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.chipRow}
-      >
-        {/* Starred chip */}
-        <TouchableOpacity
-          style={[
-            styles.chip,
-            { borderColor: colors.separator },
-            isStarred && {
-              backgroundColor: colors.tint + "20",
-              borderColor: colors.tint,
-            },
-          ]}
-          onPress={() => setIsStarred(!isStarred)}
+      <View style={styles.chipContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.chipRow}
         >
-          <MaterialIcons
-            name={isStarred ? "star" : "star-outline"}
-            size={16}
-            color={isStarred ? colors.tint : colors.secondaryText}
-            style={{ marginRight: 4 }}
-          />
-          <Text
-            variant="caption"
-            style={{
-              color: isStarred ? colors.tint : colors.secondaryText,
-              fontWeight: "600",
-            }}
+          <TouchableOpacity
+            style={[
+              styles.chip,
+              { borderColor: colors.separator },
+              isStarred && {
+                backgroundColor: colors.tint + "20",
+                borderColor: colors.tint,
+              },
+            ]}
+            onPress={() => setIsStarred(!isStarred)}
           >
-            Starred
-          </Text>
-        </TouchableOpacity>
-
-        {/* Type chips */}
-        {FILE_TYPE_OPTIONS.map((opt) => {
-          const active = selectedType === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              style={[
-                styles.chip,
-                { borderColor: colors.separator },
-                active && {
-                  backgroundColor: colors.tint + "20",
-                  borderColor: colors.tint,
-                },
-              ]}
-              onPress={() => setSelectedType(active ? undefined : opt.value)}
+            <MaterialIcons
+              name={isStarred ? "star" : "star-outline"}
+              size={16}
+              color={isStarred ? colors.tint : colors.secondaryText}
+              style={{ marginRight: 4 }}
+            />
+            <Text
+              variant="caption"
+              style={{
+                color: isStarred ? colors.tint : colors.secondaryText,
+                fontWeight: "600",
+              }}
             >
-              <Text
-                variant="caption"
-                style={{
-                  color: active ? colors.tint : colors.secondaryText,
-                  fontWeight: "600",
-                }}
-              >
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+              Starred
+            </Text>
+          </TouchableOpacity>
 
-        {/* Size chips */}
-        {SIZE_OPTIONS.map((opt) => {
-          const active = selectedSize === opt.value;
-          return (
-            <TouchableOpacity
-              key={opt.value}
-              style={[
-                styles.chip,
-                { borderColor: colors.separator },
-                active && {
-                  backgroundColor: colors.tint + "20",
-                  borderColor: colors.tint,
-                },
-              ]}
-              onPress={() => setSelectedSize(active ? undefined : opt.value)}
-            >
-              <Text
-                variant="caption"
-                style={{
-                  color: active ? colors.tint : colors.secondaryText,
-                  fontWeight: "600",
-                }}
+          {FILE_TYPE_OPTIONS.map((opt) => {
+            const active = selectedType === opt.value;
+            return (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  styles.chip,
+                  { borderColor: colors.separator },
+                  active && {
+                    backgroundColor: colors.tint + "20",
+                    borderColor: colors.tint,
+                  },
+                ]}
+                onPress={() => setSelectedType(active ? undefined : opt.value)}
               >
-                {opt.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+                <Text
+                  variant="caption"
+                  style={{
+                    color: active ? colors.tint : colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+
+          {SIZE_OPTIONS.map((opt) => {
+            const active = selectedSize === opt.value;
+            return (
+              <TouchableOpacity
+                key={opt.value}
+                style={[
+                  styles.chip,
+                  { borderColor: colors.separator },
+                  active && {
+                    backgroundColor: colors.tint + "20",
+                    borderColor: colors.tint,
+                  },
+                ]}
+                onPress={() => setSelectedSize(active ? undefined : opt.value)}
+              >
+                <Text
+                  variant="caption"
+                  style={{
+                    color: active ? colors.tint : colors.secondaryText,
+                    fontWeight: "600",
+                  }}
+                >
+                  {opt.label}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </ScrollView>
+      </View>
 
       {/* Results */}
       {!hasQuery && !hasActiveFilters ? (
@@ -258,34 +253,39 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 8,
+    paddingHorizontal: 12,
     paddingBottom: 8,
     borderBottomWidth: StyleSheet.hairlineWidth,
+    gap: 8,
   },
-  backButton: {
-    padding: 8,
-    alignSelf: "center",
+  iconButton: {
+    padding: 6,
+    alignItems: "center",
+    justifyContent: "center",
   },
   searchWrapper: {
     flex: 1,
-    marginHorizontal: 8,
+    justifyContent: "center",
   },
   searchInputContainer: {
     backgroundColor: "transparent",
     borderWidth: 0,
     paddingHorizontal: 0,
+    marginVertical: 0,
   },
   searchInput: {
-    fontSize: 18,
+    fontSize: 16,
+    paddingVertical: 4,
   },
-  clearButton: {
-    padding: 8,
+  chipContainer: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   chipRow: {
     flexDirection: "row",
     alignItems: "center",
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 8,
   },
   chip: {
     flexDirection: "row",
