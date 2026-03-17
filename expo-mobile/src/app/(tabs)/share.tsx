@@ -12,6 +12,9 @@ import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
+import { SelectionBar } from "@/components/directory/SelectionBar";
+import { RenameDialog } from "@/components/directory/RenameDialog";
+import { useFileActions } from "@/hooks/use-file-actions";
 
 export default function ShareScreen() {
   const router = useRouter();
@@ -22,6 +25,17 @@ export default function ShareScreen() {
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
   const { data, isLoading, isError, refetch } = useGetSharedWithMe();
+
+  const {
+    handleStar,
+    handleRename,
+    handleDelete,
+    handleShare,
+    renameDialogOpen,
+    fileToRename,
+    openRenameDialog,
+    closeRenameDialog,
+  } = useFileActions();
 
   const [refreshing, setRefreshing] = useState(false);
   const onRefresh = useCallback(async () => {
@@ -36,6 +50,11 @@ export default function ShareScreen() {
       documents: data?.data?.documents || [],
     };
   }, [data]);
+
+  const allFiles = useMemo(() => [
+    ...files.directories,
+    ...files.documents
+  ], [files]);
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
@@ -56,40 +75,13 @@ export default function ShareScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <View
-          style={[
-            styles.selectionBar,
-            { paddingTop: insets.top + 8, backgroundColor: colors.secondaryBackground },
-          ]}
-        >
-          <View style={styles.selectionLeft}>
-            <TouchableOpacity onPress={clearSelection} style={styles.selectionCloseBtn}>
-              <MaterialIcons name="close" size={24} color={colors.text} />
-            </TouchableOpacity>
-            <Text variant="h3" style={{ color: colors.text, marginLeft: 12 }}>
-              {selectionCount}
-            </Text>
-          </View>
-          <View style={styles.selectionActions}>
-            <TouchableOpacity style={styles.selectionActionBtn}>
-              <MaterialIcons name="star-outline" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.selectionActionBtn}>
-              <MaterialIcons name="file-download" size={22} color={colors.text} />
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.selectionActionBtn}>
-              <MaterialIcons name="share" size={22} color={colors.text} />
-            </TouchableOpacity>
-            {selectionCount === 1 && (
-              <TouchableOpacity style={styles.selectionActionBtn}>
-                <MaterialIcons name="drive-file-rename-outline" size={22} color={colors.text} />
-              </TouchableOpacity>
-            )}
-            <TouchableOpacity style={styles.selectionActionBtn}>
-              <MaterialIcons name="delete-outline" size={22} color={colors.error} />
-            </TouchableOpacity>
-          </View>
-        </View>
+        <SelectionBar 
+          allFiles={allFiles} 
+          onStar={handleStar}
+          onRename={openRenameDialog}
+          onShare={handleShare}
+          onDelete={handleDelete}
+        />
       ) : (
         <View style={{ paddingTop: insets.top + 8 }}>
           <SearchBarHeader />
@@ -129,24 +121,27 @@ export default function ShareScreen() {
         visible={menuFile !== null}
         file={menuFile}
         onClose={() => setMenuFile(null)}
+        onStar={() => menuFile && handleStar([menuFile])}
+        onRename={() => menuFile && openRenameDialog(menuFile)}
+        onShare={handleShare}
+        onDelete={() => menuFile && handleDelete([menuFile])}
       />
+
+      {fileToRename && (
+        <RenameDialog
+          visible={renameDialogOpen}
+          initialValue={fileToRename.name}
+          onClose={closeRenameDialog}
+          onConfirm={(newName) => handleRename(fileToRename, newName)}
+          title={fileToRename.extension ? "Rename File" : "Rename Folder"}
+        />
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  selectionBar: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    paddingHorizontal: 12,
-    paddingBottom: 12,
-  },
-  selectionLeft: { flexDirection: "row", alignItems: "center" },
-  selectionCloseBtn: { padding: 8 },
-  selectionActions: { flexDirection: "row", alignItems: "center" },
-  selectionActionBtn: { padding: 8, marginLeft: 4 },
   sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
