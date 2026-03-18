@@ -22,6 +22,9 @@ export const Navbar = () => {
         "bg-background/50 backdrop-blur-sm border-transparent"
       )}
     >
+      <div className='bg-primary text-primary-foreground py-2 px-4 text-center text-xs font-medium'>
+        🚀 StoreOne mobile application is coming soon! Stay tuned.
+      </div>
       <div className='container mx-auto px-6 h-20 flex items-center justify-between'>
         <Link
           to='/'
