@@ -31,6 +31,7 @@ export default function ShareScreen() {
     handleRename,
     handleDelete,
     handleShare,
+    handleDownload,
     renameDialogOpen,
     fileToRename,
     openRenameDialog,
@@ -59,7 +60,7 @@ export default function ShareScreen() {
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-        console.log("preview file", file);
+
       } else {
         router.push(`/directory/${file._id}`);
       }
@@ -81,6 +82,7 @@ export default function ShareScreen() {
           onRename={openRenameDialog}
           onShare={handleShare}
           onDelete={handleDelete}
+          onDownload={handleDownload}
         />
       ) : (
         <View style={{ paddingTop: insets.top + 8 }}>
@@ -125,6 +127,7 @@ export default function ShareScreen() {
         onRename={() => menuFile && openRenameDialog(menuFile)}
         onShare={handleShare}
         onDelete={() => menuFile && handleDelete([menuFile])}
+        onDownload={() => menuFile && handleDownload([menuFile])}
       />
 
       {fileToRename && (

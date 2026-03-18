@@ -1,5 +1,10 @@
 import React, { useMemo } from "react";
-import { RefreshControl, StyleSheet, useWindowDimensions, View } from "react-native";
+import {
+  RefreshControl,
+  StyleSheet,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { FlashList } from "@shopify/flash-list";
 import { Text } from "@/components/ui";
@@ -30,11 +35,11 @@ export const FileGrid = ({
 
   const handlePress = (file: FileItem) => {
     if (isSelectionActive) {
-      console.log("toogle section")
+      console.log("toogle section");
       // In selection mode, tap toggles selection
       toggleSelection(file._id);
     } else {
-      console.log("open file")  
+      console.log("open file");
       // Not in selection mode, tap navigates/opens
       onFileDoubleClick(file);
     }
@@ -47,7 +52,7 @@ export const FileGrid = ({
 
   const renderItem = ({ item }: { item: FileItem }) => {
     const isSelected = selectedFiles.has(item._id);
-    console.log(item);
+
     return (
       <FileItemView
         file={item}

@@ -13,6 +13,7 @@ interface SelectionBarProps {
   onRename: (file: FileItem) => void;
   onShare: () => void;
   onDelete: (selectedFiles: FileItem[]) => void;
+  onDownload: (selectedFiles: FileItem[]) => void;
 }
 
 export const SelectionBar = ({
@@ -21,6 +22,7 @@ export const SelectionBar = ({
   onRename,
   onShare,
   onDelete,
+  onDownload,
 }: SelectionBarProps) => {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
@@ -53,6 +55,10 @@ export const SelectionBar = ({
     onDelete(selectedFileObjects);
   };
 
+  const handleDownloadPress = () => {
+    onDownload(selectedFileObjects);
+  };
+
   return (
     <View
       style={[
@@ -81,7 +87,10 @@ export const SelectionBar = ({
         >
           <MaterialIcons name="star-outline" size={22} color={colors.text} />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.selectionActionBtn}>
+        <TouchableOpacity
+          style={styles.selectionActionBtn}
+          onPress={handleDownloadPress}
+        >
           <MaterialIcons name="file-download" size={22} color={colors.text} />
         </TouchableOpacity>
         <TouchableOpacity

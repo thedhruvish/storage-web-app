@@ -57,7 +57,6 @@ export default function SearchScreen() {
 
   const handleFilePress = (file: FileItem) => {
     if (file.extension) {
-      console.log("preview file", file);
     } else {
       router.push(`/directory/${file._id}`);
     }

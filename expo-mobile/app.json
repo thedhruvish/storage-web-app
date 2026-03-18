@@ -18,7 +18,12 @@
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
       "predictiveBackGestureEnabled": false,
-      "package": "com.prakrushi.expomobile"
+      "package": "com.prakrushi.expomobile",
+      "permissions": [
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "MEDIA_LIBRARY"
+      ]
     },
     "web": {
       "output": "static",
@@ -38,6 +43,14 @@
       ],
       "expo-sqlite",
       "expo-sharing",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos.",
+          "savePhotosPermission": "Allow $(PRDUCT_NAME) to save photos.",
+          "isUsageDescriptionRequired": true
+        }
+      ],
       "@react-native-google-signin/google-signin"
     ],
     "experiments": {

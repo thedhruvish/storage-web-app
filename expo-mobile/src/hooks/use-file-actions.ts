@@ -4,10 +4,12 @@ import { useUpdateDocument, useDeleteDocument } from "@/api/document-api";
 import { useDirectoryStore } from "@/store/directory-store";
 import type { FileItem } from "@/components/directory/types";
 import { useDialog } from "@/components/dialog";
+import { useDownload } from "./use-download";
 
 export const useFileActions = (directoryId: string = "") => {
   const { selectedFiles, clearSelection } = useDirectoryStore();
   const { showDialog } = useDialog();
+  const { downloadBatch } = useDownload();
   
   const starToggleMutation = usestarredToggle();
   const updateDirectoryMutation = useUpdateDirectory(directoryId);
@@ -86,6 +88,11 @@ export const useFileActions = (directoryId: string = "") => {
     });
   }, [showDialog]);
 
+  const handleDownload = useCallback(async (files: FileItem[]) => {
+    await downloadBatch(files);
+    clearSelection();
+  }, [downloadBatch, clearSelection]);
+
   const openRenameDialog = useCallback((file: FileItem) => {
     setFileToRename(file);
     setRenameDialogOpen(true);
@@ -101,6 +108,7 @@ export const useFileActions = (directoryId: string = "") => {
     handleRename,
     handleDelete,
     handleShare,
+    handleDownload,
     renameDialogOpen,
     fileToRename,
     openRenameDialog,
