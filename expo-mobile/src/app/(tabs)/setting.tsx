@@ -39,7 +39,6 @@ export default function TrashScreen() {
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-
       } else {
         router.push(`/directory/${file._id}`);
       }
@@ -55,9 +54,20 @@ export default function TrashScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <View style={[styles.selectionBar, { paddingTop: insets.top + 8, backgroundColor: colors.secondaryBackground }]}>
+        <View
+          style={[
+            styles.selectionBar,
+            {
+              paddingTop: insets.top + 8,
+              backgroundColor: colors.secondaryBackground,
+            },
+          ]}
+        >
           <View style={styles.selectionLeft}>
-            <TouchableOpacity onPress={clearSelection} style={styles.selectionCloseBtn}>
+            <TouchableOpacity
+              onPress={clearSelection}
+              style={styles.selectionCloseBtn}
+            >
               <MaterialIcons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
             <Text variant="h3" style={{ color: colors.text, marginLeft: 12 }}>
@@ -69,7 +79,11 @@ export default function TrashScreen() {
               <MaterialIcons name="restore" size={22} color={colors.text} />
             </TouchableOpacity>
             <TouchableOpacity style={styles.selectionActionBtn}>
-              <MaterialIcons name="delete-forever" size={22} color={colors.error} />
+              <MaterialIcons
+                name="delete-forever"
+                size={22}
+                color={colors.error}
+              />
             </TouchableOpacity>
           </View>
         </View>
@@ -86,18 +100,47 @@ export default function TrashScreen() {
         <Text variant="caption" style={{ color: colors.secondaryText }}>
           Items in trash are deleted after 30 days
         </Text>
-        <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
+        <View
+          style={[
+            styles.toggleContainer,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
+        >
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
-            style={[styles.toggleItem, directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "list" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="view-list" size={20} color={directoryLayout === "list" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="view-list"
+              size={20}
+              color={
+                directoryLayout === "list" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("grid")}
-            style={[styles.toggleItem, directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "grid" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="grid-view" size={20} color={directoryLayout === "grid" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="grid-view"
+              size={20}
+              color={
+                directoryLayout === "grid" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
         </View>
       </View>

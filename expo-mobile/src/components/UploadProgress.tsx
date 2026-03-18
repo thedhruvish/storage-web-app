@@ -9,14 +9,17 @@ import {
 import { MaterialIcons } from "@expo/vector-icons";
 import Animated, {
   FadeIn,
-  FadeOut,
   SlideInDown,
   SlideOutDown,
   Layout,
 } from "react-native-reanimated";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "./ui";
-import { useUploadStore, cancelUpload, retryUpload } from "@/store/upload-store";
+import {
+  useUploadStore,
+  cancelUpload,
+  retryUpload,
+} from "@/store/upload-store";
 
 const { height: SCREEN_HEIGHT } = Dimensions.get("window");
 
@@ -26,23 +29,24 @@ export const UploadProgress = () => {
   const [isExpanded, setIsExpanded] = useState(false);
 
   const activeFiles = useMemo(
-    () => files.filter((f) => f.status !== "success" && f.status !== "canceled"),
-    [files]
+    () =>
+      files.filter((f) => f.status !== "success" && f.status !== "canceled"),
+    [files],
   );
-  
+
   const completedCount = useMemo(
     () => files.filter((f) => f.status === "success").length,
-    [files]
+    [files],
   );
 
   const isUploading = useMemo(
     () => files.some((f) => f.status === "uploading" || f.status === "queued"),
-    [files]
+    [files],
   );
 
   const errorFiles = useMemo(
     () => files.filter((f) => f.status === "error" || f.status === "fail"),
-    [files]
+    [files],
   );
 
   const hasErrors = errorFiles.length > 0;
@@ -58,12 +62,17 @@ export const UploadProgress = () => {
     ? `Uploading ${activeFiles.length} ${activeFiles.length === 1 ? "file" : "files"}...`
     : hasErrors
       ? `${errorFiles.length} upload${errorFiles.length === 1 ? "" : "s"} failed`
-      : completedCount > 0 
+      : completedCount > 0
         ? `${completedCount} upload${completedCount === 1 ? "" : "s"} complete`
         : "Upload finished";
 
   const getHeaderIcon = () => {
-    if (isUploading) return { name: "cloud-upload", color: colors.primary, bg: colors.primary + "20" };
+    if (isUploading)
+      return {
+        name: "cloud-upload",
+        color: colors.primary,
+        bg: colors.primary + "20",
+      };
     if (hasErrors) return { name: "error", color: "#F44336", bg: "#F4433620" };
     return { name: "check", color: "#4CAF50", bg: "#4CAF5020" };
   };
@@ -86,22 +95,36 @@ export const UploadProgress = () => {
       ]}
     >
       {/* Collapsed Bar / Header */}
-      <View style={[styles.header, { height: 64, paddingHorizontal: spacing.md }]}>
+      <View
+        style={[styles.header, { height: 64, paddingHorizontal: spacing.md }]}
+      >
         <View style={styles.headerLeft}>
-          <View style={[styles.iconContainer, { backgroundColor: headerIcon.bg }]}>
+          <View
+            style={[styles.iconContainer, { backgroundColor: headerIcon.bg }]}
+          >
             <MaterialIcons
               name={headerIcon.name as any}
               size={20}
               color={headerIcon.color}
             />
           </View>
-          <Text variant="body" weight="medium" style={{ marginLeft: spacing.sm, color: hasErrors && !isUploading ? "#F44336" : colors.text }}>
+          <Text
+            variant="body"
+            weight="medium"
+            style={{
+              marginLeft: spacing.sm,
+              color: hasErrors && !isUploading ? "#F44336" : colors.text,
+            }}
+          >
             {statusText}
           </Text>
         </View>
 
         <View style={styles.headerRight}>
-          <TouchableOpacity onPress={() => setIsExpanded(!isExpanded)} style={styles.actionButton}>
+          <TouchableOpacity
+            onPress={() => setIsExpanded(!isExpanded)}
+            style={styles.actionButton}
+          >
             <MaterialIcons
               name={isExpanded ? "keyboard-arrow-down" : "keyboard-arrow-up"}
               size={24}
@@ -116,17 +139,27 @@ export const UploadProgress = () => {
 
       {/* Expanded List */}
       {isExpanded && (
-        <ScrollView style={styles.list} contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView
+          style={styles.list}
+          contentContainerStyle={{ paddingBottom: 24 }}
+        >
           {files.map((file) => (
             <Animated.View
               key={file.id}
               layout={Layout}
               entering={FadeIn}
-              style={[styles.fileItem, { borderBottomColor: colors.border, borderBottomWidth: 0.5 }]}
+              style={[
+                styles.fileItem,
+                { borderBottomColor: colors.border, borderBottomWidth: 0.5 },
+              ]}
             >
               <View style={styles.fileIcon}>
                 <MaterialIcons
-                  name={file.mimeType.startsWith("image/") ? "image" : "insert-drive-file"}
+                  name={
+                    file.mimeType.startsWith("image/")
+                      ? "image"
+                      : "insert-drive-file"
+                  }
                   size={24}
                   color={colors.secondaryText}
                 />
@@ -141,19 +174,23 @@ export const UploadProgress = () => {
                       <View
                         style={[
                           styles.progressBarFill,
-                          { backgroundColor: colors.primary, width: `${file.progress}%` },
+                          {
+                            backgroundColor: colors.primary,
+                            width: `${file.progress}%`,
+                          },
                         ]}
                       />
                     </View>
                   )}
-                  <Text variant="small" color="secondaryText">
+                  <Text variant="caption" color="secondaryText">
                     {file.status === "uploading"
                       ? `${file.progress}%`
-                      : file.status.charAt(0).toUpperCase() + file.status.slice(1)}
+                      : file.status.charAt(0).toUpperCase() +
+                        file.status.slice(1)}
                   </Text>
                 </View>
                 {file.error && (
-                  <Text variant="small" style={{ color: "#F44336" }}>
+                  <Text variant="caption" style={{ color: "#F44336" }}>
                     {file.error}
                   </Text>
                 )}
@@ -161,16 +198,30 @@ export const UploadProgress = () => {
               <View style={styles.fileActions}>
                 {file.status === "uploading" && (
                   <TouchableOpacity onPress={() => cancelUpload(file.id)}>
-                    <MaterialIcons name="close" size={20} color={colors.secondaryText} />
+                    <MaterialIcons
+                      name="close"
+                      size={20}
+                      color={colors.secondaryText}
+                    />
                   </TouchableOpacity>
                 )}
-                {(file.status === "error" || file.status === "canceled" || file.status === "fail") && (
+                {(file.status === "error" ||
+                  file.status === "canceled" ||
+                  file.status === "fail") && (
                   <TouchableOpacity onPress={() => retryUpload(file.id)}>
-                    <MaterialIcons name="refresh" size={20} color={colors.primary} />
+                    <MaterialIcons
+                      name="refresh"
+                      size={20}
+                      color={colors.primary}
+                    />
                   </TouchableOpacity>
                 )}
                 {file.status === "success" && (
-                  <MaterialIcons name="check-circle" size={20} color="#4CAF50" />
+                  <MaterialIcons
+                    name="check-circle"
+                    size={20}
+                    color="#4CAF50"
+                  />
                 )}
               </View>
             </Animated.View>

@@ -1,16 +1,21 @@
-import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import React from "react";
+import { Ionicons } from "@expo/vector-icons";
+import {
+  GoogleSignin,
+  statusCodes,
+} from "@react-native-google-signin/google-signin";
 import { useTheme } from "@/hooks/use-theme";
-import { Text, Button } from './ui';
+import { Button } from "./ui";
 
 interface GoogleSignInButtonProps {
   onSuccess: (userInfo: any) => void;
   onError: (error: any) => void;
 }
 
-export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonProps) {
+export function GoogleSignInButton({
+  onSuccess,
+  onError,
+}: GoogleSignInButtonProps) {
   const { colors } = useTheme();
 
   const signIn = async () => {
@@ -39,26 +44,7 @@ export function GoogleSignInButton({ onSuccess, onError }: GoogleSignInButtonPro
       size="lg"
       leftIcon={<Ionicons name="logo-google" size={20} color={colors.text} />}
       title="Continue with Google"
-      style={{ width: '100%' }}
+      style={{ width: "100%" }}
     />
   );
 }
-
-const styles = StyleSheet.create({
-  button: {
-    height: 50,
-    borderRadius: 12,
-    borderWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-  },
-  text: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-});

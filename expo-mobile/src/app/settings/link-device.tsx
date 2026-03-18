@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, TouchableOpacity, Alert, RefreshControl, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  Alert,
+  RefreshControl,
+  Platform,
+} from "react-native";
 import { Stack } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
@@ -23,101 +31,163 @@ export default function LinkDeviceScreen() {
       showGlobalDialog({
         title: "Action Not Allowed",
         message: "You cannot revoke your current active session from here.",
-        type: "info"
+        type: "info",
       });
       return;
     }
 
-    Alert.alert("Revoke Session", "Are you sure you want to log out from this device?", [
-      { text: "Cancel", style: "cancel" },
-      { 
-        text: "Revoke", 
-        style: "destructive", 
-        onPress: () => {
-          showGlobalDialog({ title: "Coming Soon", message: "Session management is being improved.", type: "info" });
-        }
-      },
-    ]);
+    Alert.alert(
+      "Revoke Session",
+      "Are you sure you want to log out from this device?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Revoke",
+          style: "destructive",
+          onPress: () => {
+            showGlobalDialog({
+              title: "Coming Soon",
+              message: "Session management is being improved.",
+              type: "info",
+            });
+          },
+        },
+      ],
+    );
   };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: "Link a Device", headerTransparent: false }} />
-      
-      <ScrollView 
+      <Stack.Screen
+        options={{ title: "Link a Device", headerTransparent: false }}
+      />
+
+      <ScrollView
         contentContainerStyle={[styles.scrollContent, { padding: spacing.md }]}
-        refreshControl={<RefreshControl refreshing={isLoading} onRefresh={refetch} />}
+        refreshControl={
+          <RefreshControl refreshing={isLoading} onRefresh={refetch} />
+        }
       >
-        <Animated.View 
+        <Animated.View
           entering={FadeIn.duration(600)}
-          style={[styles.infoCard, { backgroundColor: colors.primary + "15", borderColor: colors.primary + "30" }]}
+          style={[
+            styles.infoCard,
+            {
+              backgroundColor: colors.primary + "15",
+              borderColor: colors.primary + "30",
+            },
+          ]}
         >
-          <View style={[styles.infoIconContainer, { backgroundColor: colors.primary }]}>
+          <View
+            style={[
+              styles.infoIconContainer,
+              { backgroundColor: colors.primary },
+            ]}
+          >
             <Ionicons name="qr-code-outline" size={32} color="white" />
           </View>
           <View style={{ flex: 1, marginLeft: 16 }}>
-            <Text weight="bold" variant="h3" color="primary">Desktop Linking</Text>
-            <Text variant="bodySmall" color="secondaryText" style={{ marginTop: 4 }}>
-              Scan the QR code on StoreOne Web to securely link your account to a new device.
+            <Text weight="bold" variant="h3" color="primary">
+              Desktop Linking
+            </Text>
+            <Text
+              variant="bodySmall"
+              color="secondaryText"
+              style={{ marginTop: 4 }}
+            >
+              Scan the QR code on StoreOne Web to securely link your account to
+              a new device.
             </Text>
           </View>
         </Animated.View>
 
-        <Animated.View 
+        <Animated.View
           entering={FadeInDown.delay(200).duration(500)}
           style={{ marginTop: spacing.xl }}
         >
           <View style={styles.sectionHeader}>
-            <Text variant="label" color="secondaryText" style={styles.sectionTitle}>
+            <Text
+              variant="label"
+              color="secondaryText"
+              style={styles.sectionTitle}
+            >
               ACTIVE SESSIONS ({sessions.length})
             </Text>
-            {isLoading && <Text variant="caption" color="primary">Updating...</Text>}
+            {isLoading && (
+              <Text variant="caption" color="primary">
+                Updating...
+              </Text>
+            )}
           </View>
-          
-          <View style={[styles.card, { backgroundColor: colors.secondaryBackground }]}>
+
+          <View
+            style={[
+              styles.card,
+              { backgroundColor: colors.secondaryBackground },
+            ]}
+          >
             {sessions.length > 0 ? (
               sessions.map((session: any, index: number) => (
                 <View key={session.sessionId || index}>
-                  <SessionItem 
+                  <SessionItem
                     session={session}
                     isCurrent={session.sessionId === activeSessionId}
                     index={index}
                     onRevoke={handleRevokeSession}
                   />
                   {index < sessions.length - 1 && (
-                    <View style={[styles.separator, { backgroundColor: colors.border }]} />
+                    <View
+                      style={[
+                        styles.separator,
+                        { backgroundColor: colors.border },
+                      ]}
+                    />
                   )}
                 </View>
               ))
             ) : (
               <View style={styles.emptyContainer}>
-                <Ionicons name="shield-checkmark-outline" size={48} color={colors.secondaryText} />
-                <Text color="secondaryText" style={{ marginTop: 12 }}>No other active sessions found.</Text>
+                <Ionicons
+                  name="shield-checkmark-outline"
+                  size={48}
+                  color={colors.secondaryText}
+                />
+                <Text color="secondaryText" style={{ marginTop: 12 }}>
+                  No other active sessions found.
+                </Text>
               </View>
             )}
           </View>
-          
-          <Text variant="caption" color="secondaryText" style={styles.footerHint}>
+
+          <Text
+            variant="caption"
+            color="secondaryText"
+            style={styles.footerHint}
+          >
             Make sure you are on the official StoreOne website before scanning.
           </Text>
         </Animated.View>
       </ScrollView>
 
       {/* Fixed Bottom Button Container */}
-      <View style={[styles.bottomContainer, { backgroundColor: colors.background }]}>
-        <TouchableOpacity 
+      <View
+        style={[styles.bottomContainer, { backgroundColor: colors.background }]}
+      >
+        <TouchableOpacity
           style={[styles.qrButton, { backgroundColor: colors.primary }]}
           onPress={() => setIsScannerVisible(true)}
           activeOpacity={0.8}
         >
           <Ionicons name="scan-outline" size={24} color="white" />
-          <Text weight="bold" style={{ color: "white", marginLeft: 12 }}>Link a Device</Text>
+          <Text weight="bold" style={{ color: "white", marginLeft: 12 }}>
+            Link a Device
+          </Text>
         </TouchableOpacity>
       </View>
 
-      <Scanner 
-        isVisible={isScannerVisible} 
-        onClose={() => setIsScannerVisible(false)} 
+      <Scanner
+        isVisible={isScannerVisible}
+        onClose={() => setIsScannerVisible(false)}
       />
     </View>
   );
@@ -198,5 +268,3 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
 });
-
-

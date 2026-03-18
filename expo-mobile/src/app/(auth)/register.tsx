@@ -85,11 +85,11 @@ export default function RegisterScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { 
+          {
             paddingHorizontal: spacing.lg,
             paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg
-          }
+            paddingBottom: insets.bottom + spacing.lg,
+          },
         ]}
         keyboardShouldPersistTaps="handled"
       >
@@ -117,7 +117,13 @@ export default function RegisterScreen() {
             returnKeyType="next"
             onSubmitEditing={() => emailRef.current?.focus()}
             blurOnSubmit={false}
-            leftIcon={<Ionicons name="person-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="person-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
           />
 
           <TextInput
@@ -132,7 +138,13 @@ export default function RegisterScreen() {
             returnKeyType="next"
             onSubmitEditing={() => passwordRef.current?.focus()}
             blurOnSubmit={false}
-            leftIcon={<Ionicons name="mail-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
           />
 
           <TextInput
@@ -146,12 +158,22 @@ export default function RegisterScreen() {
             returnKeyType="next"
             onSubmitEditing={() => confirmPasswordRef.current?.focus()}
             blurOnSubmit={false}
-            leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
             rightIcon={
               <Button
                 variant="ghost"
                 onPress={() => setShowPassword(!showPassword)}
-                style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+                style={{
+                  minHeight: 0,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
               >
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
@@ -172,12 +194,22 @@ export default function RegisterScreen() {
             editable={!isLoading}
             returnKeyType="done"
             onSubmitEditing={handleRegister}
-            leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
             rightIcon={
               <Button
                 variant="ghost"
                 onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+                style={{
+                  minHeight: 0,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
               >
                 <Ionicons
                   name={showConfirmPassword ? "eye-off" : "eye"}
@@ -221,9 +253,7 @@ export default function RegisterScreen() {
           />
 
           <View style={[styles.footer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">
-              Already have an account?{" "}
-            </Text>
+            <Text color="secondaryText">Already have an account? </Text>
             <Button
               variant="ghost"
               onPress={() => router.push("/login")}

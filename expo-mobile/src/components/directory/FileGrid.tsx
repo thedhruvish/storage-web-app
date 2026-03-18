@@ -14,7 +14,7 @@ import type { FileGridProps, FileItem } from "./types";
 
 export const FileGrid = ({
   files,
-  documentType,
+
   viewMode,
   onFileDoubleClick,
   onMenuPress,

@@ -40,7 +40,8 @@ export const RenameDialog = ({
           const lastDotIndex = initialValue.lastIndexOf(".");
           // If there's a dot and it's not the first character, select up to the dot
           // Otherwise select everything (for folders or files without extensions)
-          const selectionEnd = lastDotIndex > 0 ? lastDotIndex : initialValue.length;
+          const selectionEnd =
+            lastDotIndex > 0 ? lastDotIndex : initialValue.length;
           inputRef.current.setSelection(0, selectionEnd);
         }
       }, 150);

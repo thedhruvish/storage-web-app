@@ -1,5 +1,5 @@
 import React, { createContext, useCallback, useContext, useState } from "react";
-import { Modal, StyleSheet, View, TouchableOpacity } from "react-native";
+import { Modal, StyleSheet, View } from "react-native";
 import { useTheme } from "@/hooks/use-theme";
 import { Text, Button } from "./ui";
 
@@ -134,7 +134,11 @@ function CommonDialog({
             )}
             <Button
               title={options.confirmText || "OK"}
-              variant={options.type === "error" || options.type === "warning" ? "primary" : "primary"}
+              variant={
+                options.type === "error" || options.type === "warning"
+                  ? "primary"
+                  : "primary"
+              }
               onPress={handleConfirm}
               style={styles.flexButton}
             />

@@ -35,37 +35,64 @@ export const DirectoryContent = ({
 
   if (isLoading) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.background }]}
+      >
         <ActivityIndicator size="large" color={colors.tint} />
-        <Text variant="caption" style={[styles.loadingText, { color: colors.secondaryText }]}>Loading...</Text>
+        <Text
+          variant="caption"
+          style={[styles.loadingText, { color: colors.secondaryText }]}
+        >
+          Loading...
+        </Text>
       </View>
     );
   }
 
   if (isError) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.background }]}
+      >
         <MaterialIcons name="cloud-off" size={48} color={colors.error} />
-        <Text variant="body" style={[styles.errorText, { color: colors.error }]}>Error loading content.</Text>
+        <Text
+          variant="body"
+          style={[styles.errorText, { color: colors.error }]}
+        >
+          Error loading content.
+        </Text>
       </View>
     );
   }
 
   if (isEmpty) {
     return (
-      <View style={[styles.centerContainer, { backgroundColor: colors.background }]}>
-        <View style={[styles.emptyIconContainer, { backgroundColor: colors.secondaryBackground }]}>
-          <MaterialIcons name="cloud-off" size={40} color={colors.secondaryText} />
+      <View
+        style={[styles.centerContainer, { backgroundColor: colors.background }]}
+      >
+        <View
+          style={[
+            styles.emptyIconContainer,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
+        >
+          <MaterialIcons
+            name="cloud-off"
+            size={40}
+            color={colors.secondaryText}
+          />
         </View>
-        <Text variant="h3" style={[styles.emptyMessageText, { color: colors.secondaryText }]}>{emptyMessage}</Text>
+        <Text
+          variant="h3"
+          style={[styles.emptyMessageText, { color: colors.secondaryText }]}
+        >
+          {emptyMessage}
+        </Text>
       </View>
     );
   }
 
-  const allFiles = [
-    ...(files.directories || []),
-    ...(files.documents || []),
-  ];
+  const allFiles = [...(files.directories || []), ...(files.documents || [])];
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>

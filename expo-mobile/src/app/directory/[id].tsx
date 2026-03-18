@@ -26,12 +26,15 @@ export default function DirectoryScreen() {
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
-  const { data, isLoading, isError, refetch } = useGetAllDirectoryList(id || "", {
-    isStarred: undefined,
-    search: undefined,
-    extensions: undefined,
-    size: undefined,
-  });
+  const { data, isLoading, isError, refetch } = useGetAllDirectoryList(
+    id || "",
+    {
+      isStarred: undefined,
+      search: undefined,
+      extensions: undefined,
+      size: undefined,
+    },
+  );
 
   const {
     handleStar,
@@ -60,15 +63,14 @@ export default function DirectoryScreen() {
     };
   }, [data]);
 
-  const allFiles = useMemo(() => [
-    ...files.directories,
-    ...files.documents
-  ], [files]);
+  const allFiles = useMemo(
+    () => [...files.directories, ...files.documents],
+    [files],
+  );
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-
       } else {
         router.push(`/directory/${file._id}`);
       }
@@ -84,8 +86,8 @@ export default function DirectoryScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <SelectionBar 
-          allFiles={allFiles} 
+        <SelectionBar
+          allFiles={allFiles}
           onStar={handleStar}
           onRename={openRenameDialog}
           onShare={handleShare}
@@ -95,13 +97,23 @@ export default function DirectoryScreen() {
       ) : (
         /* ===== NORMAL HEADER ===== */
         <View style={[styles.headerContainer, { paddingTop: insets.top + 8 }]}>
-          <TouchableOpacity onPress={() => router.back()} style={styles.backButton}>
+          <TouchableOpacity
+            onPress={() => router.back()}
+            style={styles.backButton}
+          >
             <MaterialIcons name="arrow-back" size={24} color={colors.text} />
           </TouchableOpacity>
-          <Text variant="h3" style={[styles.headerTitle, { color: colors.text }]} numberOfLines={1}>
+          <Text
+            variant="h3"
+            style={[styles.headerTitle, { color: colors.text }]}
+            numberOfLines={1}
+          >
             {files.parent ? files.parent.name : "Files"}
           </Text>
-          <TouchableOpacity onPress={() => router.push("/search")} style={styles.searchIconBtn}>
+          <TouchableOpacity
+            onPress={() => router.push("/search")}
+            style={styles.searchIconBtn}
+          >
             <MaterialIcons name="search" size={24} color={colors.text} />
           </TouchableOpacity>
         </View>
@@ -109,21 +121,53 @@ export default function DirectoryScreen() {
 
       {/* Section Header */}
       <View style={styles.sectionHeader}>
-        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>
+        <Text
+          variant="h3"
+          style={[styles.sectionTitle, { color: colors.text }]}
+        >
           {files.parent ? files.parent.name : "Files"}
         </Text>
-        <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
+        <View
+          style={[
+            styles.toggleContainer,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
+        >
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
-            style={[styles.toggleItem, directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "list" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="view-list" size={20} color={directoryLayout === "list" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="view-list"
+              size={20}
+              color={
+                directoryLayout === "list" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("grid")}
-            style={[styles.toggleItem, directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "grid" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="grid-view" size={20} color={directoryLayout === "grid" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="grid-view"
+              size={20}
+              color={
+                directoryLayout === "grid" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
         </View>
       </View>
@@ -138,10 +182,7 @@ export default function DirectoryScreen() {
         refreshing={refreshing}
       />
 
-      <PlusMenuFAB 
-        directoryId={id} 
-        isSelectionMode={isSelectionMode} 
-      />
+      <PlusMenuFAB directoryId={id} isSelectionMode={isSelectionMode} />
 
       {/* Three-dot Action Menu */}
       <FileActionMenu

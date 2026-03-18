@@ -35,7 +35,7 @@ export const useDeleteDocument = (directoryId?: string) => {
   });
 };
 
-export const getShareDocument = (shareId: string) => {
+export const useGetShareDocument = (shareId: string) => {
   return useQuery({
     queryKey: ["share", shareId],
     queryFn: async () => {

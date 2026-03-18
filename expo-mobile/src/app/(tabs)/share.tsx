@@ -19,7 +19,7 @@ import { useFileActions } from "@/hooks/use-file-actions";
 export default function ShareScreen() {
   const router = useRouter();
   const { directoryLayout, setDirectoryLayout } = useAppearance();
-  const { selectedFiles, clearSelection } = useDirectoryStore();
+  const { selectedFiles } = useDirectoryStore();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
@@ -52,15 +52,14 @@ export default function ShareScreen() {
     };
   }, [data]);
 
-  const allFiles = useMemo(() => [
-    ...files.directories,
-    ...files.documents
-  ], [files]);
+  const allFiles = useMemo(
+    () => [...files.directories, ...files.documents],
+    [files],
+  );
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-
       } else {
         router.push(`/directory/${file._id}`);
       }
@@ -76,8 +75,8 @@ export default function ShareScreen() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <SelectionBar 
-          allFiles={allFiles} 
+        <SelectionBar
+          allFiles={allFiles}
           onStar={handleStar}
           onRename={openRenameDialog}
           onShare={handleShare}
@@ -91,19 +90,53 @@ export default function ShareScreen() {
       )}
 
       <View style={styles.sectionHeader}>
-        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>Shared with me</Text>
-        <View style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}>
+        <Text
+          variant="h3"
+          style={[styles.sectionTitle, { color: colors.text }]}
+        >
+          Shared with me
+        </Text>
+        <View
+          style={[
+            styles.toggleContainer,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
+        >
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
-            style={[styles.toggleItem, directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "list" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="view-list" size={20} color={directoryLayout === "list" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="view-list"
+              size={20}
+              color={
+                directoryLayout === "list" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("grid")}
-            style={[styles.toggleItem, directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 }]}
+            style={[
+              styles.toggleItem,
+              directoryLayout === "grid" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
+            ]}
           >
-            <MaterialIcons name="grid-view" size={20} color={directoryLayout === "grid" ? colors.text : colors.secondaryText} />
+            <MaterialIcons
+              name="grid-view"
+              size={20}
+              color={
+                directoryLayout === "grid" ? colors.text : colors.secondaryText
+              }
+            />
           </TouchableOpacity>
         </View>
       </View>

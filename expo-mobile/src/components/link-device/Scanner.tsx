@@ -1,11 +1,18 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, Modal, Linking, Platform } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  Modal,
+  Linking,
+  Platform,
+} from "react-native";
 import { CameraView, useCameraPermissions } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
 import { showGlobalDialog } from "@/components/dialog";
-import Animated, { FadeIn, FadeOut, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeOut, ZoomIn } from "react-native-reanimated";
 
 interface ScannerProps {
   isVisible: boolean;
@@ -21,6 +28,7 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
     if (isVisible && (!permission || permission.status === "undetermined")) {
       requestPermission();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible, permission]);
 
   const handleScan = async () => {
@@ -28,7 +36,8 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
     if (status !== "granted") {
       showGlobalDialog({
         title: "Camera Permission",
-        message: "We need your permission to use the camera to scan the QR code. Please enable it in your device settings.",
+        message:
+          "We need your permission to use the camera to scan the QR code. Please enable it in your device settings.",
         type: "info",
         confirmText: "Open Settings",
         onConfirm: () => {
@@ -37,22 +46,22 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
           } else {
             Linking.openSettings();
           }
-        }
+        },
       });
       return;
     }
   };
 
-  const handleBarcodeScanned = ({ type, data }: { type: string; data: string }) => {
+  const handleBarcodeScanned = ({ data }: { type: string; data: string }) => {
     if (scanned) return;
     setScanned(true);
     console.log(`Scanned URL: ${data}`);
-    
+
     showGlobalDialog({
       title: "Device Linked",
       message: `Successfully scanned: ${data}. Linking process started.`,
       type: "success",
-      onConfirm: onClose
+      onConfirm: onClose,
     });
 
     // Reset scanned state after a delay or upon closing
@@ -69,13 +78,15 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
       onRequestClose={onClose}
     >
       <View style={styles.overlay}>
-        <Animated.View 
+        <Animated.View
           entering={ZoomIn.duration(300)}
           exiting={FadeOut.duration(200)}
           style={[styles.container, { backgroundColor: colors.background }]}
         >
           <View style={styles.header}>
-            <Text weight="bold" variant="h3">Scan QR Code</Text>
+            <Text weight="bold" variant="h3">
+              Scan QR Code
+            </Text>
             <TouchableOpacity onPress={onClose} style={styles.closeButton}>
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
@@ -91,30 +102,72 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
                 onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
               >
                 <View style={styles.scannerOverlay}>
-                  <View style={[styles.corner, styles.topLeft, { borderColor: colors.primary }]} />
-                  <View style={[styles.corner, styles.topRight, { borderColor: colors.primary }]} />
-                  <View style={[styles.corner, styles.bottomLeft, { borderColor: colors.primary }]} />
-                  <View style={[styles.corner, styles.bottomRight, { borderColor: colors.primary }]} />
+                  <View
+                    style={[
+                      styles.corner,
+                      styles.topLeft,
+                      { borderColor: colors.primary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.corner,
+                      styles.topRight,
+                      { borderColor: colors.primary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.corner,
+                      styles.bottomLeft,
+                      { borderColor: colors.primary },
+                    ]}
+                  />
+                  <View
+                    style={[
+                      styles.corner,
+                      styles.bottomRight,
+                      { borderColor: colors.primary },
+                    ]}
+                  />
                 </View>
               </CameraView>
             ) : (
-              <View style={[styles.permissionContainer, { backgroundColor: colors.card }]}>
-                <Ionicons name="camera-outline" size={64} color={colors.secondaryText} />
-                <Text style={{ marginTop: 16, textAlign: "center" }} color="secondaryText">
+              <View
+                style={[
+                  styles.permissionContainer,
+                  { backgroundColor: colors.card },
+                ]}
+              >
+                <Ionicons
+                  name="camera-outline"
+                  size={64}
+                  color={colors.secondaryText}
+                />
+                <Text
+                  style={{ marginTop: 16, textAlign: "center" }}
+                  color="secondaryText"
+                >
                   Camera permission is required to scan the QR code.
                 </Text>
-                <TouchableOpacity 
+                <TouchableOpacity
                   style={[styles.button, { backgroundColor: colors.primary }]}
                   onPress={handleScan}
                 >
-                  <Text weight="bold" style={{ color: "white" }}>Grant Permission</Text>
+                  <Text weight="bold" style={{ color: "white" }}>
+                    Grant Permission
+                  </Text>
                 </TouchableOpacity>
               </View>
             )}
           </View>
 
           <View style={styles.footer}>
-            <Text variant="bodySmall" color="secondaryText" style={{ textAlign: "center" }}>
+            <Text
+              variant="bodySmall"
+              color="secondaryText"
+              style={{ textAlign: "center" }}
+            >
               Center the QR code within the frame to scan.
             </Text>
           </View>

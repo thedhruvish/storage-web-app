@@ -52,7 +52,7 @@ function getNativeDefault(isDark: boolean): SystemColors {
       border: "#38383A",
       card: "#1C1C1E",
       notification: "#FF375F",
-    }
+    },
   };
 
   const selectedTheme = isDark ? defaults.dark : defaults.light;
@@ -85,7 +85,7 @@ function getNativeDefault(isDark: boolean): SystemColors {
       tint: Color.android.dynamic.primary,
       primary: Color.android.dynamic.primary,
       error: Color.android.dynamic.error,
-      success: Color.android.dynamic.tertiary, 
+      success: Color.android.dynamic.tertiary,
       warning: Color.android.dynamic.errorContainer,
       border: Color.android.dynamic.outline,
       card: Color.android.dynamic.surfaceVariant,

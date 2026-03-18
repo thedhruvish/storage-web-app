@@ -12,47 +12,67 @@ interface SessionItemProps {
   onRevoke: (sessionId: string) => void;
 }
 
-export const SessionItem = ({ session, isCurrent, index, onRevoke }: SessionItemProps) => {
+export const SessionItem = ({
+  session,
+  isCurrent,
+  index,
+  onRevoke,
+}: SessionItemProps) => {
   const { colors } = useTheme();
 
   const getDeviceIcon = (os: string = "") => {
     const osLower = os.toLowerCase();
-    if (osLower.includes("ios") || osLower.includes("android")) return "phone-portrait-outline";
-    if (osLower.includes("windows") || osLower.includes("mac") || osLower.includes("linux")) return "desktop-outline";
+    if (osLower.includes("ios") || osLower.includes("android"))
+      return "phone-portrait-outline";
+    if (
+      osLower.includes("windows") ||
+      osLower.includes("mac") ||
+      osLower.includes("linux")
+    )
+      return "desktop-outline";
     return "globe-outline";
   };
 
   return (
-    <Animated.View 
+    <Animated.View
       entering={FadeInDown.delay(index * 100).duration(400)}
       style={styles.container}
     >
       <View style={styles.sessionRow}>
         <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
-          <Ionicons 
-            name={getDeviceIcon(session.os)} 
-            size={24} 
-            color={isCurrent ? colors.primary : colors.text} 
+          <Ionicons
+            name={getDeviceIcon(session.os)}
+            size={24}
+            color={isCurrent ? colors.primary : colors.text}
           />
         </View>
         <View style={{ flex: 1, marginLeft: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text weight="semibold" numberOfLines={1}>
-              {session.browser || "Unknown Browser"} on {session.os || "Unknown OS"}
+              {session.browser || "Unknown Browser"} on{" "}
+              {session.os || "Unknown OS"}
             </Text>
             {isCurrent && (
-              <Badge label="Current" variant="success" size="sm" style={{ marginLeft: 8 }} />
+              <Badge
+                label="Current"
+                variant="success"
+                size="sm"
+                style={{ marginLeft: 8 }}
+              />
             )}
           </View>
           <Text variant="caption" color="secondaryText">
-            {session.ip} • {typeof session.location === 'object' ? `${session.location.city}, ${session.location.countryCode}` : (session.location || "Unknown Location")}
+            {session.ip} •{" "}
+            {typeof session.location === "object"
+              ? `${session.location.city}, ${session.location.countryCode}`
+              : session.location || "Unknown Location"}
           </Text>
           <Text variant="caption" color="secondaryText">
             Last active: {new Date(session.createdAt).toLocaleString()}
           </Text>
         </View>
         {!isCurrent && (
-          <TouchableOpacity 
+          <TouchableOpacity
             onPress={() => onRevoke(session.sessionId)}
             style={styles.revokeButton}
           >

@@ -20,7 +20,7 @@ import { showGlobalDialog } from "@/components/dialog";
 
 export default function SecurityScreen() {
   const { colors, spacing } = useTheme();
-  const { data: info, isPending, refetch } = useGetInfoOnSetting();
+  const { data: info, refetch } = useGetInfoOnSetting();
   const toggleMutation = useToggleTwoFactor();
   const deleteMutation = useDeleteTwoFactorMethod(
     info?.data?.twoFactorId || "",

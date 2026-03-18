@@ -1,4 +1,4 @@
-import axios from "axios";
+import { isAxiosError } from "axios";
 import { create } from "zustand";
 import axiosClient from "@/api/axios-client";
 import { useUserStore } from "./user-store";
@@ -142,7 +142,7 @@ const processFile = async (fileItem: UploadableFile, dirId: string) => {
     } else {
       let errorMessage = `Failed to upload ${fileItem.name}`;
 
-      if (axios.isAxiosError(error)) {
+      if (isAxiosError(error)) {
         errorMessage = error.response?.data?.message || error.message;
       } else if (error instanceof Error) {
         errorMessage = error.message;

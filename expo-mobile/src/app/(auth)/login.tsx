@@ -68,11 +68,11 @@ export default function LoginScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { 
+          {
             paddingHorizontal: spacing.lg,
             paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg
-          }
+            paddingBottom: insets.bottom + spacing.lg,
+          },
         ]}
         keyboardShouldPersistTaps="handled"
       >
@@ -102,7 +102,13 @@ export default function LoginScreen() {
             returnKeyType="next"
             onSubmitEditing={() => passwordRef.current?.focus()}
             blurOnSubmit={false}
-            leftIcon={<Ionicons name="mail-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
           />
 
           <TextInput
@@ -115,12 +121,22 @@ export default function LoginScreen() {
             editable={!isLoading}
             returnKeyType="done"
             onSubmitEditing={handleLogin}
-            leftIcon={<Ionicons name="lock-closed-outline" size={20} color={colors.secondaryText} />}
+            leftIcon={
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={colors.secondaryText}
+              />
+            }
             rightIcon={
               <Button
                 variant="ghost"
                 onPress={() => setShowPassword(!showPassword)}
-                style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+                style={{
+                  minHeight: 0,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
               >
                 <Ionicons
                   name={showPassword ? "eye-off" : "eye"}
@@ -164,9 +180,7 @@ export default function LoginScreen() {
           />
 
           <View style={[styles.footer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">
-              Don't have an account?{" "}
-            </Text>
+            <Text color="secondaryText">Don&apos;t have an account? </Text>
             <Button
               variant="ghost"
               onPress={() => router.push("/register")}

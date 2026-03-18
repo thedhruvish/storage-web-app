@@ -13,6 +13,7 @@ export const truncateFileName = (fileName: string, maxLength: number = 20) => {
     return fileName.substring(0, maxLength) + "...";
   }
   const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf("."));
-  const truncatedName = nameWithoutExt.substring(0, maxLength - ext.length - 3) + "...";
+  const truncatedName =
+    nameWithoutExt.substring(0, maxLength - ext.length - 3) + "...";
   return truncatedName + "." + ext;
 };

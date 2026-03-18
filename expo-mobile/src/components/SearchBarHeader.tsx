@@ -15,7 +15,10 @@ export const SearchBarHeader = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        style={[styles.searchPill, { backgroundColor: colors.secondaryBackground }]}
+        style={[
+          styles.searchPill,
+          { backgroundColor: colors.secondaryBackground },
+        ]}
         onPress={() => router.push("/search")}
         activeOpacity={0.9}
       >
@@ -25,7 +28,9 @@ export const SearchBarHeader = () => {
           color={colors.secondaryText}
           style={{ marginRight: 8 }}
         />
-        <Text style={[styles.searchPlaceholder, { color: colors.secondaryText }]}>
+        <Text
+          style={[styles.searchPlaceholder, { color: colors.secondaryText }]}
+        >
           Search in StoreOne
         </Text>
       </TouchableOpacity>
@@ -41,7 +46,9 @@ export const SearchBarHeader = () => {
             transition={200}
           />
         ) : (
-          <View style={[styles.avatarFallback, { backgroundColor: colors.tint }]}>
+          <View
+            style={[styles.avatarFallback, { backgroundColor: colors.tint }]}
+          >
             <Text style={styles.avatarInitial}>
               {user?.name?.charAt(0)?.toUpperCase() || "U"}
             </Text>

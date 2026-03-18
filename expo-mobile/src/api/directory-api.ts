@@ -10,7 +10,7 @@ export const useGetAllDirectoryList = (
     search: undefined,
     extensions: undefined,
     size: undefined,
-  }
+  },
 ) => {
   return useQuery({
     queryKey: ["directorys", directoryId, filter],
@@ -29,7 +29,7 @@ export const useGetAllDirectoryList = (
         } else if (filter.size.startsWith("greater_")) {
           queryParams.append(
             "greater_size",
-            filter.size.replace("greater_", "")
+            filter.size.replace("greater_", ""),
           );
         }
       }
@@ -37,7 +37,7 @@ export const useGetAllDirectoryList = (
       const queryString = queryParams.toString();
 
       const response = await axiosClient.get(
-        `/directory/${id || ""}${queryString ? `?${queryString}` : ""}`
+        `/directory/${id || ""}${queryString ? `?${queryString}` : ""}`,
       );
       return response.data;
     },
@@ -113,7 +113,7 @@ export const useCreateDirectory = (directoryId?: string) => {
   });
 };
 
-export const usestarredToggle = () => {
+export const useStarredToggle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
@@ -131,6 +131,7 @@ export const usestarredToggle = () => {
     },
   });
 };
+
 export const useEmptyTrash = () => {
   const queryClient = useQueryClient();
 

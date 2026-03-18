@@ -53,7 +53,8 @@ export const useDownload = () => {
       if (status !== "granted") {
         showDialog({
           title: "Permission Denied",
-          message: "Permission to access storage is required to download files.",
+          message:
+            "Permission to access storage is required to download files.",
           type: "warning",
         });
         return;
@@ -63,8 +64,8 @@ export const useDownload = () => {
       const response = await axiosClient.get(
         `/document/${file._id}?action=download`,
       );
-      const actualDownloadUrl = response.data?.data; 
-      
+      const actualDownloadUrl = response.data?.data;
+
       if (!actualDownloadUrl) {
         showDialog({
           title: "Error",
@@ -74,9 +75,13 @@ export const useDownload = () => {
         return;
       }
 
-      const token = handleToken.getToken(AUTH_TOKEN_NAME);
+      const Token = await handleToken.getToken(AUTH_TOKEN_NAME);
+      if (!Token) {
+        throw new Error("Token was Not found");
+      }
+
       const headers = {
-        Token: token || "",
+        Token,
         "X-Platform": "mobile",
       };
 
@@ -105,7 +110,7 @@ export const useDownload = () => {
             // Check if 'storeone' already exists to avoid duplicates like 'storeone (1)'
             const existingItems = targetDir.list();
             let storeOneDir = existingItems.find(
-              (item) => item instanceof Directory && item.name === "storeone"
+              (item) => item instanceof Directory && item.name === "storeone",
             ) as Directory | undefined;
 
             if (!storeOneDir) {
@@ -118,38 +123,58 @@ export const useDownload = () => {
             // Check if the file already exists in 'storeone' to avoid duplicates like 'file (1).png'
             const storeOneItems = storeOneDir.list();
             let finalFile = storeOneItems.find(
-              (item) => item instanceof File && item.name === file.name
+              (item) => item instanceof File && item.name === file.name,
             ) as File | undefined;
 
             if (!finalFile) {
               let nameWithoutExtension = file.name;
-              if (file.extension && file.name.toLowerCase().endsWith("." + file.extension.toLowerCase())) {
-                nameWithoutExtension = file.name.slice(0, -(file.extension.length + 1));
+              if (
+                file.extension &&
+                file.name
+                  .toLowerCase()
+                  .endsWith("." + file.extension.toLowerCase())
+              ) {
+                nameWithoutExtension = file.name.slice(
+                  0,
+                  -(file.extension.length + 1),
+                );
               }
               const mimeType = getMimeType(file.extension);
-              finalFile = storeOneDir.createFile(nameWithoutExtension, mimeType);
+              finalFile = storeOneDir.createFile(
+                nameWithoutExtension,
+                mimeType,
+              );
             }
-            
+
             // 1. Download to a temporary LOCAL file first (must be file:// for downloadAsync)
             const timestamp = Date.now();
-            const extension = file.extension ? `.${file.extension.replace(".", "")}` : "";
+            const extension = file.extension
+              ? `.${file.extension.replace(".", "")}`
+              : "";
             const tempLocalUri = `${FileSystem.documentDirectory}temp_saf_${timestamp}${extension}`;
-            
-            const downloadResult = await FileSystem.downloadAsync(actualDownloadUrl, tempLocalUri, {
-              headers,
-            });
+
+            const downloadResult = await FileSystem.downloadAsync(
+              actualDownloadUrl,
+              tempLocalUri,
+              {
+                headers,
+              },
+            );
 
             if (downloadResult.status === 200) {
               // 2. Read the temp file as base64
-              const base64Content = await FileSystem.readAsStringAsync(downloadResult.uri, {
-                encoding: FileSystem.EncodingType.Base64,
-              });
+              const base64Content = await FileSystem.readAsStringAsync(
+                downloadResult.uri,
+                {
+                  encoding: FileSystem.EncodingType.Base64,
+                },
+              );
 
               // 3. Use StorageAccessFramework to write to the content URI
               await FileSystem.StorageAccessFramework.writeAsStringAsync(
                 finalFile.uri,
                 base64Content,
-                { encoding: FileSystem.EncodingType.Base64 }
+                { encoding: FileSystem.EncodingType.Base64 },
               );
 
               // 4. Cleanup temp local file
@@ -162,7 +187,7 @@ export const useDownload = () => {
                 confirmText: "Open Folder",
                 onConfirm: () => {
                   if (storeOneDir.uri) {
-                    Linking.openURL(storeOneDir.uri).catch(err => {
+                    Linking.openURL(storeOneDir.uri).catch((err) => {
                       console.error("Failed to open folder:", err);
                     });
                   }
@@ -172,22 +197,31 @@ export const useDownload = () => {
               return; // Success!
             }
           } catch (err) {
-            console.error("SAF write failed, falling back to MediaLibrary:", err);
+            console.error(
+              "SAF write failed, falling back to MediaLibrary:",
+              err,
+            );
           }
         }
       }
 
       // 3. Fallback/iOS path: Download to temporary file
       const timestamp = Date.now();
-      const extension = file.extension ? `.${file.extension.replace(".", "")}` : "";
+      const extension = file.extension
+        ? `.${file.extension.replace(".", "")}`
+        : "";
       const tempFileName = `temp_${timestamp}${extension}`;
       tempUri = `${FileSystem.documentDirectory}${tempFileName}`;
 
       await FileSystem.deleteAsync(tempUri, { idempotent: true });
 
-      const downloadResult = await FileSystem.downloadAsync(actualDownloadUrl, tempUri, {
-        headers,
-      });
+      const downloadResult = await FileSystem.downloadAsync(
+        actualDownloadUrl,
+        tempUri,
+        {
+          headers,
+        },
+      );
 
       if (downloadResult.status !== 200) {
         throw new Error(`Download failed with status ${downloadResult.status}`);
@@ -214,7 +248,6 @@ export const useDownload = () => {
           type: "success",
         });
       }
-
     } catch (error) {
       console.error("Download error:", error);
       showDialog({
@@ -227,7 +260,7 @@ export const useDownload = () => {
       if (tempUri) {
         try {
           await FileSystem.deleteAsync(tempUri, { idempotent: true });
-        } catch (e) {
+        } catch {
           // Ignore cleanup errors
         }
       }

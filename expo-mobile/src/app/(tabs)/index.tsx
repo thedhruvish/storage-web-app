@@ -59,15 +59,14 @@ export default function Index() {
     };
   }, [data]);
 
-  const allFiles = useMemo(() => [
-    ...files.directories,
-    ...files.documents
-  ], [files]);
+  const allFiles = useMemo(
+    () => [...files.directories, ...files.documents],
+    [files],
+  );
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (file.extension) {
-
       } else {
         router.push(`/directory/${file._id}`);
       }
@@ -83,8 +82,8 @@ export default function Index() {
       <Stack.Screen options={{ headerShown: false }} />
 
       {isSelectionMode ? (
-        <SelectionBar 
-          allFiles={allFiles} 
+        <SelectionBar
+          allFiles={allFiles}
           onStar={handleStar}
           onRename={openRenameDialog}
           onShare={handleShare}
@@ -99,36 +98,52 @@ export default function Index() {
 
       {/* Section Header */}
       <View style={styles.sectionHeader}>
-        <Text variant="h3" style={[styles.sectionTitle, { color: colors.text }]}>
+        <Text
+          variant="h3"
+          style={[styles.sectionTitle, { color: colors.text }]}
+        >
           Files
         </Text>
         <View
-          style={[styles.toggleContainer, { backgroundColor: colors.secondaryBackground }]}
+          style={[
+            styles.toggleContainer,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
         >
           <TouchableOpacity
             onPress={() => setDirectoryLayout("list")}
             style={[
               styles.toggleItem,
-              directoryLayout === "list" && { backgroundColor: colors.background, borderRadius: 8 },
+              directoryLayout === "list" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
             ]}
           >
             <MaterialIcons
               name="view-list"
               size={20}
-              color={directoryLayout === "list" ? colors.text : colors.secondaryText}
+              color={
+                directoryLayout === "list" ? colors.text : colors.secondaryText
+              }
             />
           </TouchableOpacity>
           <TouchableOpacity
             onPress={() => setDirectoryLayout("grid")}
             style={[
               styles.toggleItem,
-              directoryLayout === "grid" && { backgroundColor: colors.background, borderRadius: 8 },
+              directoryLayout === "grid" && {
+                backgroundColor: colors.background,
+                borderRadius: 8,
+              },
             ]}
           >
             <MaterialIcons
               name="grid-view"
               size={20}
-              color={directoryLayout === "grid" ? colors.text : colors.secondaryText}
+              color={
+                directoryLayout === "grid" ? colors.text : colors.secondaryText
+              }
             />
           </TouchableOpacity>
         </View>
@@ -144,10 +159,7 @@ export default function Index() {
         refreshing={refreshing}
       />
 
-      <PlusMenuFAB 
-        isSelectionMode={isSelectionMode} 
-        showCamera={true} 
-      />
+      <PlusMenuFAB isSelectionMode={isSelectionMode} showCamera={true} />
 
       <FileActionMenu
         visible={menuFile !== null}

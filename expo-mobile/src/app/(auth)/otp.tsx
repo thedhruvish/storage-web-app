@@ -7,14 +7,13 @@ import {
   Platform,
   ScrollView,
 } from "react-native";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { useResendOtp, useVerifyOtp } from "@/api/auth-api";
 import { Text, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function OTPScreen() {
-  const router = useRouter();
   const { userId } = useLocalSearchParams<{ userId: string }>();
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
@@ -23,7 +22,7 @@ export default function OTPScreen() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [timer, setTimer] = useState(120); // 2 minutes in seconds
   const [canResend, setCanResend] = useState(false);
-  const inputRefs = useRef<Array<RNTextInput | null>>([]);
+  const inputRefs = useRef<(RNTextInput | null)[]>([]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -86,19 +85,29 @@ export default function OTPScreen() {
       setCanResend(false);
       setTimer(120); // Reset timer immediately to prevent multiple clicks
       resendOtpMutation.mutate(userId, {
-        onError: () => {
-        },
+        onError: () => {},
       });
     }
   };
 
   const isLoading = verifyOtpMutation.isPending;
-  const isResending = resendOtpMutation.isPending;
+  // const isResending = resendOtpMutation.isPending;
 
   if (!userId) {
     return (
-      <View style={[styles.container, { backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center' }]}>
-        <Text variant="body" color="text">User was not Found</Text>
+      <View
+        style={[
+          styles.container,
+          {
+            backgroundColor: colors.background,
+            justifyContent: "center",
+            alignItems: "center",
+          },
+        ]}
+      >
+        <Text variant="body" color="text">
+          User was not Found
+        </Text>
       </View>
     );
   }
@@ -111,11 +120,11 @@ export default function OTPScreen() {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { 
+          {
             paddingHorizontal: spacing.lg,
             paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg
-          }
+            paddingBottom: insets.bottom + spacing.lg,
+          },
         ]}
         keyboardShouldPersistTaps="handled"
       >
@@ -137,7 +146,9 @@ export default function OTPScreen() {
           {otp.map((digit, index) => (
             <RNTextInput
               key={index}
-              ref={(ref) => { inputRefs.current[index] = ref; }}
+              ref={(ref) => {
+                inputRefs.current[index] = ref;
+              }}
               style={[
                 styles.otpInput,
                 {
@@ -167,23 +178,18 @@ export default function OTPScreen() {
             loading={isLoading}
             disabled={otp.join("").length !== 6 || isLoading}
             size="lg"
-            style={{ marginTop: spacing.xl, width: '100%' }}
+            style={{ marginTop: spacing.xl, width: "100%" }}
           />
 
           <View style={[styles.resendContainer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">
-              Didn't receive the code?{" "}
-            </Text>
+            <Text color="secondaryText">Didn&apos;t receive the code? </Text>
             <Button
               variant="ghost"
               onPress={handleResendOtp}
               disabled={!canResend || resendOtpMutation.isPending}
               style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
             >
-              <Text
-                color={canResend ? "link" : "secondaryText"}
-                weight="bold"
-              >
+              <Text color={canResend ? "link" : "secondaryText"} weight="bold">
                 {canResend ? "Resend" : `Resend in ${formatTime(timer)}`}
               </Text>
             </Button>

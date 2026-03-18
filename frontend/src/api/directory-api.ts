@@ -233,7 +233,7 @@ export const useCreateDirectoryShareShortLink = () => {
   });
 };
 
-export const usestarredToggle = () => {
+export const useStarredToggle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

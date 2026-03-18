@@ -16,10 +16,7 @@ import { uploadFiles } from "@/store/upload-store";
 import { useUserStore } from "@/store/user-store";
 import { showGlobalDialog } from "@/components/dialog";
 import { useCreateDirectory } from "@/api/directory-api";
-import Animated, {
-  SlideInDown,
-  SlideOutDown,
-} from "react-native-reanimated";
+import Animated, { SlideInDown, SlideOutDown } from "react-native-reanimated";
 
 interface PlusMenuFABProps {
   directoryId?: string;
@@ -74,9 +71,9 @@ export const PlusMenuFAB = ({
           showGlobalDialog({
             title: "Upload Limit Exceeded",
             message: `Your upload limit is ${Math.round(
-              user.uploadLimit / (1024 * 1024)
+              user.uploadLimit / (1024 * 1024),
             )}MB. This photo is ${Math.round(
-              cameraAsset.size / (1024 * 1024)
+              cameraAsset.size / (1024 * 1024),
             )}MB.`,
             type: "error",
           });
@@ -101,15 +98,15 @@ export const PlusMenuFAB = ({
       if (!result.canceled) {
         const totalSize = result.assets.reduce(
           (acc, asset) => acc + (asset.size || 0),
-          0
+          0,
         );
         if (user && totalSize > user.uploadLimit) {
           showGlobalDialog({
             title: "Upload Limit Exceeded",
             message: `Your upload limit is ${Math.round(
-              user.uploadLimit / (1024 * 1024)
+              user.uploadLimit / (1024 * 1024),
             )}MB. The selected files are ${Math.round(
-              totalSize / (1024 * 1024)
+              totalSize / (1024 * 1024),
             )}MB.`,
             type: "error",
           });

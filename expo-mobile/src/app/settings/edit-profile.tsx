@@ -30,7 +30,7 @@ export default function EditProfileScreen() {
     updateMutation.mutate(
       { name },
       {
-        onSuccess: (response) => {
+        onSuccess: () => {
           if (user) {
             setUser({ ...user, name });
           }

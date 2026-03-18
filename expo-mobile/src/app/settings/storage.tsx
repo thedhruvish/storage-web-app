@@ -19,57 +19,116 @@ export default function StorageSettingsScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <Stack.Screen options={{ title: "Storage Settings", headerTransparent: false }} />
+      <Stack.Screen
+        options={{ title: "Storage Settings", headerTransparent: false }}
+      />
       <ScrollView contentContainerStyle={{ padding: spacing.md }}>
-        
-        <View style={[styles.card, { backgroundColor: colors.secondaryBackground, padding: spacing.lg }]}>
-          <Text variant="h3" weight="bold">Current Usage</Text>
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: colors.secondaryBackground,
+              padding: spacing.lg,
+            },
+          ]}
+        >
+          <Text variant="h3" weight="bold">
+            Current Usage
+          </Text>
           <View style={{ marginTop: spacing.md }}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 8 }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                marginBottom: 8,
+              }}
+            >
               <Text weight="medium">{formatFileSize(usedStorage)}</Text>
               <Text color="secondaryText">of {formatFileSize(maxStorage)}</Text>
             </View>
-            <View style={[styles.progressBarContainer, { backgroundColor: colors.border }]}>
+            <View
+              style={[
+                styles.progressBarContainer,
+                { backgroundColor: colors.border },
+              ]}
+            >
               <View
                 style={[
                   styles.progressBar,
-                  { width: `${storagePercentage}%`, backgroundColor: storagePercentage > 90 ? colors.error : colors.primary }
+                  {
+                    width: `${storagePercentage}%`,
+                    backgroundColor:
+                      storagePercentage > 90 ? colors.error : colors.primary,
+                  },
                 ]}
               />
             </View>
           </View>
         </View>
 
-        <View style={[styles.infoCard, { backgroundColor: colors.primary + "05", borderColor: colors.primary + "20", marginTop: spacing.lg }]}>
+        <View
+          style={[
+            styles.infoCard,
+            {
+              backgroundColor: colors.primary + "05",
+              borderColor: colors.primary + "20",
+              marginTop: spacing.lg,
+            },
+          ]}
+        >
           <Ionicons name="sparkles" size={24} color={colors.primary} />
           <View style={{ marginLeft: 16, flex: 1 }}>
             <Text weight="bold">Cloud Optimized</Text>
             <Text variant="bodySmall" color="secondaryText">
-              Your files are stored securely with high redundancy and availability.
+              Your files are stored securely with high redundancy and
+              availability.
             </Text>
           </View>
         </View>
 
         <View style={{ marginTop: spacing.xl }}>
-          <Text variant="label" color="secondaryText" style={{ marginLeft: 12, marginBottom: 8 }}>PLAN DETAILS</Text>
-          <View style={[styles.card, { backgroundColor: colors.secondaryBackground, padding: spacing.lg }]}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Text
+            variant="label"
+            color="secondaryText"
+            style={{ marginLeft: 12, marginBottom: 8 }}
+          >
+            PLAN DETAILS
+          </Text>
+          <View
+            style={[
+              styles.card,
+              {
+                backgroundColor: colors.secondaryBackground,
+                padding: spacing.lg,
+              },
+            ]}
+          >
+            <View
+              style={{
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
               <View>
-                <Text variant="h4" weight="bold">Free Starter</Text>
-                <Text variant="caption" color="secondaryText">Up to 500MB free storage</Text>
+                <Text variant="h4" weight="bold">
+                  Free Starter
+                </Text>
+                <Text variant="caption" color="secondaryText">
+                  Up to 500MB free storage
+                </Text>
               </View>
               <Badge label="Current Plan" variant="secondary" />
             </View>
-            
-            <Button 
-              title="Manage Subscription" 
+
+            <Button
+              title="Manage Subscription"
               variant="outline"
               onPress={() => Linking.openURL("https://storeone.cloud/pricing")}
               style={{ marginTop: spacing.lg }}
             />
           </View>
         </View>
-
       </ScrollView>
     </View>
   );
@@ -78,7 +137,18 @@ export default function StorageSettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   card: { borderRadius: 20 },
-  progressBarContainer: { height: 12, borderRadius: 6, width: "100%", overflow: "hidden" },
+  progressBarContainer: {
+    height: 12,
+    borderRadius: 6,
+    width: "100%",
+    overflow: "hidden",
+  },
   progressBar: { height: "100%" },
-  infoCard: { flexDirection: "row", padding: 16, borderRadius: 16, borderWidth: 1, alignItems: "center" }
+  infoCard: {
+    flexDirection: "row",
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    alignItems: "center",
+  },
 });

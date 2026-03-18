@@ -5,7 +5,6 @@ import {
   ScrollView,
   Linking,
   Share,
-  Platform,
   TouchableOpacity,
   Modal,
   Pressable,
