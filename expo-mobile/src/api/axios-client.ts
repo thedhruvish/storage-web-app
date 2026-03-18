@@ -18,7 +18,7 @@ const axiosClient = axios.create({
 // Request Interceptor
 axiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const token = handleToken.getToken(AUTH_TOKEN_NAME);
+    const token = await handleToken.getToken(AUTH_TOKEN_NAME);
     if (token) {
       config.headers.Token = token;
     }

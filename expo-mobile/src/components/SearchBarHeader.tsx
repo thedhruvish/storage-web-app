@@ -26,7 +26,7 @@ export const SearchBarHeader = () => {
           style={{ marginRight: 8 }}
         />
         <Text style={[styles.searchPlaceholder, { color: colors.secondaryText }]}>
-          Search in Drive
+          Search in StoreOne
         </Text>
       </TouchableOpacity>
       <TouchableOpacity

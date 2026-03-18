@@ -90,7 +90,7 @@ export default function SearchScreen() {
         <View style={styles.searchWrapper}>
           <TextInput
             autoFocus
-            placeholder="Search in Drive"
+            placeholder="Search in StoreOne"
             value={searchQuery}
             onChangeText={setSearchQuery}
             containerStyle={styles.searchInputContainer}

@@ -1,14 +1,24 @@
 import { DialogProvider } from "@/components/dialog";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClientProvider, focusManager } from "@tanstack/react-query";
+import { queryClient } from "@/lib/query-client";
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/hooks/use-theme";
-
-const queryClient = new QueryClient();
+import { AppState, Platform } from "react-native";
+import { useEffect } from "react";
 
 export default function RootLayout() {
   const { isDark, colors } = useTheme();
 
+  useEffect(() => {
+    const subscription = AppState.addEventListener("change", (status) => {
+      if (Platform.OS !== "web") {
+        focusManager.setFocused(status === "active");
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
   return (
     <QueryClientProvider client={queryClient}>
       <DialogProvider>
@@ -20,7 +30,7 @@ export default function RootLayout() {
             },
             headerTintColor: colors.text,
             headerTitleStyle: {
-              fontWeight: 'bold',
+              fontWeight: "bold",
             },
             headerShadowVisible: false,
           }}

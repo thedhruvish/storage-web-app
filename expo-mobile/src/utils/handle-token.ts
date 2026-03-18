@@ -8,6 +8,9 @@ export const handleToken = {
     await KvStore.setItem(name, token);
   },
   getToken(name: string = AUTH_TOKEN_NAME) {
+    return KvStore.getItem(name);
+  },
+  getTokenSync(name: string = AUTH_TOKEN_NAME) {
     return KvStore.getItemSync(name);
   },
   async deleteToken(name: string = AUTH_TOKEN_NAME) {

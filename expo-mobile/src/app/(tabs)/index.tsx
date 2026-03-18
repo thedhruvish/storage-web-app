@@ -15,11 +15,13 @@ import { Text } from "@/components/ui";
 import { SelectionBar } from "@/components/directory/SelectionBar";
 import { RenameDialog } from "@/components/directory/RenameDialog";
 import { useFileActions } from "@/hooks/use-file-actions";
+import { UploadProgress } from "@/components/UploadProgress";
+import { PlusMenuFAB } from "@/components/directory/PlusMenuFAB";
 
 export default function Index() {
   const router = useRouter();
   const { directoryLayout, setDirectoryLayout } = useAppearance();
-  const { selectedFiles, clearSelection } = useDirectoryStore();
+  const { selectedFiles } = useDirectoryStore();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
@@ -142,21 +144,10 @@ export default function Index() {
         refreshing={refreshing}
       />
 
-      {/* FABs */}
-      {!isSelectionMode && (
-        <View style={styles.fabContainer}>
-          <TouchableOpacity
-            style={[styles.fabSecondary, { backgroundColor: colors.secondaryBackground }]}
-          >
-            <MaterialIcons name="camera-alt" size={24} color={colors.text} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.fabPrimary, { backgroundColor: "#443a34" }]}
-          >
-            <MaterialIcons name="add" size={32} color="#fff" />
-          </TouchableOpacity>
-        </View>
-      )}
+      <PlusMenuFAB 
+        isSelectionMode={isSelectionMode} 
+        showCamera={true} 
+      />
 
       <FileActionMenu
         visible={menuFile !== null}
@@ -178,6 +169,8 @@ export default function Index() {
           title={fileToRename.extension ? "Rename File" : "Rename Folder"}
         />
       )}
+
+      <UploadProgress />
     </View>
   );
 }
@@ -203,36 +196,5 @@ const styles = StyleSheet.create({
   },
   toggleItem: {
     padding: 6,
-  },
-  fabContainer: {
-    position: "absolute",
-    bottom: 24,
-    right: 16,
-    alignItems: "center",
-  },
-  fabPrimary: {
-    width: 64,
-    height: 64,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 4,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    marginTop: 16,
-  },
-  fabSecondary: {
-    width: 48,
-    height: 48,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    elevation: 3,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.2,
-    shadowRadius: 1.41,
   },
 });

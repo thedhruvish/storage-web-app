@@ -14,17 +14,19 @@ import { Text } from "@/components/ui";
 import { SelectionBar } from "@/components/directory/SelectionBar";
 import { RenameDialog } from "@/components/directory/RenameDialog";
 import { useFileActions } from "@/hooks/use-file-actions";
+import { UploadProgress } from "@/components/UploadProgress";
+import { PlusMenuFAB } from "@/components/directory/PlusMenuFAB";
 
 export default function DirectoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
   const { directoryLayout, setDirectoryLayout } = useAppearance();
-  const { selectedFiles, clearSelection } = useDirectoryStore();
+  const { selectedFiles } = useDirectoryStore();
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
 
-  const { data, isLoading, isError } = useGetAllDirectoryList(id || "", {
+  const { data, isLoading, isError, refetch } = useGetAllDirectoryList(id || "", {
     isStarred: undefined,
     search: undefined,
     extensions: undefined,
@@ -42,6 +44,13 @@ export default function DirectoryScreen() {
     openRenameDialog,
     closeRenameDialog,
   } = useFileActions(id);
+
+  const [refreshing, setRefreshing] = useState(false);
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    await refetch();
+    setRefreshing(false);
+  }, [refetch]);
 
   const files = useMemo(() => {
     return {
@@ -125,6 +134,13 @@ export default function DirectoryScreen() {
         isError={isError}
         onFileDoubleClick={handleFilePress}
         onMenuPress={(file) => setMenuFile(file)}
+        onRefresh={onRefresh}
+        refreshing={refreshing}
+      />
+
+      <PlusMenuFAB 
+        directoryId={id} 
+        isSelectionMode={isSelectionMode} 
       />
 
       {/* Three-dot Action Menu */}
@@ -148,6 +164,8 @@ export default function DirectoryScreen() {
           title={fileToRename.extension ? "Rename File" : "Rename Folder"}
         />
       )}
+
+      <UploadProgress />
     </View>
   );
 }
