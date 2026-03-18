@@ -142,11 +142,11 @@ export const getSettingInfoService = async (userId) => {
             : null,
   }));
 
-  let avatarUrl;
+  let picture;
   if (userInfo.picture.startsWith("http")) {
-    avatarUrl = userInfo.picture;
+    picture = userInfo.picture;
   } else {
-    avatarUrl = await getSignedUrlForGetObject(
+    picture = await getSignedUrlForGetObject(
       userInfo.picture,
       "my_avatar.png",
       false,
@@ -165,7 +165,7 @@ export const getSettingInfoService = async (userId) => {
     user: {
       name: userInfo.name,
       email: userInfo.email,
-      avatarUrl,
+      picture,
       isPremium: Boolean(isPremium),
     },
   };

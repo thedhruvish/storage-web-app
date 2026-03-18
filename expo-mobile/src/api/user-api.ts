@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosClient from "./axios-client";
+import { useUserStore } from "@/store/user-store";
 
 const STORAGE_SIZE_API_KEY = "storage-used";
 
@@ -19,6 +20,7 @@ export const useGenetorAvatarUploadUrl = () => {
 
 export const getCurrentUser = async () => {
   const response = await axiosClient.get("/sso/me");
+  useUserStore.getState().setUser(response.data.data);
   return response.data;
 };
 

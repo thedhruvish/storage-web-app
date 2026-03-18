@@ -98,7 +98,6 @@ export const getCureentUser = async (req, res) => {
     throw new ApiError(401, "User need to re Authenticated.");
   }
   const user = directory.userId;
-
   let avatarUrl = user.picture;
   if (!user.picture.startsWith("http")) {
     avatarUrl = await getSignedUrlForGetObject(

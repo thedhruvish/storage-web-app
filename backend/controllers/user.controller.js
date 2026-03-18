@@ -18,6 +18,7 @@ export const genAvatarImgUploadLink = async (req, res) => {
   const { extension, contentType } = req.body;
   const userId = req.user._id;
   const fileName = `${userId}.${extension}`;
+
   const presignedUrl = await generatePresignedUrl(
     fileName,
     contentType,
@@ -26,7 +27,7 @@ export const genAvatarImgUploadLink = async (req, res) => {
 
   await updateUserInfo(userId, {
     $set: {
-      picture: `${AVATAR_UPLOAD_FOLDER}${fileName}`,
+      picture: fileName,
     },
   });
   res
