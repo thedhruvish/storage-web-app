@@ -3,18 +3,18 @@ import { Directory, File } from "expo-file-system";
 import * as MediaLibrary from "expo-media-library";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
-import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import type { FileItem } from "@/components/directory/types";
 import KvStore from "expo-sqlite/kv-store";
-import axiosClient from "@/api/axios-client";
 import { useDialog } from "@/components/dialog";
 import * as Linking from "expo-linking";
 import { getMimeType } from "@/utils/mime-helper";
+import { useFileOperation } from "./use-file-operation";
 
 const DOWNLOAD_DIR_KEY = "download_directory_uri";
 
 export const useDownload = () => {
   const { showDialog } = useDialog();
+  const { getFileUrl } = useFileOperation();
 
   const getStoredDirectory = async () => {
     if (Platform.OS !== "android") return null;
@@ -60,11 +60,8 @@ export const useDownload = () => {
         return;
       }
 
-      // 2. Request the download URL
-      const response = await axiosClient.get(
-        `/document/${file._id}?action=download`,
-      );
-      const actualDownloadUrl = response.data?.data;
+      // 2. Request the download URL using common hook
+      const actualDownloadUrl = await getFileUrl(file._id, "download");
 
       if (!actualDownloadUrl) {
         showDialog({
@@ -74,16 +71,6 @@ export const useDownload = () => {
         });
         return;
       }
-
-      const Token = await handleToken.getToken(AUTH_TOKEN_NAME);
-      if (!Token) {
-        throw new Error("Token was Not found");
-      }
-
-      const headers = {
-        Token,
-        "X-Platform": "mobile",
-      };
 
       if (Platform.OS === "android") {
         let targetDir = await getStoredDirectory();
@@ -107,7 +94,7 @@ export const useDownload = () => {
 
         if (targetDir) {
           try {
-            // Check if 'storeone' already exists to avoid duplicates like 'storeone (1)'
+            // Check if 'storeone' already exists
             const existingItems = targetDir.list();
             let storeOneDir = existingItems.find(
               (item) => item instanceof Directory && item.name === "storeone",
@@ -120,7 +107,7 @@ export const useDownload = () => {
               }
             }
 
-            // Check if the file already exists in 'storeone' to avoid duplicates like 'file (1).png'
+            // Check if the file already exists
             const storeOneItems = storeOneDir.list();
             let finalFile = storeOneItems.find(
               (item) => item instanceof File && item.name === file.name,
@@ -146,7 +133,7 @@ export const useDownload = () => {
               );
             }
 
-            // 1. Download to a temporary LOCAL file first (must be file:// for downloadAsync)
+            // 1. Download to a temporary LOCAL file
             const timestamp = Date.now();
             const extension = file.extension
               ? `.${file.extension.replace(".", "")}`
@@ -156,9 +143,6 @@ export const useDownload = () => {
             const downloadResult = await FileSystem.downloadAsync(
               actualDownloadUrl,
               tempLocalUri,
-              {
-                headers,
-              },
             );
 
             if (downloadResult.status === 200) {
@@ -170,14 +154,14 @@ export const useDownload = () => {
                 },
               );
 
-              // 3. Use StorageAccessFramework to write to the content URI
+              // 3. Write to the SAF URI
               await FileSystem.StorageAccessFramework.writeAsStringAsync(
                 finalFile.uri,
                 base64Content,
                 { encoding: FileSystem.EncodingType.Base64 },
               );
 
-              // 4. Cleanup temp local file
+              // 4. Cleanup
               await FileSystem.deleteAsync(tempLocalUri, { idempotent: true });
 
               showDialog({
@@ -205,7 +189,7 @@ export const useDownload = () => {
         }
       }
 
-      // 3. Fallback/iOS path: Download to temporary file
+      // 3. Fallback/iOS path
       const timestamp = Date.now();
       const extension = file.extension
         ? `.${file.extension.replace(".", "")}`
@@ -218,9 +202,6 @@ export const useDownload = () => {
       const downloadResult = await FileSystem.downloadAsync(
         actualDownloadUrl,
         tempUri,
-        {
-          headers,
-        },
       );
 
       if (downloadResult.status !== 200) {
@@ -228,7 +209,6 @@ export const useDownload = () => {
       }
 
       if (Platform.OS === "ios") {
-        // iOS: Share sheet
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(downloadResult.uri);
         } else {
@@ -240,7 +220,6 @@ export const useDownload = () => {
           });
         }
       } else {
-        // Android fallback (if SAF failed or was cancelled)
         await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
         showDialog({
           title: "Success",
@@ -256,7 +235,6 @@ export const useDownload = () => {
         type: "error",
       });
     } finally {
-      // Cleanup temp file if it was created
       if (tempUri) {
         try {
           await FileSystem.deleteAsync(tempUri, { idempotent: true });

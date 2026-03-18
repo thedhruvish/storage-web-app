@@ -64,8 +64,7 @@ export default function StarredScreen() {
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
-      if (file.extension) {
-      } else {
+      if (!file.extension) {
         router.push(`/directory/${file._id}`);
       }
     },

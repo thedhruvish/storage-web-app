@@ -1,8 +1,8 @@
 export const getFileIconName = (extension?: string) => {
   if (!extension) return "file";
 
-  const ext = extension.toLowerCase();
-
+  const ext = extension.toLowerCase().split(".")[1];
+  console.log(ext);
   // Images
   if (["jpg", "jpeg", "png", "gif", "bmp", "webp", "svg"].includes(ext)) {
     return "image";

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { View, StyleSheet, ActivityIndicator } from "react-native";
 import { Text } from "@/components/ui";
 import { FileGrid } from "./FileGrid";
@@ -6,6 +6,8 @@ import { useAppearance } from "@/store/appearance-store";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
 import type { FileItem } from "./types";
+import { useFilePreview } from "@/hooks/use-file-preview";
+import { FilePreviewModal } from "./FilePreviewModal";
 
 interface DirectoryContentProps {
   files: { directories?: FileItem[]; documents?: FileItem[] };
@@ -30,6 +32,25 @@ export const DirectoryContent = ({
 }: DirectoryContentProps) => {
   const { directoryLayout } = useAppearance();
   const { colors } = useTheme();
+
+  const {
+    previewFile,
+    isPreviewVisible,
+    isSharing,
+    handlePreview,
+    closePreview,
+  } = useFilePreview();
+
+  const handlePress = useCallback(
+    (file: FileItem) => {
+      if (file.extension) {
+        handlePreview(file);
+      } else {
+        onFileDoubleClick(file);
+      }
+    },
+    [onFileDoubleClick, handlePreview],
+  );
 
   const isEmpty = !files?.directories?.length && !files?.documents?.length;
 
@@ -99,11 +120,36 @@ export const DirectoryContent = ({
       <FileGrid
         files={allFiles}
         viewMode={directoryLayout}
-        onFileDoubleClick={onFileDoubleClick}
+        onFileDoubleClick={handlePress}
         onMenuPress={onMenuPress}
         showHeader={allFiles.length > 0}
         onRefresh={onRefresh}
         refreshing={refreshing}
+      />
+
+      {isSharing && (
+        <View style={styles.loadingOverlay}>
+          <View
+            style={[
+              styles.loadingBox,
+              { backgroundColor: colors.secondaryBackground },
+            ]}
+          >
+            <ActivityIndicator size="large" color={colors.tint} />
+            <Text
+              variant="caption"
+              style={{ marginTop: 12, color: colors.text }}
+            >
+              Preparing file...
+            </Text>
+          </View>
+        </View>
+      )}
+
+      <FilePreviewModal
+        visible={isPreviewVisible}
+        file={previewFile}
+        onClose={closePreview}
       />
     </View>
   );
@@ -112,6 +158,24 @@ export const DirectoryContent = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    alignItems: "center",
+    justifyContent: "center",
+    zIndex: 100,
+  },
+  loadingBox: {
+    padding: 24,
+    borderRadius: 16,
+    alignItems: "center",
+    minWidth: 150,
+    elevation: 5,
+    shadowColor: "#000",
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 4 },
   },
   centerContainer: {
     flex: 1,

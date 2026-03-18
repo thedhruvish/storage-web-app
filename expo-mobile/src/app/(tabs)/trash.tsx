@@ -51,9 +51,7 @@ export default function TrashScreen() {
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
-      if (file.extension) {
-        // Handle file preview if needed
-      } else {
+      if (!file.extension) {
         router.push(`/directory/${file._id}`);
       }
     },
