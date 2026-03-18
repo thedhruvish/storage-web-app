@@ -19,7 +19,7 @@ export default function TabLayout() {
         <NativeTabs.Trigger.Icon sf="person.2.fill" md="people_outline" />
       </NativeTabs.Trigger>
 
-      <NativeTabs.Trigger name="setting">
+      <NativeTabs.Trigger name="trash">
         <NativeTabs.Trigger.Label>Trash</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="trash.fill" md="delete_outline" />
       </NativeTabs.Trigger>
