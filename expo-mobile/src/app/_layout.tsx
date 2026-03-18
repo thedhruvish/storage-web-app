@@ -6,9 +6,11 @@ import { StatusBar } from "expo-status-bar";
 import { useTheme } from "@/hooks/use-theme";
 import { AppState, Platform } from "react-native";
 import { useEffect } from "react";
+import { useBackExit } from "@/hooks/use-back-exit";
 
 export default function RootLayout() {
   const { isDark, colors } = useTheme();
+  useBackExit();
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (status) => {
