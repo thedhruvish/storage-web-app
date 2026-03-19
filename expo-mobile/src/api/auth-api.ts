@@ -40,6 +40,10 @@ export const authApi = {
     const response = await axiosClient.post("/sso/logout");
     return response.data;
   },
+  authTokenVerify: async (id: string) => {
+    const response = await axiosClient.post(`/sso/link/${id}`);
+    return response.data;
+  },
 };
 
 export function useLogin() {
@@ -155,6 +159,7 @@ export const useResendOtp = () => {
     mutationFn: authApi.resendOtp,
   });
 };
+
 export function useGoogleLogin() {
   const router = useRouter();
   const { setUser } = useUserStore();
@@ -219,4 +224,9 @@ export function useLogout() {
   });
 }
 
-// handle the tokens
+// handle the tokens for link devices
+export const useTokenVerifyForLink = () => {
+  return useMutation({
+    mutationFn: authApi.authTokenVerify,
+  });
+};

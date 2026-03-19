@@ -179,3 +179,21 @@ export const useDeleteSession = () => {
     },
   });
 };
+
+export const useCreateLinkToken = () => {
+  return useMutation({
+    mutationFn: async () => {
+      const res = await axiosClient.get("/auth/link/create");
+      return res.data;
+    },
+  });
+};
+
+export const useCheckLinkToken = () => {
+  return useMutation({
+    mutationFn: async (token: string) => {
+      const res = await axiosClient.get(`/auth/link/check/${token}`);
+      return res.data;
+    },
+  });
+};

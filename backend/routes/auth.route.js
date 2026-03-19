@@ -20,6 +20,9 @@ import {
   disConnectAccount,
   deleteSession,
   getUseStorage,
+  authTokenVerify,
+  authTokenCreate,
+  authTokenCheck,
 } from "../controllers/auth.controller.js";
 import { checkAuth } from "../middlewares/auth.middleware.js";
 import {
@@ -89,10 +92,15 @@ router.post(
 
 router.post("/2fa/login/passkey-verify", verifyPasskeyChallenge);
 
+// link devices
+router.get("/link/create", authTokenCreate);
+router.get("/link/check/:id", authTokenCheck);
+
 // authenticated route
 router.use(checkAuth);
 router.get("/me", getCureentUser);
 router.get("/storage", getUseStorage);
+router.post("/link/:id", authTokenVerify);
 
 // link account
 router.post("/google/link", connectWithGoogle);

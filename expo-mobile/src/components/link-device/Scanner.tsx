@@ -13,6 +13,7 @@ import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
 import { showGlobalDialog } from "@/components/dialog";
 import Animated, { FadeOut, ZoomIn } from "react-native-reanimated";
+import { useTokenVerifyForLink } from "@/api/auth-api";
 
 interface ScannerProps {
   isVisible: boolean;
@@ -23,6 +24,7 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
   const { colors } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
+  const { mutate } = useTokenVerifyForLink();
 
   React.useEffect(() => {
     if (isVisible && (!permission || permission.status === "undetermined")) {
@@ -55,17 +57,51 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
   const handleBarcodeScanned = ({ data }: { type: string; data: string }) => {
     if (scanned) return;
     setScanned(true);
-    console.log(`Scanned URL: ${data}`);
 
-    showGlobalDialog({
-      title: "Device Linked",
-      message: `Successfully scanned: ${data}. Linking process started.`,
-      type: "success",
-      onConfirm: onClose,
+    // Extract token from URL like https://links.example.com/?token=thisistoken
+    const tokenMatch = data.match(/[?&]token=([^&]+)/);
+    const token = tokenMatch ? tokenMatch[1] : null;
+
+    if (!token) {
+      showGlobalDialog({
+        title: "Invalid QR Code",
+        message: "The scanned QR code is not valid for device linking.",
+        type: "error",
+      });
+      setTimeout(() => setScanned(false), 2000);
+      return;
+    }
+
+    mutate(token, {
+      onSuccess: () => {
+        showGlobalDialog({
+          title: "Device Linked",
+          message:
+            "Successfully linked your device. You can now access your account from the new device.",
+          type: "success",
+          onConfirm: onClose,
+        });
+      },
+      onError: (error: any) => {
+        if (error.response?.status === 404) {
+          showGlobalDialog({
+            title: "Link Expired",
+            message:
+              "The QR code has expired or is invalid. Please refresh your website to get a new QR code and try again.",
+            type: "error",
+          });
+        } else {
+          showGlobalDialog({
+            title: "Error",
+            message:
+              error.response?.data?.message ||
+              "Failed to link device. Please try again.",
+            type: "error",
+          });
+        }
+        setTimeout(() => setScanned(false), 2000);
+      },
     });
-
-    // Reset scanned state after a delay or upon closing
-    setTimeout(() => setScanned(false), 2000);
   };
 
   if (!isVisible) return null;
