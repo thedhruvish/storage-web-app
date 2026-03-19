@@ -27,8 +27,12 @@ export const authApi = {
     return response.data;
   },
 
-  googleLogin: async (idToken: string) => {
-    const response = await axiosClient.post("/sso/google", { idToken });
+  googleLogin: async (data: {
+    idToken: string;
+    deviceName?: string;
+    ip?: string;
+  }) => {
+    const response = await axiosClient.post("/sso/google", data);
     return response.data;
   },
 

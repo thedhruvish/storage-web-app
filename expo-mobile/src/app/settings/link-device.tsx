@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import Animated, { FadeIn, FadeInDown } from "react-native-reanimated";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
-import { useGetInfoOnSetting } from "@/api/setting-api";
+import { useGetInfoOnSetting, useRevokeSession } from "@/api/setting-api";
 import { showGlobalDialog } from "@/components/dialog";
 import { SessionItem } from "@/components/link-device/SessionItem";
 import { Scanner } from "@/components/link-device/Scanner";
@@ -22,6 +22,7 @@ export default function LinkDeviceScreen() {
   const { colors, spacing } = useTheme();
   const { data: info, isLoading, refetch } = useGetInfoOnSetting();
   const [isScannerVisible, setIsScannerVisible] = useState(false);
+  const revokeSessionMutation = useRevokeSession();
 
   const sessions = info?.data?.sessionHistory || [];
   const activeSessionId = info?.data?.sessionId;
@@ -45,10 +46,24 @@ export default function LinkDeviceScreen() {
           text: "Revoke",
           style: "destructive",
           onPress: () => {
-            showGlobalDialog({
-              title: "Coming Soon",
-              message: "Session management is being improved.",
-              type: "info",
+            revokeSessionMutation.mutate(sessionId, {
+              onSuccess: () => {
+                showGlobalDialog({
+                  title: "Success",
+                  message: "Session revoked successfully.",
+                  type: "success",
+                });
+                refetch();
+              },
+              onError: (error: any) => {
+                showGlobalDialog({
+                  title: "Error",
+                  message:
+                    error.response?.data?.message ||
+                    "Failed to revoke session.",
+                  type: "error",
+                });
+              },
             });
           },
         },
@@ -127,11 +142,11 @@ export default function LinkDeviceScreen() {
             ]}
           >
             {sessions.length > 0 ? (
-              sessions.map((session: any, index: number) => (
-                <View key={session.sessionId || index}>
+              sessions?.map((session: any, index: number) => (
+                <View key={session._id || index}>
                   <SessionItem
                     session={session}
-                    isCurrent={session.sessionId === activeSessionId}
+                    isCurrent={session._id === activeSessionId}
                     index={index}
                     onRevoke={handleRevokeSession}
                   />

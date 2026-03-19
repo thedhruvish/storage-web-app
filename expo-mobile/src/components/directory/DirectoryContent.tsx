@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { View, StyleSheet, ActivityIndicator } from "react-native";
+import { View, StyleSheet } from "react-native";
 import { Text } from "@/components/ui";
 import { FileGrid } from "./FileGrid";
 import { useAppearance } from "@/store/appearance-store";
@@ -8,6 +8,7 @@ import { useTheme } from "@/hooks/use-theme";
 import type { FileItem } from "./types";
 import { useFilePreview } from "@/hooks/use-file-preview";
 import { FilePreviewModal } from "./FilePreviewModal";
+import { FileSkeleton } from "./FileSkeleton";
 
 interface DirectoryContentProps {
   files: { directories?: FileItem[]; documents?: FileItem[] };
@@ -33,13 +34,8 @@ export const DirectoryContent = ({
   const { directoryLayout } = useAppearance();
   const { colors } = useTheme();
 
-  const {
-    previewFile,
-    isPreviewVisible,
-    isSharing,
-    handlePreview,
-    closePreview,
-  } = useFilePreview();
+  const { previewFile, isPreviewVisible, handlePreview, closePreview } =
+    useFilePreview();
 
   const handlePress = useCallback(
     (file: FileItem) => {
@@ -55,19 +51,7 @@ export const DirectoryContent = ({
   const isEmpty = !files?.directories?.length && !files?.documents?.length;
 
   if (isLoading) {
-    return (
-      <View
-        style={[styles.centerContainer, { backgroundColor: colors.background }]}
-      >
-        <ActivityIndicator size="large" color={colors.tint} />
-        <Text
-          variant="caption"
-          style={[styles.loadingText, { color: colors.secondaryText }]}
-        >
-          Loading...
-        </Text>
-      </View>
-    );
+    return <FileSkeleton viewMode={directoryLayout} />;
   }
 
   if (isError) {
@@ -127,7 +111,7 @@ export const DirectoryContent = ({
         refreshing={refreshing}
       />
 
-      {isSharing && (
+      {/* {isSharing && (
         <View style={styles.loadingOverlay}>
           <View
             style={[
@@ -144,7 +128,7 @@ export const DirectoryContent = ({
             </Text>
           </View>
         </View>
-      )}
+      )} */}
 
       <FilePreviewModal
         visible={isPreviewVisible}

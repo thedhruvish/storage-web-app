@@ -20,14 +20,16 @@ export const SessionItem = ({
 }: SessionItemProps) => {
   const { colors } = useTheme();
 
-  const getDeviceIcon = (os: string = "") => {
-    const osLower = os.toLowerCase();
-    if (osLower.includes("ios") || osLower.includes("android"))
-      return "phone-portrait-outline";
-    if (
-      osLower.includes("windows") ||
-      osLower.includes("mac") ||
-      osLower.includes("linux")
+  const getDeviceIcon = (os: any) => {
+    console.log(os);
+    const osLower = os?.device?.browser;
+
+    if (osLower === "mobile") return "phone-portrait-outline";
+    else if (
+      osLower &&
+      (osLower.includes("windows") ||
+        osLower.includes("mac") ||
+        osLower.includes("linux"))
     )
       return "desktop-outline";
     return "globe-outline";
@@ -41,7 +43,7 @@ export const SessionItem = ({
       <View style={styles.sessionRow}>
         <View style={[styles.iconContainer, { backgroundColor: colors.card }]}>
           <Ionicons
-            name={getDeviceIcon(session.os)}
+            name={getDeviceIcon(session)}
             size={24}
             color={isCurrent ? colors.primary : colors.text}
           />
@@ -49,8 +51,8 @@ export const SessionItem = ({
         <View style={{ flex: 1, marginLeft: 12 }}>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
             <Text weight="semibold" numberOfLines={1}>
-              {session.browser || "Unknown Browser"} on{" "}
-              {session.os || "Unknown OS"}
+              {session.device.type || "Unknown Browser"} on{" "}
+              {session.device.os || "Unknown OS"}
             </Text>
             {isCurrent && (
               <Badge
@@ -71,9 +73,9 @@ export const SessionItem = ({
             Last active: {new Date(session.createdAt).toLocaleString()}
           </Text>
         </View>
-        {!isCurrent && (
+        {session.isActive && (
           <TouchableOpacity
-            onPress={() => onRevoke(session.sessionId)}
+            onPress={() => onRevoke(session._id)}
             style={styles.revokeButton}
           >
             <Ionicons name="log-out-outline" size={20} color={colors.error} />

@@ -18,7 +18,6 @@ export const useFilePreview = () => {
 
       try {
         setIsOpening(true);
-        console.log(file.extension);
         const fileType = getFileIconName(file.extension);
         const actualUrl = await getFileUrl(file._id);
 
@@ -30,7 +29,7 @@ export const useFilePreview = () => {
           });
           return;
         }
-        console.log(fileType);
+
         if (fileType === "image") {
           // For images, show the internal preview modal
           setPreviewFile({ ...file, previewUrl: actualUrl });

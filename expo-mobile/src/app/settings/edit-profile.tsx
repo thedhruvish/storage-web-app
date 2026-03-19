@@ -61,7 +61,7 @@ export default function EditProfileScreen() {
       const fileName = asset.fileName || uri.split("/").pop() || "avatar.jpg";
       const extension = fileName.split(".").pop()?.toLowerCase() || "jpg";
       const contentType = asset.mimeType || `image/${extension}`;
-      console.log({ extension, fileName });
+
       // 1. Get pre-signed URL
       const { data } = await avatarUploadUrlMutation.mutateAsync({
         contentType,

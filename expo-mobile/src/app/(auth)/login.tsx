@@ -16,6 +16,7 @@ import { z } from "zod";
 import { showGlobalDialog } from "@/components/dialog";
 import { Text, TextInput, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getDeviceInfo } from "@/utils/device-info";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -35,10 +36,16 @@ export default function LoginScreen() {
 
   const passwordRef = useRef<RNTextInput>(null);
 
-  const handleLogin = () => {
+  const handleLogin = async () => {
     const { success, error } = loginSchema.safeParse({ email, password });
     if (success) {
-      loginMutation.mutate({ email, password });
+      const deviceInfo = await getDeviceInfo();
+      loginMutation.mutate({
+        email,
+        password,
+        deviceName: deviceInfo.deviceName,
+        ip: deviceInfo.ip,
+      });
     } else {
       showGlobalDialog({
         title: "Input Validation Failed",
@@ -48,9 +55,14 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleSuccess = (userInfo: any) => {
+  const handleGoogleSuccess = async (userInfo: any) => {
     if (userInfo.idToken) {
-      googleLoginMutation.mutate(userInfo.idToken);
+      const deviceInfo = await getDeviceInfo();
+      googleLoginMutation.mutate({
+        idToken: userInfo.idToken,
+        deviceName: deviceInfo.deviceName,
+        ip: deviceInfo.ip,
+      });
     }
   };
 

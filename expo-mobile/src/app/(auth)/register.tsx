@@ -16,6 +16,7 @@ import { z } from "zod";
 import { showGlobalDialog } from "@/components/dialog";
 import { Text, TextInput, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getDeviceInfo } from "@/utils/device-info";
 
 const registerSchema = z
   .object({
@@ -47,7 +48,7 @@ export default function RegisterScreen() {
   const passwordRef = useRef<RNTextInput>(null);
   const confirmPasswordRef = useRef<RNTextInput>(null);
 
-  const handleRegister = () => {
+  const handleRegister = async () => {
     const { success, error } = registerSchema.safeParse({
       name,
       email,
@@ -55,7 +56,14 @@ export default function RegisterScreen() {
       confirmPassword,
     });
     if (success) {
-      registerMutation.mutate({ name, email, password });
+      const deviceInfo = await getDeviceInfo();
+      registerMutation.mutate({
+        name,
+        email,
+        password,
+        deviceName: deviceInfo.deviceName,
+        ip: deviceInfo.ip,
+      });
     } else {
       showGlobalDialog({
         title: "Input Validation Failed",
@@ -65,9 +73,14 @@ export default function RegisterScreen() {
     }
   };
 
-  const handleGoogleSuccess = (userInfo: any) => {
+  const handleGoogleSuccess = async (userInfo: any) => {
     if (userInfo.idToken) {
-      googleLoginMutation.mutate(userInfo.idToken);
+      const deviceInfo = await getDeviceInfo();
+      googleLoginMutation.mutate({
+        idToken: userInfo.idToken,
+        deviceName: deviceInfo.deviceName,
+        ip: deviceInfo.ip,
+      });
     }
   };
 

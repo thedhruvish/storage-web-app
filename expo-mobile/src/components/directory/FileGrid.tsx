@@ -35,12 +35,8 @@ export const FileGrid = ({
 
   const handlePress = (file: FileItem) => {
     if (isSelectionActive) {
-      console.log("toogle section");
-      // In selection mode, tap toggles selection
       toggleSelection(file._id);
     } else {
-      console.log("open file");
-      // Not in selection mode, tap navigates/opens
       onFileDoubleClick(file);
     }
   };

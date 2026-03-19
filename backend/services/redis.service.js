@@ -15,16 +15,18 @@ export const createAndCheckLimitSession = async ({
   const now = Date.now();
   const SESSION_TTL = 24 * 60 * 60;
 
+  const ipAddress = req.body.ip || deviceInfo.ipAddress;
+
   // Create DB session
   const newSession = await SessionHistory.create({
     userId,
     isActive: true,
     location: locationInfo,
-    ipAddress: deviceInfo.ipAddress,
+    ipAddress,
     device: {
       browser: deviceInfo.device.browser,
-      os: deviceInfo.device.os,
-      type: deviceInfo.device.type,
+      os: req.isMobile ? req.body.deviceName : deviceInfo.device.os,
+      type: req.isMobile ? "Mobile" : deviceInfo.device.type,
     },
     userAgent: deviceInfo.userAgent,
   });
