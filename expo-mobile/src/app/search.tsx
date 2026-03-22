@@ -1,10 +1,16 @@
 import React, { useState } from "react";
-import { View, StyleSheet, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  TextInput as RNTextInput,
+} from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { MaterialIcons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
-import { TextInput, Text } from "@/components/ui";
+import { Text } from "@/components/ui";
 import { useGetAllDirectoryList } from "@/api/directory-api";
 import { DirectoryContent } from "@/components/directory/DirectoryContent";
 import { FileActionMenu } from "@/components/directory/FileActionMenu";
@@ -76,7 +82,6 @@ export default function SearchScreen() {
           {
             paddingTop: insets.top + 8,
             backgroundColor: colors.background,
-            borderBottomColor: colors.separator,
           },
         ]}
       >
@@ -87,34 +92,43 @@ export default function SearchScreen() {
           <MaterialIcons name="arrow-back" size={24} color={colors.text} />
         </TouchableOpacity>
 
-        <View style={styles.searchWrapper}>
-          <TextInput
+        <View
+          style={[
+            styles.searchPill,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
+        >
+          <MaterialIcons
+            name="search"
+            size={22}
+            color={colors.secondaryText}
+            style={{ marginRight: 8 }}
+          />
+          <RNTextInput
             autoFocus
             placeholder="Search in StoreOne"
             value={searchQuery}
             onChangeText={setSearchQuery}
-            containerStyle={styles.searchInputContainer}
-            inputStyle={styles.searchInput}
+            style={[styles.searchInput, { color: colors.text }]}
+            placeholderTextColor={colors.secondaryText}
           />
+          {(hasQuery || hasActiveFilters) && (
+            <TouchableOpacity
+              onPress={() => {
+                setSearchQuery("");
+                setIsStarred(false);
+                setSelectedType(undefined);
+                setSelectedSize(undefined);
+              }}
+            >
+              <MaterialIcons
+                name="close"
+                size={22}
+                color={colors.secondaryText}
+              />
+            </TouchableOpacity>
+          )}
         </View>
-
-        {(hasQuery || hasActiveFilters) && (
-          <TouchableOpacity
-            onPress={() => {
-              setSearchQuery("");
-              setIsStarred(false);
-              setSelectedType(undefined);
-              setSelectedSize(undefined);
-            }}
-            style={styles.iconButton}
-          >
-            <MaterialIcons
-              name="close"
-              size={24}
-              color={colors.secondaryText}
-            />
-          </TouchableOpacity>
-        )}
       </View>
 
       <View style={styles.chipContainer}>
@@ -252,29 +266,27 @@ const styles = StyleSheet.create({
   header: {
     flexDirection: "row",
     alignItems: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     paddingBottom: 8,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    gap: 8,
+    gap: 12,
   },
   iconButton: {
-    padding: 6,
+    padding: 4,
     alignItems: "center",
     justifyContent: "center",
   },
-  searchWrapper: {
+  searchPill: {
     flex: 1,
-    justifyContent: "center",
-  },
-  searchInputContainer: {
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    paddingHorizontal: 0,
-    marginVertical: 0,
+    flexDirection: "row",
+    alignItems: "center",
+    height: 48,
+    borderRadius: 24,
+    paddingHorizontal: 16,
   },
   searchInput: {
+    flex: 1,
     fontSize: 16,
-    paddingVertical: 4,
+    paddingVertical: 8,
   },
   chipContainer: {
     borderBottomWidth: StyleSheet.hairlineWidth,

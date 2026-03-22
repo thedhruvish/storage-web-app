@@ -8,7 +8,7 @@ import { router } from "expo-router";
 const BASE_URL = process.env.EXPO_PUBLIC_BACKEND_URL;
 const axiosClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 100000,
   headers: {
     "Content-Type": "application/json",
     Accept: "application/json",
