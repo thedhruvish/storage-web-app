@@ -18,12 +18,20 @@ const axiosClient = axios.create({
 // Request Interceptor
 axiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    const token = await handleToken.getToken(AUTH_TOKEN_NAME);
-    if (token) {
-      config.headers.Token = token;
+    let token;
+    try {
+      token = await handleToken.getToken(AUTH_TOKEN_NAME);
+      console.log(token);
+      if (token) {
+        config.headers.Token = token;
+      }
+      config.headers["X-Platform"] = "mobile";
+      return config;
+    } catch (error) {
+      console.log("error on the token get Faile");
+      console.log({ error });
+      return config;
     }
-    config.headers["X-Platform"] = "mobile";
-    return config;
   },
   (error) => {
     return Promise.reject(error);

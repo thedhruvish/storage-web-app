@@ -2,7 +2,7 @@ import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import { Redirect } from "expo-router";
 
 export default function Index() {
-  const authToken = handleToken.getTokenSync(AUTH_TOKEN_NAME);
+  const authToken = handleToken.getToken(AUTH_TOKEN_NAME);
   if (authToken) {
     return <Redirect href="/(tabs)" />;
   }

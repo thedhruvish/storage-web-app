@@ -1,19 +1,19 @@
-import KvStore from "expo-sqlite/kv-store";
+import { MMkvStore } from "@/lib/mmkv";
 
 export const AUTH_TOKEN_NAME = "dhrvish-token";
 export const ONBOARD_STATUS = "onbaoard";
 
 export const handleToken = {
-  async setToken(name: string, token: string) {
-    await KvStore.setItem(name, token);
+  setToken(name: string, token: string) {
+    MMkvStore.set(name, token);
   },
   getToken(name: string = AUTH_TOKEN_NAME) {
-    return KvStore.getItem(name);
+    return MMkvStore.getString(name);
   },
-  getTokenSync(name: string = AUTH_TOKEN_NAME) {
-    return KvStore.getItemSync(name);
+  deleteToken(name: string = AUTH_TOKEN_NAME) {
+    MMkvStore.remove(name);
   },
-  async deleteToken(name: string = AUTH_TOKEN_NAME) {
-    await KvStore.removeItem(name);
+  clearAll() {
+    MMkvStore.clearAll();
   },
 };
