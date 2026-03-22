@@ -219,7 +219,9 @@ export const loginWithGoogle = async (req, res) => {
     userId: userId.toString(),
   });
 
-  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", sessionId, SESSION_OPTIONS);
+  }
 
   return res.status(200).json(
     new ApiResponse(
@@ -227,6 +229,7 @@ export const loginWithGoogle = async (req, res) => {
       "User login Successfuly . and you can set the optionality to the 2 FA auth",
       {
         showSetUp2Fa,
+        sessionId: req.isMobile ? sessionId : undefined,
       },
     ),
   );

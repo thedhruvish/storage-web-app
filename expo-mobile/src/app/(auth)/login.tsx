@@ -10,7 +10,7 @@ import {
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
 import { GoogleSignInButton } from "@/components/google-signIn-button";
-import { useLogin, useGoogleLogin } from "@/api/auth-api";
+import { useLogin } from "@/api/auth-api";
 import { Ionicons } from "@expo/vector-icons";
 import { z } from "zod";
 import { showGlobalDialog } from "@/components/dialog";
@@ -28,7 +28,6 @@ export default function LoginScreen() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
   const loginMutation = useLogin();
-  const googleLoginMutation = useGoogleLogin();
 
   const [email, setEmail] = useState("admin@gmail.com");
   const [password, setPassword] = useState("admin@123");
@@ -55,22 +54,7 @@ export default function LoginScreen() {
     }
   };
 
-  const handleGoogleSuccess = async (userInfo: any) => {
-    if (userInfo.idToken) {
-      const deviceInfo = await getDeviceInfo();
-      googleLoginMutation.mutate({
-        idToken: userInfo.idToken,
-        deviceName: deviceInfo.deviceName,
-        ip: deviceInfo.ip,
-      });
-    }
-  };
-
-  const handleGoogleError = (error: any) => {
-    console.error("Google Error:", error);
-  };
-
-  const isLoading = loginMutation.isPending || googleLoginMutation.isPending;
+  const isLoading = loginMutation.isPending;
 
   return (
     <KeyboardAvoidingView
@@ -186,10 +170,7 @@ export default function LoginScreen() {
             </Text>
           </View>
 
-          <GoogleSignInButton
-            onSuccess={handleGoogleSuccess}
-            onError={handleGoogleError}
-          />
+          <GoogleSignInButton disabled={isLoading} />
 
           <View style={[styles.footer, { marginTop: spacing.lg }]}>
             <Text color="secondaryText">Don&apos;t have an account? </Text>

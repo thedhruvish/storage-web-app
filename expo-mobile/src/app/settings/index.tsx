@@ -21,11 +21,12 @@ import { useGetRealStorage, getCurrentUser } from "@/api/user-api";
 import { formatFileSize } from "@/utils/format-bytes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDialog } from "@/components/dialog";
+import { GoogleSignin } from "@react-native-google-signin/google-signin";
 
 const PRICING_URL = "https://storeone.cloud/pricing";
 const WEBSITE_URL = "https://storeone.cloud";
-const LINKEDIN_URL = "https://linkedin.com/company/storeone";
-const X_URL = "https://x.com/storeone";
+const LINKEDIN_URL = "https://linkedin.com/in/dhruvishlathiya";
+const X_URL = "https://x.com/dhruvishlathiya";
 const APP_SHARE_MESSAGE =
   "Check out StoreOne - Your secure cloud storage! " + WEBSITE_URL;
 
@@ -64,7 +65,11 @@ export default function SettingScreen() {
       confirmText: "Logout",
       cancelText: "Cancel",
       type: "warning",
-      onConfirm: () => logout.mutate(),
+      onConfirm: async () => {
+        await GoogleSignin.revokeAccess();
+        await GoogleSignin.signOut();
+        logout.mutate();
+      },
     });
   };
 
@@ -127,12 +132,20 @@ export default function SettingScreen() {
         <Text variant="h2" weight="bold">
           Settings
         </Text>
-        <TouchableOpacity
-          onPress={() => setIsMenuVisible(true)}
-          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
-        >
-          <Ionicons name="ellipsis-vertical" size={24} color={colors.text} />
-        </TouchableOpacity>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+          <TouchableOpacity
+            onPress={handleLogout}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="log-out-outline" size={24} color={colors.error} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => setIsMenuVisible(true)}
+            hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          >
+            <Ionicons name="ellipsis-vertical" size={24} color={colors.text} />
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* More Options Modal */}
@@ -219,12 +232,6 @@ export default function SettingScreen() {
         {/* Profile Header */}
         <View style={[styles.header, { padding: spacing.lg }]}>
           <View style={styles.profileInfo}>
-            <Image
-              source={user?.picture}
-              style={styles.avatar}
-              contentFit="cover"
-              transition={200}
-            />
             <View style={styles.nameContainer}>
               <Text variant="h3" weight="bold">
                 {user?.name}
@@ -238,6 +245,12 @@ export default function SettingScreen() {
                 </View>
               )}
             </View>
+            <Image
+              source={user?.picture}
+              style={styles.avatar}
+              contentFit="cover"
+              transition={200}
+            />
           </View>
         </View>
 
@@ -470,24 +483,7 @@ export default function SettingScreen() {
           </View>
         </View>
 
-        <View
-          style={{
-            padding: spacing.lg,
-            marginTop: spacing.xl,
-            marginBottom: spacing.xl,
-          }}
-        >
-          <Button
-            variant="outline"
-            title="Logout"
-            onPress={handleLogout}
-            leftIcon={
-              <Ionicons name="log-out-outline" size={20} color={colors.error} />
-            }
-            textStyle={{ color: colors.error }}
-            style={{ borderColor: colors.error, borderRadius: 16 }}
-          />
-        </View>
+        <View style={{ marginBottom: spacing.xl }} />
       </ScrollView>
     </View>
   );
@@ -541,7 +537,7 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
     borderRadius: 35,
-    marginRight: 16,
+    marginLeft: 16,
   },
   nameContainer: {
     flex: 1,
