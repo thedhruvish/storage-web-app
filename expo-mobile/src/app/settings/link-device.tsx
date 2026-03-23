@@ -4,7 +4,6 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  Alert,
   RefreshControl,
   Platform,
 } from "react-native";
@@ -37,38 +36,33 @@ export default function LinkDeviceScreen() {
       return;
     }
 
-    Alert.alert(
-      "Revoke Session",
-      "Are you sure you want to log out from this device?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Revoke",
-          style: "destructive",
-          onPress: () => {
-            revokeSessionMutation.mutate(sessionId, {
-              onSuccess: () => {
-                showGlobalDialog({
-                  title: "Success",
-                  message: "Session revoked successfully.",
-                  type: "success",
-                });
-                refetch();
-              },
-              onError: (error: any) => {
-                showGlobalDialog({
-                  title: "Error",
-                  message:
-                    error.response?.data?.message ||
-                    "Failed to revoke session.",
-                  type: "error",
-                });
-              },
+    showGlobalDialog({
+      title: "Revoke Session",
+      message: "Are you sure you want to log out from this device?",
+      type: "warning",
+      confirmText: "Revoke",
+      cancelText: "Cancel",
+      onConfirm: () => {
+        revokeSessionMutation.mutate(sessionId, {
+          onSuccess: () => {
+            showGlobalDialog({
+              title: "Success",
+              message: "Session revoked successfully.",
+              type: "success",
+            });
+            refetch();
+          },
+          onError: (error: any) => {
+            showGlobalDialog({
+              title: "Error",
+              message:
+                error.response?.data?.message || "Failed to revoke session.",
+              type: "error",
             });
           },
-        },
-      ],
-    );
+        });
+      },
+    });
   };
 
   return (

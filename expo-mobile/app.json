@@ -19,7 +19,26 @@
         "READ_EXTERNAL_STORAGE",
         "WRITE_EXTERNAL_STORAGE",
         "MEDIA_LIBRARY"
+      ],
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "links.storeone.cloud",
+              "pathPrefix": "/link-devices"
+            }
+          ],
+          "category": ["BROWSABLE", "DEFAULT"]
+        }
       ]
+    },
+    "ios": {
+      "bundleIdentifier": "com.dhruvish.storeone",
+      "supportsTablet": true,
+      "associatedDomains": ["applinks:links.example.com"]
     },
     "web": {
       "output": "static",

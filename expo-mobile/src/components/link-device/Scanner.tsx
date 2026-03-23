@@ -24,7 +24,7 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
   const { colors } = useTheme();
   const [permission, requestPermission] = useCameraPermissions();
   const [scanned, setScanned] = useState(false);
-  const { mutate } = useTokenVerifyForLink();
+  const { mutate: mutateVerify } = useTokenVerifyForLink();
 
   React.useEffect(() => {
     if (isVisible && (!permission || permission.status === "undetermined")) {
@@ -58,9 +58,8 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
     if (scanned) return;
     setScanned(true);
 
-    // Extract token from URL like https://links.example.com/?token=thisistoken
-    const tokenMatch = data.match(/[?&]token=([^&]+)/);
-    const token = tokenMatch ? tokenMatch[1] : null;
+    // Extract token from URL like https://links.example.com/link-devices?token=thisistoken
+    const token = new URL(data).searchParams.get("token");
 
     if (!token) {
       showGlobalDialog({
@@ -72,7 +71,7 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
       return;
     }
 
-    mutate(token, {
+    mutateVerify(token, {
       onSuccess: () => {
         showGlobalDialog({
           title: "Device Linked",
