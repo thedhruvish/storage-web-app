@@ -1,18 +1,20 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { QR_CODE_URL } from "@/contansts";
 import { Loader2, RefreshCw } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { toast } from "sonner";
 import { useCreateLinkToken, useCheckLinkToken } from "@/api/auth";
 import { Button } from "@/components/ui/button";
 
-export function QrLogin() {
+export function QrLogin({ isActive }: { isActive: boolean }) {
   const [token, setToken] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
   const createTokenMutation = useCreateLinkToken();
   const checkTokenMutation = useCheckLinkToken();
   const navigate = useNavigate();
+
   const generateToken = () => {
     setIsExpired(false);
     setTimeLeft(120);
@@ -27,14 +29,16 @@ export function QrLogin() {
   };
 
   useEffect(() => {
-    generateToken();
+    if (isActive && !token && !createTokenMutation.isPending) {
+      generateToken();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isActive, token]);
 
+  // Timer countdown - runs in background as long as token exists
   useEffect(() => {
     if (!token || isExpired) return;
 
-    // Timer countdown
     const timerInterval = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -45,13 +49,18 @@ export function QrLogin() {
       });
     }, 1000);
 
-    // Polling backend status
+    return () => clearInterval(timerInterval);
+  }, [token, isExpired]);
+
+  // Polling backend status - only runs when isActive is true
+  useEffect(() => {
+    if (!token || isExpired || !isActive) return;
+
     const pollInterval = setInterval(() => {
       checkTokenMutation.mutate(token, {
         onSuccess: (res) => {
           if (res.data.status === "verified") {
             clearInterval(pollInterval);
-            clearInterval(timerInterval);
             toast.success("Login successful");
             navigate({ to: "/app/directory" });
           }
@@ -60,20 +69,14 @@ export function QrLogin() {
           if (err.response?.status === 404) {
             setIsExpired(true);
             clearInterval(pollInterval);
-            clearInterval(timerInterval);
           }
         },
       });
     }, 3000);
 
-    return () => {
-      clearInterval(pollInterval);
-      clearInterval(timerInterval);
-    };
+    return () => clearInterval(pollInterval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [token, isExpired]);
-
-  const qrValue = `${window.location.origin}/link-device?token=${token}`;
+  }, [token, isExpired, isActive]);
 
   return (
     <div className='flex flex-col items-center justify-center p-4 gap-4'>
@@ -96,7 +99,7 @@ export function QrLogin() {
           </div>
         ) : token ? (
           <QRCodeSVG
-            value={qrValue}
+            value={`${QR_CODE_URL}?token=${token}`}
             size={200}
             level='H'
             imageSettings={{

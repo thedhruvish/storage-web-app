@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Link, useNavigate, useLocation } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { APP_NAME } from "@/contansts";
 import {
   AlertTriangle,
@@ -35,24 +35,44 @@ import { TurnstileWidget } from "./TurnstileWidget";
 import LoginWithOauth from "./login-with-0auth";
 import { QrLogin } from "./qr-login";
 
+type Tab = "password" | "qr";
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [activeTab, setActiveTab] = useState("password");
+  const {
+    error,
+    error_description: errorDescription,
+    tab,
+  } = location.search as {
+    error?: string;
+    error_description?: string;
+    tab?: Tab;
+  };
+  const loginMutation = useLoginMutation();
+  const navigate = useNavigate({ from: "/auth/login" });
+
+  const [activeTab, setActiveTab] = useState(tab || "password");
+
+  useEffect(() => {
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [tab, activeTab]);
+
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileLoading, setTurnstileLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const turnstile = useTurnstile();
-  const location = useLocation();
 
-  const { error, error_description: errorDescription } = location.search as {
-    error?: string;
-    error_description?: string;
+  const handleTabChange = (value: string) => {
+    setActiveTab(value as Tab);
+    navigate({
+      search: (prev: any) => ({ ...prev, tab: value }),
+      replace: true,
+    });
   };
-
-  const loginMutation = useLoginMutation();
-  const navigate = useNavigate();
 
   const formSchema = z.object({
     email: z.string().email("Invalid email address"),
@@ -169,7 +189,7 @@ export function LoginForm({
               <Tabs
                 defaultValue='password'
                 value={activeTab}
-                onValueChange={setActiveTab}
+                onValueChange={handleTabChange}
                 className='w-full'
               >
                 <TabsList className='grid w-full grid-cols-2 mb-8 bg-muted/50 p-1 rounded-xl h-12'>
@@ -323,7 +343,7 @@ export function LoginForm({
                       activeTab !== "qr" && "hidden"
                     )}
                   >
-                    <QrLogin />
+                    <QrLogin isActive={activeTab === "qr"} />
                   </TabsContent>
                 </div>
               </Tabs>

@@ -28,8 +28,7 @@ export function StorageSettings() {
       setTimeout(() => {
         window.location.reload();
       }, 1500);
-    } catch (error) {
-      console.error("Error clearing cache:", error);
+    } catch {
       toast.error("Failed to clear cache fully.");
     }
   };
