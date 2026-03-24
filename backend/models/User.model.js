@@ -1,6 +1,7 @@
 import { model, Schema } from "mongoose";
 import { ROLE } from "../constants/role.js";
 import { DEFAULT_STORAGE, UPLOAD_LIMIT } from "../constants/constant.js";
+import { string } from "zod";
 
 const userSchema = new Schema(
   {
@@ -50,6 +51,9 @@ const userSchema = new Schema(
     twoFactorId: {
       type: Schema.Types.ObjectId,
       ref: "TwoFa",
+    },
+    expoPushToken: {
+      type: string,
     },
     metaData: {
       type: Object,

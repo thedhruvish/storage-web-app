@@ -47,6 +47,7 @@ export default function LinkDevicesScreen() {
     };
 
     checkAuthAndHandleToken();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [token]);
 
   const handleVerify = (tokenValue: string) => {

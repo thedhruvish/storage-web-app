@@ -125,7 +125,7 @@ export const downloadSingleFile = async (
       partSize: 1024 * 1024 * 5, // 5MB minimum
     });
     parallelUploads3.on("httpUploadProgress", (progress) => {
-      console.log(`Uploaded ${progress.loaded} bytes to S3`);
+      // console.log(`Uploaded ${progress.loaded} bytes to S3`);
     });
 
     await parallelUploads3.done();
@@ -143,8 +143,8 @@ export const downloadSingleFile = async (
       },
     };
   } catch (error) {
-    console.log(JSON.stringify(error));
-    console.error("❌ downloadSingleFile error:", error.message);
+    // console.log(JSON.stringify(error));
+    // console.error("❌ downloadSingleFile error:", error.message);
     throw new Error("Failed to download file from Google Drive");
   }
 };

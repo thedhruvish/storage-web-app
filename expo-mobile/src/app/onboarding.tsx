@@ -8,6 +8,8 @@ import {
 } from "react-native";
 import { useRouter, Stack } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as Notifications from "expo-notifications";
+import * as Device from "expo-device";
 import Animated, {
   useSharedValue,
   useAnimatedScrollHandler,
@@ -19,7 +21,7 @@ import {
   ONBOARDING_DATA,
   OnboardingData,
 } from "@/components/onboarding/onboarding-data";
-import { RenderItem } from "@/components/onboarding/onboarding-items";
+import { OnboardingItem } from "@/components/onboarding/onboarding-items";
 import { Pagination } from "@/components/onboarding/pagination";
 
 const { width } = Dimensions.get("window");
@@ -34,6 +36,24 @@ export default function Onboarding() {
   const onScroll = useAnimatedScrollHandler((event) => {
     scrollX.value = event.contentOffset.x;
   });
+
+  const requestPermission = async () => {
+    if (Device.isDevice) {
+      const { status: existingStatus } =
+        await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== "granted") {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+      }
+      if (finalStatus !== "granted") {
+        // console.log("Failed to get push token for push notification!");
+      }
+    } else {
+      // console.log("Must use physical device for Push Notifications");
+    }
+    handleComplete();
+  };
 
   const handleNext = () => {
     if (currentIndex < ONBOARDING_DATA.length - 1) {
@@ -71,7 +91,7 @@ export default function Onboarding() {
       <Animated.FlatList
         ref={flatListRef}
         data={ONBOARDING_DATA}
-        renderItem={RenderItem}
+        renderItem={({ item }) => <OnboardingItem item={item} />}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -87,14 +107,30 @@ export default function Onboarding() {
       <View style={styles.footer}>
         <Pagination scrollX={scrollX} data={ONBOARDING_DATA} />
 
-        <Button
-          title={
-            currentIndex === ONBOARDING_DATA.length - 1 ? "Get Started" : "Next"
-          }
-          onPress={handleNext}
-          size="lg"
-          style={styles.nextButton}
-        />
+        {ONBOARDING_DATA[currentIndex].isPermission ? (
+          <View style={styles.buttonContainer}>
+            <Button
+              title="Allow Notifications"
+              onPress={requestPermission}
+              size="lg"
+              style={styles.nextButton}
+            />
+            <Button
+              title="Maybe Later"
+              onPress={handleComplete}
+              variant="ghost"
+              size="md"
+              style={styles.maybeLaterButton}
+            />
+          </View>
+        ) : (
+          <Button
+            title="Next"
+            onPress={handleNext}
+            size="lg"
+            style={styles.nextButton}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -119,7 +155,15 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     alignItems: "center",
   },
+
   nextButton: {
     width: "100%",
+  },
+  buttonContainer: {
+    width: "100%",
+    alignItems: "center",
+  },
+  maybeLaterButton: {
+    marginTop: 8,
   },
 });

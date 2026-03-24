@@ -43,5 +43,3 @@ app-example
 /android
 
 .env
-google-services-*
-storeone-7ff25-firebase-adminsdk-fbsvc-*

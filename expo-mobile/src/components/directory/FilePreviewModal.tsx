@@ -10,7 +10,6 @@ import {
 import { Image } from "expo-image";
 import { MaterialIcons } from "@expo/vector-icons";
 import { Text } from "@/components/ui";
-import { useTheme } from "@/hooks/use-theme";
 import type { FileItem } from "./types";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
@@ -28,7 +27,6 @@ export const FilePreviewModal = ({
   file,
   onClose,
 }: FilePreviewModalProps) => {
-  const { colors } = useTheme();
   const insets = useSafeAreaInsets();
   const [headers, setHeaders] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);

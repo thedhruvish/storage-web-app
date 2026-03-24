@@ -2,6 +2,7 @@ import { MMkvStore } from "@/lib/mmkv";
 
 export const AUTH_TOKEN_NAME = "dhrvish-token";
 export const ONBOARD_STATUS = "onbaoard";
+export const PUSH_TOKEN = "push-token";
 
 export const handleToken = {
   setToken(name: string, token: string) {

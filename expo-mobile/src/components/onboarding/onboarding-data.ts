@@ -10,6 +10,7 @@ export interface OnboardingData {
   description: string;
   icon: SFSymbol;
   materialIcon: MaterialIconName;
+  isPermission?: boolean;
 }
 export const ONBOARDING_DATA: OnboardingData[] = [
   {
@@ -35,5 +36,14 @@ export const ONBOARDING_DATA: OnboardingData[] = [
       "Access your files anywhere. Seamlessly sync your data between our mobile and web applications in real-time.",
     icon: "laptopcomputer.and.iphone",
     materialIcon: "devices",
+  },
+  {
+    id: "4",
+    title: "Stay Updated",
+    description:
+      "Enable notifications to get real-time updates on your file uploads, shares, and security alerts.",
+    icon: "bell.badge.fill",
+    materialIcon: "notifications-active",
+    isPermission: true,
   },
 ];

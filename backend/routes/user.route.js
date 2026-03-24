@@ -15,11 +15,14 @@ import {
   dangerZoneValidator,
   updateUserInfoValidator,
   uploadAvatarValidator,
+  expoPushTokenValidator,
 } from "../validators/auth.validator.js";
 import {
   cancelRazorpayPaymentController,
   updateUserDetails,
   genAvatarImgUploadLink,
+  expoPushTokenSet,
+  expoPushTokenDelete,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -36,6 +39,10 @@ router.patch(
   validateInput(updateUserInfoValidator),
   updateUserDetails,
 );
+router
+  .route("/push")
+  .post(validateInput(expoPushTokenValidator), expoPushTokenSet)
+  .delete(expoPushTokenDelete);
 
 router.post(
   "/avatar-gen",

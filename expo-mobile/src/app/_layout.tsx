@@ -7,10 +7,12 @@ import { useTheme } from "@/hooks/use-theme";
 import { AppState, Platform } from "react-native";
 import { useEffect } from "react";
 import { useBackExit } from "@/hooks/use-back-exit";
+import { useNotifications } from "@/hooks/use-notifications";
 
-export default function RootLayout() {
+function RootContent() {
   const { isDark, colors } = useTheme();
   useBackExit();
+  useNotifications();
 
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (status) => {
@@ -21,27 +23,34 @@ export default function RootLayout() {
 
     return () => subscription.remove();
   }, []);
+
+  return (
+    <DialogProvider>
+      <StatusBar style={isDark ? "light" : "dark"} />
+      <Stack
+        screenOptions={{
+          headerStyle: {
+            backgroundColor: colors.background,
+          },
+          headerTintColor: colors.text,
+          headerTitleStyle: {
+            fontWeight: "bold",
+          },
+          headerShadowVisible: false,
+        }}
+      >
+        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} />
+      </Stack>
+    </DialogProvider>
+  );
+}
+
+export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
-      <DialogProvider>
-        <StatusBar style={isDark ? "light" : "dark"} />
-        <Stack
-          screenOptions={{
-            headerStyle: {
-              backgroundColor: colors.background,
-            },
-            headerTintColor: colors.text,
-            headerTitleStyle: {
-              fontWeight: "bold",
-            },
-            headerShadowVisible: false,
-          }}
-        >
-          <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="index" options={{ headerShown: false }} />
-        </Stack>
-      </DialogProvider>
+      <RootContent />
     </QueryClientProvider>
   );
 }

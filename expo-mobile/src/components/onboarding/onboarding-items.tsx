@@ -9,12 +9,7 @@ import { useTheme } from "@/hooks/use-theme";
 
 const { width } = Dimensions.get("window");
 
-export const RenderItem = ({
-  item,
-}: {
-  item: OnboardingData;
-  index: number;
-}) => {
+export const OnboardingItem = ({ item }: { item: OnboardingData }) => {
   const { colors } = useTheme();
   return (
     <View style={[styles.slide, { width }]}>

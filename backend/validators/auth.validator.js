@@ -73,3 +73,7 @@ export const uploadAvatarValidator = z.object({
   extension: z.string("File Extenstion are the Required"),
   contentType: z.string("File ContentType are the Required"),
 });
+
+export const expoPushTokenValidator = z.object({
+  token: z.string("Token Does Required"),
+});

@@ -21,14 +21,12 @@ axiosClient.interceptors.request.use(
     let token;
     try {
       token = await handleToken.getToken(AUTH_TOKEN_NAME);
-      console.log(token);
       if (token) {
         config.headers.Token = token;
       }
       config.headers["X-Platform"] = "mobile";
       return config;
     } catch (error) {
-      console.log("error on the token get Faile");
       console.log({ error });
       return config;
     }

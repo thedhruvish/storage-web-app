@@ -53,8 +53,6 @@ export function useLogin() {
   return useMutation({
     mutationFn: authApi.login,
     onSuccess: async (data) => {
-      console.log("Login success:", data);
-
       if (data.data.sessionId) {
         await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
@@ -77,7 +75,6 @@ export function useLogin() {
           },
         });
       } else if (data.data.showSetUp2Fa) {
-        console.log("two fa authentication");
       }
     },
     onError: (error: any) => {
@@ -96,8 +93,7 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: (data) => {
-      console.log("Registration success:", data);
+    onSuccess: () => {
       router.push("/otp");
     },
     onError: (error: any) => {
@@ -118,13 +114,11 @@ export function useVerifyOtp() {
   return useMutation({
     mutationFn: authApi.verifyOtp,
     onSuccess: async (data) => {
-      console.log("OTP verified:", data);
       if (data.data.sessionId) {
         await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           const userResponse = await getCurrentUser();
-          console.log(userResponse);
           if (userResponse.data) {
             setUser(userResponse.data);
           }
@@ -141,7 +135,6 @@ export function useVerifyOtp() {
           },
         });
       } else if (data.data.showSetUp2Fa) {
-        console.log("two fa authentication");
       }
     },
     onError: (error: any) => {
@@ -167,7 +160,6 @@ export function useGoogleLogin() {
   return useMutation({
     mutationFn: authApi.googleLogin,
     onSuccess: async (data) => {
-      console.log("Google login success:", data);
       if (data.data.sessionId) {
         await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
@@ -189,7 +181,6 @@ export function useGoogleLogin() {
           },
         });
       } else if (data.data.showSetUp2Fa) {
-        console.log("two fa authentication");
       }
     },
     onError: (error: any) => {

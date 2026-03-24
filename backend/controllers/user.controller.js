@@ -257,3 +257,34 @@ export const toggleTwoFaAuth = async (req, res) => {
   ]);
   res.status(200).json(new ApiResponse(200, "successfully Toggle 2 fa auth"));
 };
+
+/**
+ * expo push tokens
+ */
+
+export const expoPushTokenSet = async (req, res) => {
+  const userId = req.user._id;
+  const { token } = req.body;
+  await User.updateOne(
+    { _id: userId },
+    {
+      $set: {
+        expoPushToken: token,
+      },
+    },
+  );
+  res.status(200).json(new ApiResponse(200, "successfully set Token"));
+};
+
+export const expoPushTokenDelete = async (req, res) => {
+  const userId = req.user._id;
+  await User.updateOne(
+    { _id: userId },
+    {
+      $unset: {
+        expoPushToken: "",
+      },
+    },
+  );
+  res.status(200).json(new ApiResponse(200, "successfully Delete Token"));
+};

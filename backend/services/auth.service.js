@@ -196,9 +196,8 @@ export const accConnectGoogle = async (userSession, idToken) => {
   if (!tokens) {
     throw new ApiError(400, "Try agin");
   }
-  console.log(JSON.stringify(tokens, null, 2));
   const { sub, email } = await googleIdTokenVerify(tokens.id_token);
-  console.log({ sub, email });
+
   // create If Not Exist
   const exsting = await AuthIdentity.findOneAndUpdate(
     {

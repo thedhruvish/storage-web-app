@@ -16,8 +16,11 @@ import { Image } from "expo-image";
 import { useTheme } from "@/hooks/use-theme";
 import { Text, MenuItem, Button, Badge } from "@/components/ui";
 import { useUserStore } from "@/store/user-store";
-import { useLogout } from "@/api/auth-api";
-import { useGetRealStorage, getCurrentUser } from "@/api/user-api";
+import {
+  usePushLogout,
+  useGetRealStorage,
+  getCurrentUser,
+} from "@/api/user-api";
 import { formatFileSize } from "@/utils/format-bytes";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDialog } from "@/components/dialog";
@@ -33,7 +36,7 @@ const APP_SHARE_MESSAGE =
 export default function SettingScreen() {
   const { colors, spacing } = useTheme();
   const insets = useSafeAreaInsets();
-  const logout = useLogout();
+  const logout = usePushLogout();
   const router = useRouter();
   const { user, setUser } = useUserStore();
   const { showDialog } = useDialog();
@@ -66,8 +69,10 @@ export default function SettingScreen() {
       cancelText: "Cancel",
       type: "warning",
       onConfirm: async () => {
-        await GoogleSignin.revokeAccess();
-        await GoogleSignin.signOut();
+        try {
+          await GoogleSignin.revokeAccess();
+          await GoogleSignin.signOut();
+        } catch {}
         logout.mutate();
       },
     });
