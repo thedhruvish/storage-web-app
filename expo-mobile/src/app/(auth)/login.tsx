@@ -29,8 +29,8 @@ export default function LoginScreen() {
   const insets = useSafeAreaInsets();
   const loginMutation = useLogin();
 
-  const [email, setEmail] = useState("admin@gmail.com");
-  const [password, setPassword] = useState("admin@123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
   const passwordRef = useRef<RNTextInput>(null);
