@@ -53,7 +53,7 @@ const userSchema = new Schema(
       ref: "TwoFa",
     },
     expoPushToken: {
-      type: string,
+      type: String,
     },
     metaData: {
       type: Object,

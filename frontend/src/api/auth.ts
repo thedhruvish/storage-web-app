@@ -183,7 +183,7 @@ export const useDeleteSession = () => {
 export const useCreateLinkToken = () => {
   return useMutation({
     mutationFn: async () => {
-      const res = await axiosClient.get("/auth/link/create");
+      const res = await axiosClient.get("/sso/link/create");
       return res.data;
     },
   });
@@ -192,7 +192,7 @@ export const useCreateLinkToken = () => {
 export const useCheckLinkToken = () => {
   return useMutation({
     mutationFn: async (token: string) => {
-      const res = await axiosClient.get(`/auth/link/check/${token}`);
+      const res = await axiosClient.get(`/sso/link/check/${token}`);
       return res.data;
     },
   });
