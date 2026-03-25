@@ -8,7 +8,7 @@ import {
   exstingAuthIdentity,
   getOneAuthIdentity,
 } from "./authIdentity.service.js";
-import { createAndCheckLimitSession, deleteRedisKey } from "./redis.service.js";
+import { deleteRedisKey } from "./redis.service.js";
 import { sendOtpToMail, verifyMailOTP } from "./mail.service.js";
 import { googleClient } from "../lib/google.client.js";
 import { LOGIN_PROVIDER } from "../constants/constant.js";
