@@ -22,7 +22,7 @@ import {
   Video,
 } from "lucide-react";
 import { toast } from "sonner";
-import { usestarredToggle, useRestore } from "@/api/directory-api";
+import { useStarredToggle, useRestore } from "@/api/directory-api";
 import { getFileIconName } from "@/utils/file-icon-helper";
 import { formatFileSize } from "@/utils/functions";
 import { truncateFileName } from "@/utils/truncateFileName";
@@ -90,7 +90,7 @@ const Picture = ({
 
   if (file.previewUrl && !hasError) {
     return (
-      <div className='h-[100px] w-[100px] overflow-hidden rounded-md relative'>
+      <div className='h-25 w-25 overflow-hidden rounded-md relative'>
         {isLoading && <Skeleton className='h-full w-full absolute inset-0' />}
         <img
           src={file.previewUrl}
@@ -108,7 +108,7 @@ const Picture = ({
     );
   }
   return (
-    <div className='flex items-center justify-center bg-accent/50 rounded-md h-[100px] w-[100px]'>
+    <div className='flex items-center justify-center bg-accent/50 rounded-md h-25 w-25'>
       {getFileIcon(documentType, file)}
     </div>
   );
@@ -123,7 +123,7 @@ export function FileGrid({
 }: FileGridProps) {
   const { setOpen, setCurrentItem } = useDialogStore();
   const { selectedFiles, toggleSelection } = useDirectoryStore();
-  const starredMutation = usestarredToggle();
+  const starredMutation = useStarredToggle();
   const clickTimeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(
     new Map()
   );

@@ -49,6 +49,9 @@ export const getDocumentById = async (req, res) => {
     req.user?._id,
   );
   if (req.query.action === "download") {
+    if (req.isMobile) {
+      return res.status(200).json(new ApiResponse(200, "Download link", url));
+    }
     return res.redirect(url);
   }
   res.status(200).json(new ApiResponse(200, "Preview link", url));

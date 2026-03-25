@@ -198,7 +198,6 @@ export const useRemoveDirectoryPermission = () => {
       data: { userId: string };
     }) => axiosClient.delete(`/permission/${dirId}/directory`, { data }),
     onSuccess(_, { dirId }) {
-      console.log("log run permision", dirId);
       queryClient.invalidateQueries({
         queryKey: ["permission", dirId, "directory"],
       });
@@ -233,7 +232,7 @@ export const useCreateDirectoryShareShortLink = () => {
   });
 };
 
-export const usestarredToggle = () => {
+export const useStarredToggle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({

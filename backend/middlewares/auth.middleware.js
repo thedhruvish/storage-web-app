@@ -4,7 +4,12 @@ import { getRedisValue, setRedisValue } from "../services/redis.service.js";
 import { CLEAR_COOKIE_OPTIONS } from "../constants/constant.js";
 
 export const checkAuth = async (req, res, next) => {
-  const { sessionId } = req.signedCookies;
+  let sessionId;
+  if (req.isMobile) {
+    sessionId = req.headers.token;
+  } else {
+    sessionId = req.signedCookies?.sessionId;
+  }
 
   // check valid id
   if (!sessionId) {

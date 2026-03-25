@@ -3,19 +3,14 @@ import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Eye, EyeOff } from "lucide-react";
+import { APP_NAME } from "@/contansts";
+import { Eye, EyeOff, Cloud, ShieldCheck, Zap } from "lucide-react";
 import { useTurnstile } from "react-turnstile";
 import { toast } from "sonner";
 import { useRegisterMutation } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   Form,
   FormControl,
@@ -41,7 +36,7 @@ export function SigupForm({
   const registerMutation = useRegisterMutation();
   const formSchema = z.object({
     name: z.string().min(1, "Name is required"),
-    email: z.string().email("Invalid email"),
+    email: z.string().email("Invalid email address"),
     password: z.string().min(6, "Password must be at least 6 characters"),
   });
 
@@ -78,136 +73,236 @@ export function SigupForm({
       }
     );
   }
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
-      <Card>
-        <CardHeader className='text-center'>
-          <CardTitle className='text-xl'>Welcome back</CardTitle>
-          <CardDescription>
-            SignUp with your Github Or Google account
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <div className='grid gap-6'>
-                {/* OAuth Buttons */}
-                <LoginWithOauth />
+      <Card className='overflow-hidden border-none shadow-2xl p-0 max-w-4xl w-full mx-auto'>
+        <div className='grid md:grid-cols-2 lg:grid-cols-5 min-h-[700px]'>
+          {/* BRANDING SIDE */}
+          <div className='hidden md:flex lg:col-span-2 bg-primary p-10 flex-col justify-between text-primary-foreground relative overflow-hidden'>
+            {/* Background Pattern/Overlay */}
+            <div className='absolute inset-0 bg-linear-to-br from-primary via-primary to-indigo-900 opacity-90' />
+            <div className='absolute -bottom-20 -left-20 w-64 h-64 bg-white/10 rounded-full blur-3xl' />
+            <div className='absolute -top-20 -right-20 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl' />
 
-                {/* Divider */}
-                <div className='after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t'>
-                  <span className='bg-card text-muted-foreground relative z-10 px-2'>
-                    Or continue with
-                  </span>
+            <div className='relative z-10'>
+              <div className='flex items-center gap-2 mb-8'>
+                <div className='bg-white/20 p-2 rounded-lg backdrop-blur-md'>
+                  <Cloud className='h-6 w-6' />
                 </div>
+                <span className='text-2xl font-bold tracking-tighter uppercase'>
+                  {APP_NAME}
+                </span>
+              </div>
 
-                {/* Input Fields */}
-                <div className='grid gap-6'>
-                  <FormField
-                    control={form.control}
-                    name='name'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input placeholder='Dhruvish' {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <div className='space-y-6 mt-12'>
+                <h2 className='text-3xl font-bold leading-tight'>
+                  Start Your <br />
+                  Journey with <br />
+                  <span className='text-indigo-200'>Cloud Freedom.</span>
+                </h2>
+                <p className='text-primary-foreground/80 text-lg max-w-xs'>
+                  Join thousands of users who trust StoreOne for their most
+                  important data.
+                </p>
+              </div>
+            </div>
 
-                  <FormField
-                    control={form.control}
-                    name='email'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input
-                            type='email'
-                            placeholder='m@example.com'
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+            <div className='relative z-10 space-y-4'>
+              <div className='flex items-center gap-3'>
+                <ShieldCheck className='h-5 w-5 text-indigo-200' />
+                <span className='text-sm font-medium'>
+                  Privacy-first architecture
+                </span>
+              </div>
+              <div className='flex items-center gap-3'>
+                <Zap className='h-5 w-5 text-indigo-200' />
+                <span className='text-sm font-medium'>
+                  Unlimited possibilities
+                </span>
+              </div>
 
-                  <FormField
-                    control={form.control}
-                    name='password'
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Password</FormLabel>
-                        <FormControl>
-                          <div className='relative'>
-                            <Input
-                              type={showPassword ? "text" : "password"}
-                              {...field}
-                            />
-                            <button
-                              type='button'
-                              className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
-                              onClick={() => setShowPassword(!showPassword)}
-                            >
-                              {showPassword ? (
-                                <EyeOff className='h-4 w-4' />
-                              ) : (
-                                <Eye className='h-4 w-4' />
-                              )}
-                            </button>
-                          </div>
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+              <div className='pt-8 border-t border-white/10 mt-8'>
+                <p className='text-xs text-primary-foreground/60 italic'>
+                  "Setting up an account was seamless. The best storage solution
+                  I've used."
+                </p>
+              </div>
+            </div>
+          </div>
 
-                  <TurnstileWidget
-                    setTurnstileToken={setTurnstileToken}
-                    setTurnstileLoading={setTurnstileLoading}
-                  />
+          {/* FORM SIDE */}
+          <div className='lg:col-span-3 p-6 md:p-10 flex flex-col justify-center bg-card'>
+            <div className='w-full max-w-md mx-auto space-y-8'>
+              <div className='space-y-2 text-center md:text-left'>
+                <h1 className='text-3xl font-bold tracking-tight'>
+                  Create Account
+                </h1>
+                <p className='text-muted-foreground'>
+                  Get started with your free StoreOne account today.
+                </p>
+              </div>
 
-                  <Button
-                    type='submit'
-                    className='w-full'
-                    disabled={
-                      (turnstileLoading && !turnstileToken) ||
-                      !form.formState.isValid ||
-                      registerMutation.isPending
-                    }
+              <div className='space-y-6'>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className='space-y-5'
                   >
-                    Sign up
-                  </Button>
-                </div>
+                    <div className='grid gap-5'>
+                      <LoginWithOauth />
 
-                {/* Link */}
-                <div className='text-center text-sm'>
-                  Already have an account?{" "}
+                      <div className='relative'>
+                        <div className='absolute inset-0 flex items-center'>
+                          <span className='w-full border-t border-muted' />
+                        </div>
+                        <div className='relative flex justify-center text-xs uppercase'>
+                          <span className='bg-card px-2 text-muted-foreground'>
+                            Or continue with email
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className='grid gap-4'>
+                        <FormField
+                          control={form.control}
+                          name='name'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className='text-xs font-bold uppercase text-muted-foreground tracking-widest'>
+                                Full Name
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  placeholder='John Doe'
+                                  className='h-12 bg-muted/30 border-muted-foreground/20 focus:border-primary transition-all'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name='email'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className='text-xs font-bold uppercase text-muted-foreground tracking-widest'>
+                                Email Address
+                              </FormLabel>
+                              <FormControl>
+                                <Input
+                                  type='email'
+                                  placeholder='name@example.com'
+                                  className='h-12 bg-muted/30 border-muted-foreground/20 focus:border-primary transition-all'
+                                  {...field}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <FormField
+                          control={form.control}
+                          name='password'
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className='text-xs font-bold uppercase text-muted-foreground tracking-widest'>
+                                Password
+                              </FormLabel>
+                              <FormControl>
+                                <div className='relative'>
+                                  <Input
+                                    type={showPassword ? "text" : "password"}
+                                    className='h-12 bg-muted/30 border-muted-foreground/20 focus:border-primary transition-all pr-10'
+                                    {...field}
+                                  />
+                                  <button
+                                    type='button'
+                                    className='absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors'
+                                    onClick={() =>
+                                      setShowPassword(!showPassword)
+                                    }
+                                  >
+                                    {showPassword ? (
+                                      <EyeOff className='h-4 w-4' />
+                                    ) : (
+                                      <Eye className='h-4 w-4' />
+                                    )}
+                                  </button>
+                                </div>
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+
+                        <div className='py-1'>
+                          <TurnstileWidget
+                            setTurnstileToken={setTurnstileToken}
+                            setTurnstileLoading={setTurnstileLoading}
+                          />
+                        </div>
+
+                        <Button
+                          type='submit'
+                          className='w-full h-12 text-base font-bold shadow-lg shadow-primary/20 transition-all hover:scale-[1.01]'
+                          disabled={
+                            (turnstileLoading && !turnstileToken) ||
+                            !form.formState.isValid ||
+                            registerMutation.isPending
+                          }
+                        >
+                          {registerMutation.isPending
+                            ? "Creating account..."
+                            : "Sign up"}
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </Form>
+
+                <div className='text-center text-sm pt-4 border-t border-muted/50'>
+                  <span className='text-muted-foreground'>
+                    Already have an account?{" "}
+                  </span>
                   <Link
                     to='/auth/login'
-                    className='underline underline-offset-4'
+                    className='font-bold text-primary underline-offset-4 hover:underline'
                   >
-                    Login
+                    Log in here
                   </Link>
                 </div>
               </div>
-            </form>
-          </Form>
-        </CardContent>
+            </div>
+          </div>
+        </div>
       </Card>
-      <div className='text-muted-foreground *:[a]:hover:text-primary text-center text-xs text-balance *:[a]:underline *:[a]:underline-offset-4'>
-        By clicking continue, you agree to our{" "}
-        <a href='/terms-and-conditions' target='_blank'>
-          Terms of Service
-        </a>{" "}
-        and{" "}
-        <a href='/privacy-policy' target='_blank'>
-          Privacy Policy
+
+      {/* Footer Legal Links */}
+      <div className='text-muted-foreground text-center text-xs px-8 flex justify-center gap-4'>
+        <a
+          href='/terms-and-conditions'
+          target='_blank'
+          className='hover:text-primary transition-colors'
+        >
+          Terms
         </a>
-        .
+        <span>•</span>
+        <a
+          href='/privacy-policy'
+          target='_blank'
+          className='hover:text-primary transition-colors'
+        >
+          Privacy
+        </a>
+        <span>•</span>
+        <Link to='/' className='hover:text-primary transition-colors'>
+          Support
+        </Link>
       </div>
     </div>
   );

@@ -3,10 +3,12 @@ import { z } from "zod";
 export const emailAndPWDValidation = z.object({
   email: z.email("Invalid email address").trim().toLowerCase(),
   password: z.string().min(6, "Password must be at least 6 characters long"),
+  deviceName: z.string().optional(),
+  ip: z.string().optional(),
 });
 
 export const loginWithEmailValidation = emailAndPWDValidation.extend({
-  turnstileToken: z.string("Turnstile Token is required"),
+  turnstileToken: z.string().optional(),
 });
 
 export const verifyConnectEmail = emailAndPWDValidation.extend({
@@ -70,4 +72,8 @@ export const updateUserInfoValidator = z.object({
 export const uploadAvatarValidator = z.object({
   extension: z.string("File Extenstion are the Required"),
   contentType: z.string("File ContentType are the Required"),
+});
+
+export const expoPushTokenValidator = z.object({
+  token: z.string("Token Does Required"),
 });

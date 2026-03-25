@@ -2,7 +2,7 @@ import { useDialogStore } from "@/store/dialogs-store";
 import { motion } from "framer-motion";
 import { Star, StarOff, FileText } from "lucide-react";
 import { toast } from "sonner";
-import { usestarredToggle } from "@/api/directory-api";
+import { useStarredToggle } from "@/api/directory-api";
 import { formatDate, formatFileSize } from "@/utils/functions";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ interface Props {
 }
 export default function FileDetailsDialog({ open }: Props) {
   const { currentItem, closeDialog } = useDialogStore();
-  const starredMutation = usestarredToggle();
+  const starredMutation = useStarredToggle();
 
   const starredToggle = () => {
     if (!currentItem) return;

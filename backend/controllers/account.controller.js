@@ -49,7 +49,13 @@ export const updatePaymentMethodDetails = async (req, res) => {
 
 // settings
 export const settingInfo = async (req, res) => {
-  const { sessionId } = req.signedCookies;
+  let sessionId;
+
+  if (req.isMobile) {
+    sessionId = req.headers.token;
+  } else {
+    sessionId = req.signedCookies?.sessionId;
+  }
 
   const info = await getSettingInfoService(req.user._id);
 

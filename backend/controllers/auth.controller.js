@@ -6,6 +6,8 @@ import {
   deleteAllUserSessions,
   deleteRedisKey,
   deleteSingleUserSession,
+  getRedisValue,
+  setRedisValue,
 } from "../services/redis.service.js";
 import {
   accConnectEmail,
@@ -33,6 +35,7 @@ import { getSignedUrlForGetObject } from "../services/s3.service.js";
 import { AVATAR_UPLOAD_FOLDER } from "../constants/s3.constants.js";
 import { twoFaOnBoarding } from "../services/twofa.service.js";
 import User from "../models/User.model.js";
+import mongoose from "mongoose";
 
 // register user
 export const registerWithEmail = async (req, res) => {
@@ -68,11 +71,14 @@ export const loginWithEmail = async (req, res) => {
     );
   }
 
-  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  }
 
   res.status(200).json(
     new ApiResponse(200, "Login successful", {
       showSetUp2Fa: result.showSetUp2Fa,
+      sessionId: req.isMobile ? result.sessionId : undefined,
     }),
   );
 };
@@ -95,7 +101,6 @@ export const getCureentUser = async (req, res) => {
     throw new ApiError(401, "User need to re Authenticated.");
   }
   const user = directory.userId;
-
   let avatarUrl = user.picture;
   if (!user.picture.startsWith("http")) {
     avatarUrl = await getSignedUrlForGetObject(
@@ -130,7 +135,12 @@ export const getUseStorage = async (req, res) => {
 
 // logout user
 export const logout = async (req, res) => {
-  const { sessionId } = req.signedCookies;
+  let sessionId;
+  if (req.isMobile) {
+    sessionId = req.headers.token;
+  } else {
+    sessionId = req.signedCookies?.sessionId;
+  }
   const userId = req.user._id.toString();
   await deleteSingleUserSession({
     userId,
@@ -209,7 +219,9 @@ export const loginWithGoogle = async (req, res) => {
     userId: userId.toString(),
   });
 
-  res.cookie("sessionId", sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", sessionId, SESSION_OPTIONS);
+  }
 
   return res.status(200).json(
     new ApiResponse(
@@ -217,6 +229,7 @@ export const loginWithGoogle = async (req, res) => {
       "User login Successfuly . and you can set the optionality to the 2 FA auth",
       {
         showSetUp2Fa,
+        sessionId: req.isMobile ? sessionId : undefined,
       },
     ),
   );
@@ -336,11 +349,15 @@ export const verfiyOtp = async (req, res) => {
   const user = await User.findById(userId);
   const result = await twoFaOnBoarding(req, user);
 
-  res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  if (!req.isMobile) {
+    res.cookie("sessionId", result.sessionId, SESSION_OPTIONS);
+  }
+
   res.status(200).json(
     new ApiResponse(200, "User login Successfuly", {
       showSetUp2Fa: true,
       userId,
+      sessionId: req.isMobile ? result.sessionId : undefined,
     }),
   );
 };
@@ -469,9 +486,86 @@ export const deleteSession = async (req, res) => {
       sessionId,
     });
   } else {
-    const { sessionId } = req.signedCookies;
+    let sessionId;
+    if (req.isMobile) {
+      sessionId = req.headers.token;
+    } else {
+      sessionId = req.signedCookies?.sessionId;
+    }
 
     await deleteAllUserSessions(userId, sessionId);
   }
   res.status(200).json(new ApiResponse(200, "Success Logout"));
+};
+
+export const authTokenCreate = async (req, res) => {
+  const token = new mongoose.Types.ObjectId();
+  const key = `linkToken:${token}`;
+
+  await setRedisValue(key, JSON.stringify({ status: "pending" }), {
+    expiration: { type: "EX", value: 120 }, // 2 minutes
+  });
+
+  res.status(200).json(new ApiResponse(200, "Token created", { token }));
+};
+
+export const authTokenVerify = async (req, res) => {
+  const { id } = req.params;
+  const key = `linkToken:${id}`;
+
+  const data = await getRedisValue(key);
+  if (!data) {
+    throw new ApiError(404, "Token expired or invalid");
+  }
+
+  const tokenData = JSON.parse(data);
+
+  if (tokenData.status === "verified") {
+    return res.status(200).json(new ApiResponse(200, "Already verified"));
+  }
+
+  await setRedisValue(
+    key,
+    JSON.stringify({ status: "verified", userId: req.user._id }),
+    {
+      expiration: { type: "EX", value: 300 },
+    },
+  );
+
+  res.status(200).json(new ApiResponse(200, "Token verified"));
+};
+
+export const authTokenCheck = async (req, res) => {
+  const { id } = req.params;
+  const key = `linkToken:${id}`;
+
+  const data = await getRedisValue(key);
+  if (!data) {
+    throw new ApiError(404, "Token expired or invalid");
+  }
+
+  const tokenData = JSON.parse(data);
+
+  if (tokenData.status === "pending") {
+    return res
+      .status(200)
+      .json(new ApiResponse(200, "Pending", { status: "pending" }));
+  }
+
+  if (tokenData.status === "verified") {
+    const sessionId = await createAndCheckLimitSession({
+      userId: tokenData.userId,
+      req,
+    });
+
+    res.cookie("sessionId", sessionId, SESSION_OPTIONS);
+
+    await deleteRedisKey(key);
+
+    return res.status(200).json(
+      new ApiResponse(200, "Verified", {
+        status: "verified",
+      }),
+    );
+  }
 };

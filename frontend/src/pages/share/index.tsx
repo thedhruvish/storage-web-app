@@ -7,7 +7,7 @@ import { useAppearance } from "@/store/appearance-store";
 import { useDialogStore } from "@/store/dialogs-store";
 import { useUser } from "@/store/user-store";
 import { Moon, Sun } from "lucide-react";
-import { getShareDocument } from "@/api/docuement-api";
+import { useGetShareDocument } from "@/api/docuement-api";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
@@ -22,7 +22,7 @@ const DialogPreviewFile = lazy(
 );
 
 export default function Index({ shareId = "" }: { shareId?: string }) {
-  const getShareDocumentData = getShareDocument(shareId);
+  const getShareDocumentData = useGetShareDocument(shareId);
   const { user } = useUser();
   const { setOpen, setCurrentItem, open } = useDialogStore();
 

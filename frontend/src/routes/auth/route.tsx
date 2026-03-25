@@ -27,13 +27,17 @@ function RouteComponent() {
   }, [user, navigate]);
 
   const isSetupPage = location.pathname.includes("/auth/2fa/setup");
+  const isWidePage =
+    isSetupPage ||
+    location.pathname.includes("/auth/login") ||
+    location.pathname.includes("/auth/signup");
 
   return (
     <div className='bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10'>
       <div
         className={cn(
           "flex w-full flex-col gap-6",
-          isSetupPage ? "max-w-2xl" : "max-w-sm"
+          isWidePage ? "max-w-4xl" : "max-w-sm"
         )}
       >
         <Link

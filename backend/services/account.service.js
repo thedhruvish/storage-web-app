@@ -141,13 +141,19 @@ export const getSettingInfoService = async (userId) => {
             ? userInfo.githubEmail
             : null,
   }));
-  const avatarUrl = await getSignedUrlForGetObject(
-    userInfo.picture,
-    "my_avatar.png",
-    false,
-    AVATAR_UPLOAD_FOLDER,
-    8640 * 7,
-  );
+
+  let picture;
+  if (userInfo.picture.startsWith("http")) {
+    picture = userInfo.picture;
+  } else {
+    picture = await getSignedUrlForGetObject(
+      userInfo.picture,
+      "my_avatar.png",
+      false,
+      AVATAR_UPLOAD_FOLDER,
+      8640 * 7,
+    );
+  }
   return {
     twoFactor: passkey,
     authenticate,
@@ -159,7 +165,7 @@ export const getSettingInfoService = async (userId) => {
     user: {
       name: userInfo.name,
       email: userInfo.email,
-      avatarUrl,
+      picture,
       isPremium: Boolean(isPremium),
     },
   };

@@ -10,7 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { useRestore, usestarredToggle } from "@/api/directory-api";
+import { useRestore, useStarredToggle } from "@/api/directory-api";
 import {
   DropdownMenuItem,
   DropdownMenuSeparator,
@@ -24,7 +24,7 @@ interface Props {
 
 export default function FileMenuItems({ file, fileType }: Props) {
   const { setOpen, setCurrentItem } = useDialogStore();
-  const starredMutation = usestarredToggle();
+  const starredMutation = useStarredToggle();
 
   const openDialog = (type: Parameters<typeof setOpen>[0]) => {
     setOpen(type);
