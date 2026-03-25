@@ -15,14 +15,17 @@ import {
 import { getRequestInfo } from "./middlewares/getRequestInfo.middleware.js";
 import helmet from "helmet";
 import { connectDB } from "./config/db.js";
+import { deviceCheck } from "./middlewares/devicecheck.middleware.js";
 
 const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
 
 const app = express();
 
 app.set("trust proxy", 1);
+app.use(deviceCheck);
 
-app.use(
+app.use((req, res, next) => {
+  if (req.isMobile) return next();
   helmet({
     crossOriginResourcePolicy: { policy: "same-site" },
     contentSecurityPolicy: {
@@ -30,8 +33,8 @@ app.use(
         reportUri: "/report-violation",
       },
     },
-  }),
-);
+  })(req, res, next);
+});
 // cors allow
 const allowedOrigins = process.env.FRONTEND_URL
   ? process.env.FRONTEND_URL.split(",")

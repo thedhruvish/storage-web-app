@@ -24,9 +24,11 @@ const cookieSecret = process.env.COOKIESECRETKEY || "DHRUVISH";
 
 const app = express();
 app.set("trust proxy", 1);
+app.use(deviceCheck);
 
 // helmet
-app.use(
+app.use((req, res, next) => {
+  if (req.isMobile) return next();
   helmet({
     crossOriginResourcePolicy: { policy: "same-site" },
     contentSecurityPolicy: {
@@ -34,8 +36,8 @@ app.use(
         reportUri: "/report-violation",
       },
     },
-  }),
-);
+  })(req, res, next);
+});
 
 // cron-job
 startCronJobs();
@@ -70,7 +72,6 @@ app.use("/wh", webhookRoute);
 
 // parser data into json and add req.body
 app.use(express.json());
-app.use(deviceCheck);
 
 // health
 app.get("/health", (req, res) => {

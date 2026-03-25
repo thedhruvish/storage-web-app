@@ -1,6 +1,7 @@
 import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import axios, { AxiosError, InternalAxiosRequestConfig } from "axios";
 import { router } from "expo-router";
+import { getDeviceInfo } from "@/utils/device-info";
 
 /**
  * Update this URL with your actual backend API base URL
@@ -18,13 +19,25 @@ const axiosClient = axios.create({
 // Request Interceptor
 axiosClient.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
-    let token;
     try {
-      token = await handleToken.getToken(AUTH_TOKEN_NAME);
+      const token = handleToken.getToken(AUTH_TOKEN_NAME);
       if (token) {
         config.headers.Token = token;
       }
+
       config.headers["X-Platform"] = "mobile";
+
+      // Conditionally send device info headers for auth routes
+      const authRoutes = ["/auth/login", "/auth/register", "/sso/google"];
+      if (
+        config.url &&
+        authRoutes.some((route) => config.url?.includes(route))
+      ) {
+        const { deviceName, ip } = await getDeviceInfo();
+        config.headers["X-Device-Name"] = deviceName;
+        config.headers["X-IP"] = ip;
+      }
+
       return config;
     } catch (error) {
       console.log({ error });

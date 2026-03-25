@@ -16,7 +16,6 @@ import { z } from "zod";
 import { showGlobalDialog } from "@/components/dialog";
 import { Text, TextInput, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getDeviceInfo } from "@/utils/device-info";
 
 const registerSchema = z
   .object({
@@ -55,13 +54,10 @@ export default function RegisterScreen() {
       confirmPassword,
     });
     if (success) {
-      const deviceInfo = await getDeviceInfo();
       registerMutation.mutate({
         name,
         email,
         password,
-        deviceName: deviceInfo.deviceName,
-        ip: deviceInfo.ip,
       });
     } else {
       showGlobalDialog({

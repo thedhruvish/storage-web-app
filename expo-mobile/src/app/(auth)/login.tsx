@@ -16,7 +16,6 @@ import { z } from "zod";
 import { showGlobalDialog } from "@/components/dialog";
 import { Text, TextInput, Button } from "@/components/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { getDeviceInfo } from "@/utils/device-info";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email is required").email("Invalid email format"),
@@ -38,12 +37,9 @@ export default function LoginScreen() {
   const handleLogin = async () => {
     const { success, error } = loginSchema.safeParse({ email, password });
     if (success) {
-      const deviceInfo = await getDeviceInfo();
       loginMutation.mutate({
         email,
         password,
-        deviceName: deviceInfo.deviceName,
-        ip: deviceInfo.ip,
       });
     } else {
       showGlobalDialog({

@@ -7,7 +7,6 @@ import {
 import { useTheme } from "@/hooks/use-theme";
 import { Button } from "./ui";
 import { useGoogleLogin } from "@/api/auth-api";
-import { getDeviceInfo } from "@/utils/device-info";
 
 import { ToastAndroid, Platform } from "react-native";
 import { showGlobalDialog } from "@/components/dialog";
@@ -45,11 +44,8 @@ export function GoogleSignInButton({
       let idToken = userInfo.data?.idToken;
 
       if (idToken) {
-        const deviceInfo = await getDeviceInfo();
         loginWithGoogle.mutate({
           idToken: idToken,
-          deviceName: deviceInfo.deviceName,
-          ip: deviceInfo.ip,
         });
       } else {
         throw new Error("ID_TOKEN_MISSING");
