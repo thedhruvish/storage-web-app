@@ -53,13 +53,16 @@ export const registerWithEmail = async (req, res) => {
 export const loginWithEmail = async (req, res) => {
   const result = await loginWithEmailService(req);
 
-  if (result.step === "2FA") {
-    return res.status(200).json(
-      new ApiResponse(200, "Verify 2FA", {
-        isEnabled2Fa: true,
-        ...result.data,
-      }),
-    );
+  // temp: disable for the mobile devices
+  if (!req.isMobile) {
+    if (result.step === "2FA") {
+      return res.status(200).json(
+        new ApiResponse(200, "Verify 2FA", {
+          isEnabled2Fa: true,
+          ...result.data,
+        }),
+      );
+    }
   }
 
   if (result.step === "OTP") {
@@ -180,20 +183,23 @@ export const loginWithGoogle = async (req, res) => {
           new ApiError(409, "Your Account is Deleted. Please Contact Admin"),
         );
     }
-    // verifiy 2FA
-    userId = exstingEmail.userId._id;
-    if (exstingEmail.userId?.twoFactorId?.isEnabled) {
-      showSetUp2Fa = false;
-      const twoFa = exstingEmail.userId?.twoFactorId;
-      // do not gen a token just send which method to verify
-      return res.status(200).json(
-        new ApiResponse(200, "verify 2FA ", {
-          isEnabled2Fa: true,
-          isTotp: twoFa.totp?.isVerified === true ? true : false,
-          isPasskey: twoFa.passkeys?.length !== 0 ? true : false,
-          userId,
-        }),
-      );
+    // TEMP: disable for the mobile
+    if (!req.isMobile) {
+      // verifiy 2FA
+      userId = exstingEmail.userId._id;
+      if (exstingEmail.userId?.twoFactorId?.isEnabled) {
+        showSetUp2Fa = false;
+        const twoFa = exstingEmail.userId?.twoFactorId;
+        // do not gen a token just send which method to verify
+        return res.status(200).json(
+          new ApiResponse(200, "verify 2FA ", {
+            isEnabled2Fa: true,
+            isTotp: twoFa.totp?.isVerified === true ? true : false,
+            isPasskey: twoFa.passkeys?.length !== 0 ? true : false,
+            userId,
+          }),
+        );
+      }
     }
   } else {
     //  in the here register a new user.
