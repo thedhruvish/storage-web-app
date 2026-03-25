@@ -44,11 +44,6 @@ export function GoogleSignInButton({
 
       let idToken = userInfo.data?.idToken;
 
-      if (!idToken) {
-        const tokens = await GoogleSignin.getTokens();
-        idToken = tokens.idToken;
-      }
-
       if (idToken) {
         const deviceInfo = await getDeviceInfo();
         loginWithGoogle.mutate({

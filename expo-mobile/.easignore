@@ -1,45 +1,16 @@
-# Learn more https://docs.github.com/en/get-started/getting-started-with-git/ignoring-files
+# Copy everything from your .gitignore file here
 
-# dependencies
-node_modules/
+# Ignore files and directories that EAS Build doesn't need to build your app
 
-# Expo
-.expo/
-dist/
-web-build/
-expo-env.d.ts
+/docs
 
-# Native
-.kotlin/
-*.orig.*
-*.jks
-*.p8
-*.p12
-*.key
-*.mobileprovision
+# Ignore native directories (if you are using EAS Build)
 
-# Metro
-.metro-health-check*
-
-# debug
-npm-debug.*
-yarn-debug.*
-yarn-error.*
-
-# macOS
-.DS_Store
-*.pem
-
-# local env files
-.env*.local
-
-# typescript
-*.tsbuildinfo
-
-app-example
-
-# generated native folders
-/ios
 /android
+/ios
 
-.env
+# Ignore test coverage reports
+
+/coverage
+
+android
