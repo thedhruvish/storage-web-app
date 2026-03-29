@@ -142,9 +142,12 @@ export const PlusMenuFAB = ({
         )}
         <TouchableOpacity
           onPress={() => setIsPlusMenuVisible(true)}
-          style={[styles.fabPrimary, { backgroundColor: "#443a34" }]}
+          style={[
+            styles.fabPrimary,
+            { backgroundColor: colors.secondaryBackground },
+          ]}
         >
-          <MaterialIcons name="add" size={32} color="#fff" />
+          <MaterialIcons name="add" size={32} color={colors.text} />
         </TouchableOpacity>
       </View>
 

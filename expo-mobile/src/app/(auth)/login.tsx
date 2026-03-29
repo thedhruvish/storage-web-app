@@ -6,6 +6,8 @@ import {
   Platform,
   ScrollView,
   TextInput as RNTextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
@@ -54,139 +56,145 @@ export default function LoginScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
       style={[styles.container, { backgroundColor: colors.background }]}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingHorizontal: spacing.lg,
-            paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={[styles.header, { marginBottom: spacing.xxl }]}>
-          <Text variant="h1" align="center">
-            Welcome Back
-          </Text>
-          <Text
-            variant="body"
-            color="secondaryText"
-            align="center"
-            style={{ marginTop: spacing.xs }}
-          >
-            Sign in to your account
-          </Text>
-        </View>
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: spacing.lg,
+              paddingTop: insets.top + spacing.lg,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.header, { marginBottom: spacing.xxl }]}>
+            <Text variant="h1" align="center">
+              Welcome Back
+            </Text>
+            <Text
+              variant="body"
+              color="secondaryText"
+              align="center"
+              style={{ marginTop: spacing.xs }}
+            >
+              Sign in to your account
+            </Text>
+          </View>
 
-        <View style={[styles.form, { gap: spacing.md }]}>
-          <TextInput
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!isLoading}
-            returnKeyType="next"
-            onSubmitEditing={() => passwordRef.current?.focus()}
-            blurOnSubmit={false}
-            leftIcon={
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color={colors.secondaryText}
-              />
-            }
-          />
+          <View style={[styles.form, { gap: spacing.md }]}>
+            <TextInput
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
+              leftIcon={
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+            />
 
-          <TextInput
-            ref={passwordRef}
-            label="Password"
-            placeholder="Enter your password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            editable={!isLoading}
-            returnKeyType="done"
-            onSubmitEditing={handleLogin}
-            leftIcon={
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={colors.secondaryText}
+            <TextInput
+              ref={passwordRef}
+              label="Password"
+              placeholder="Enter your password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!isLoading}
+              returnKeyType="done"
+              onSubmitEditing={handleLogin}
+              leftIcon={
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+              rightIcon={
+                <Button
+                  variant="ghost"
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{
+                    minHeight: 0,
+                    paddingHorizontal: 0,
+                    paddingVertical: 0,
+                  }}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color={colors.secondaryText}
+                  />
+                </Button>
+              }
+            />
+
+            <Button
+              title="Login"
+              onPress={handleLogin}
+              loading={isLoading}
+              disabled={isLoading}
+              size="lg"
+              style={{ marginTop: spacing.sm }}
+            />
+
+            <View
+              style={[styles.dividerContainer, { marginVertical: spacing.md }]}
+            >
+              <View
+                style={[styles.divider, { backgroundColor: colors.separator }]}
               />
-            }
-            rightIcon={
+              <Text
+                variant="caption"
+                color="secondaryText"
+                style={{
+                  backgroundColor: colors.background,
+                  paddingHorizontal: spacing.sm,
+                }}
+              >
+                OR
+              </Text>
+            </View>
+
+            <GoogleSignInButton disabled={isLoading} />
+
+            <View style={[styles.footer, { marginTop: spacing.lg }]}>
+              <Text color="secondaryText">Don&apos;t have an account? </Text>
               <Button
                 variant="ghost"
-                onPress={() => setShowPassword(!showPassword)}
+                onPress={() => router.push("/register")}
+                disabled={isLoading}
                 style={{
                   minHeight: 0,
                   paddingHorizontal: 0,
                   paddingVertical: 0,
                 }}
               >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={24}
-                  color={colors.secondaryText}
-                />
+                <Text color="link" weight="bold">
+                  Register
+                </Text>
               </Button>
-            }
-          />
-
-          <Button
-            title="Login"
-            onPress={handleLogin}
-            loading={isLoading}
-            disabled={isLoading}
-            size="lg"
-            style={{ marginTop: spacing.sm }}
-          />
-
-          <View
-            style={[styles.dividerContainer, { marginVertical: spacing.md }]}
-          >
-            <View
-              style={[styles.divider, { backgroundColor: colors.separator }]}
-            />
-            <Text
-              variant="caption"
-              color="secondaryText"
-              style={{
-                backgroundColor: colors.background,
-                paddingHorizontal: spacing.sm,
-              }}
-            >
-              OR
-            </Text>
+            </View>
           </View>
-
-          <GoogleSignInButton disabled={isLoading} />
-
-          <View style={[styles.footer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">Don&apos;t have an account? </Text>
-            <Button
-              variant="ghost"
-              onPress={() => router.push("/register")}
-              disabled={isLoading}
-              style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
-            >
-              <Text color="link" weight="bold">
-                Register
-              </Text>
-            </Button>
-          </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,

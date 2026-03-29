@@ -115,7 +115,7 @@ export function useVerifyOtp() {
     mutationFn: authApi.verifyOtp,
     onSuccess: async (data) => {
       if (data.data.sessionId) {
-        await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
+        handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           const userResponse = await getCurrentUser();
@@ -161,7 +161,7 @@ export function useGoogleLogin() {
     mutationFn: authApi.googleLogin,
     onSuccess: async (data) => {
       if (data.data.sessionId) {
-        await handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
+        handleToken.setToken(AUTH_TOKEN_NAME, data.data.sessionId);
 
         try {
           const userResponse = await getCurrentUser();

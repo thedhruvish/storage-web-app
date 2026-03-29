@@ -6,6 +6,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
@@ -114,88 +116,98 @@ export default function OTPScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
       style={[styles.container, { backgroundColor: colors.background }]}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingHorizontal: spacing.lg,
-            paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={[styles.header, { marginBottom: spacing.xxl }]}>
-          <Text variant="h2" align="center">
-            Verification
-          </Text>
-          <Text
-            variant="body"
-            color="secondaryText"
-            align="center"
-            style={{ marginTop: spacing.xs }}
-          >
-            Enter the 6-digit code sent to your email
-          </Text>
-        </View>
-
-        <View style={[styles.otpContainer, { gap: spacing.sm }]}>
-          {otp.map((digit, index) => (
-            <RNTextInput
-              key={index}
-              ref={(ref) => {
-                inputRefs.current[index] = ref;
-              }}
-              style={[
-                styles.otpInput,
-                {
-                  color: colors.text,
-                  borderColor: digit ? colors.tint : colors.separator,
-                  backgroundColor: colors.secondaryBackground,
-                  borderRadius: spacing.borderRadius,
-                  fontSize: 20,
-                },
-              ]}
-              value={digit}
-              onChangeText={(value) => handleOTPChange(value, index)}
-              onKeyPress={(e) => handleKeyPress(e, index)}
-              keyboardType="number-pad"
-              maxLength={index === 0 ? 6 : 1} // Index 0 handles potential paste
-              textAlign="center"
-              selectionColor={colors.tint}
-              editable={!isLoading}
-            />
-          ))}
-        </View>
-
-        <View style={styles.actionContainer}>
-          <Button
-            title="Verify"
-            onPress={handleVerify}
-            loading={isLoading}
-            disabled={otp.join("").length !== 6 || isLoading}
-            size="lg"
-            style={{ marginTop: spacing.xl, width: "100%" }}
-          />
-
-          <View style={[styles.resendContainer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">Didn&apos;t receive the code? </Text>
-            <Button
-              variant="ghost"
-              onPress={handleResendOtp}
-              disabled={!canResend || resendOtpMutation.isPending}
-              style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: spacing.lg,
+              paddingTop: insets.top + spacing.lg,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.header, { marginBottom: spacing.xxl }]}>
+            <Text variant="h2" align="center">
+              Verification
+            </Text>
+            <Text
+              variant="body"
+              color="secondaryText"
+              align="center"
+              style={{ marginTop: spacing.xs }}
             >
-              <Text color={canResend ? "link" : "secondaryText"} weight="bold">
-                {canResend ? "Resend" : `Resend in ${formatTime(timer)}`}
-              </Text>
-            </Button>
+              Enter the 6-digit code sent to your email
+            </Text>
           </View>
-        </View>
-      </ScrollView>
+
+          <View style={[styles.otpContainer, { gap: spacing.sm }]}>
+            {otp.map((digit, index) => (
+              <RNTextInput
+                key={index}
+                ref={(ref) => {
+                  inputRefs.current[index] = ref;
+                }}
+                style={[
+                  styles.otpInput,
+                  {
+                    color: colors.text,
+                    borderColor: digit ? colors.tint : colors.separator,
+                    backgroundColor: colors.secondaryBackground,
+                    borderRadius: spacing.borderRadius,
+                    fontSize: 20,
+                  },
+                ]}
+                value={digit}
+                onChangeText={(value) => handleOTPChange(value, index)}
+                onKeyPress={(e) => handleKeyPress(e, index)}
+                keyboardType="number-pad"
+                maxLength={index === 0 ? 6 : 1} // Index 0 handles potential paste
+                textAlign="center"
+                selectionColor={colors.tint}
+                editable={!isLoading}
+              />
+            ))}
+          </View>
+
+          <View style={styles.actionContainer}>
+            <Button
+              title="Verify"
+              onPress={handleVerify}
+              loading={isLoading}
+              disabled={otp.join("").length !== 6 || isLoading}
+              size="lg"
+              style={{ marginTop: spacing.xl, width: "100%" }}
+            />
+
+            <View style={[styles.resendContainer, { marginTop: spacing.lg }]}>
+              <Text color="secondaryText">Didn&apos;t receive the code? </Text>
+              <Button
+                variant="ghost"
+                onPress={handleResendOtp}
+                disabled={!canResend || resendOtpMutation.isPending}
+                style={{
+                  minHeight: 0,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
+              >
+                <Text
+                  color={canResend ? "link" : "secondaryText"}
+                  weight="bold"
+                >
+                  {canResend ? "Resend" : `Resend in ${formatTime(timer)}`}
+                </Text>
+              </Button>
+            </View>
+          </View>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }

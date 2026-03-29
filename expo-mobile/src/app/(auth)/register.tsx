@@ -6,6 +6,8 @@ import {
   Platform,
   ScrollView,
   TextInput as RNTextInput,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import { useRouter } from "expo-router";
 import { useTheme } from "@/hooks/use-theme";
@@ -72,191 +74,198 @@ export default function RegisterScreen() {
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "padding"}
       style={[styles.container, { backgroundColor: colors.background }]}
+      keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 0}
     >
-      <ScrollView
-        contentContainerStyle={[
-          styles.scrollContent,
-          {
-            paddingHorizontal: spacing.lg,
-            paddingTop: insets.top + spacing.lg,
-            paddingBottom: insets.bottom + spacing.lg,
-          },
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={[styles.header, { marginBottom: spacing.xl }]}>
-          <Text variant="h1" align="center">
-            Create Account
-          </Text>
-          <Text
-            variant="body"
-            color="secondaryText"
-            align="center"
-            style={{ marginTop: spacing.xs }}
-          >
-            Start your journey with us
-          </Text>
-        </View>
-
-        <View style={[styles.form, { gap: spacing.md }]}>
-          <TextInput
-            label="Full Name"
-            placeholder="Enter your full name"
-            value={name}
-            onChangeText={setName}
-            editable={!isLoading}
-            returnKeyType="next"
-            onSubmitEditing={() => emailRef.current?.focus()}
-            blurOnSubmit={false}
-            leftIcon={
-              <Ionicons
-                name="person-outline"
-                size={20}
-                color={colors.secondaryText}
-              />
-            }
-          />
-
-          <TextInput
-            ref={emailRef}
-            label="Email"
-            placeholder="Enter your email"
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
-            editable={!isLoading}
-            returnKeyType="next"
-            onSubmitEditing={() => passwordRef.current?.focus()}
-            blurOnSubmit={false}
-            leftIcon={
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color={colors.secondaryText}
-              />
-            }
-          />
-
-          <TextInput
-            ref={passwordRef}
-            label="Password"
-            placeholder="Create a password"
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
-            editable={!isLoading}
-            returnKeyType="next"
-            onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-            blurOnSubmit={false}
-            leftIcon={
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={colors.secondaryText}
-              />
-            }
-            rightIcon={
-              <Button
-                variant="ghost"
-                onPress={() => setShowPassword(!showPassword)}
-                style={{
-                  minHeight: 0,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
-              >
-                <Ionicons
-                  name={showPassword ? "eye-off" : "eye"}
-                  size={24}
-                  color={colors.secondaryText}
-                />
-              </Button>
-            }
-          />
-
-          <TextInput
-            ref={confirmPasswordRef}
-            label="Confirm Password"
-            placeholder="Confirm your password"
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            secureTextEntry={!showConfirmPassword}
-            editable={!isLoading}
-            returnKeyType="done"
-            onSubmitEditing={handleRegister}
-            leftIcon={
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={colors.secondaryText}
-              />
-            }
-            rightIcon={
-              <Button
-                variant="ghost"
-                onPress={() => setShowConfirmPassword(!showConfirmPassword)}
-                style={{
-                  minHeight: 0,
-                  paddingHorizontal: 0,
-                  paddingVertical: 0,
-                }}
-              >
-                <Ionicons
-                  name={showConfirmPassword ? "eye-off" : "eye"}
-                  size={24}
-                  color={colors.secondaryText}
-                />
-              </Button>
-            }
-          />
-
-          <Button
-            title="Register"
-            onPress={handleRegister}
-            loading={isLoading}
-            disabled={isLoading}
-            size="lg"
-            style={{ marginTop: spacing.sm }}
-          />
-
-          <View
-            style={[styles.dividerContainer, { marginVertical: spacing.md }]}
-          >
-            <View
-              style={[styles.divider, { backgroundColor: colors.separator }]}
-            />
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <ScrollView
+          contentContainerStyle={[
+            styles.scrollContent,
+            {
+              paddingHorizontal: spacing.lg,
+              paddingTop: insets.top + spacing.lg,
+              paddingBottom: insets.bottom + spacing.lg,
+            },
+          ]}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={[styles.header, { marginBottom: spacing.xl }]}>
+            <Text variant="h1" align="center">
+              Create Account
+            </Text>
             <Text
-              variant="caption"
+              variant="body"
               color="secondaryText"
-              style={{
-                backgroundColor: colors.background,
-                paddingHorizontal: spacing.sm,
-              }}
+              align="center"
+              style={{ marginTop: spacing.xs }}
             >
-              OR
+              Start your journey with us
             </Text>
           </View>
 
-          <GoogleSignInButton disabled={isLoading} />
+          <View style={[styles.form, { gap: spacing.md }]}>
+            <TextInput
+              label="Full Name"
+              placeholder="Enter your full name"
+              value={name}
+              onChangeText={setName}
+              editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => emailRef.current?.focus()}
+              blurOnSubmit={false}
+              leftIcon={
+                <Ionicons
+                  name="person-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+            />
 
-          <View style={[styles.footer, { marginTop: spacing.lg }]}>
-            <Text color="secondaryText">Already have an account? </Text>
+            <TextInput
+              ref={emailRef}
+              label="Email"
+              placeholder="Enter your email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => passwordRef.current?.focus()}
+              blurOnSubmit={false}
+              leftIcon={
+                <Ionicons
+                  name="mail-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+            />
+
+            <TextInput
+              ref={passwordRef}
+              label="Password"
+              placeholder="Create a password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+              editable={!isLoading}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+              blurOnSubmit={false}
+              leftIcon={
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+              rightIcon={
+                <Button
+                  variant="ghost"
+                  onPress={() => setShowPassword(!showPassword)}
+                  style={{
+                    minHeight: 0,
+                    paddingHorizontal: 0,
+                    paddingVertical: 0,
+                  }}
+                >
+                  <Ionicons
+                    name={showPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color={colors.secondaryText}
+                  />
+                </Button>
+              }
+            />
+
+            <TextInput
+              ref={confirmPasswordRef}
+              label="Confirm Password"
+              placeholder="Confirm your password"
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              secureTextEntry={!showConfirmPassword}
+              editable={!isLoading}
+              returnKeyType="done"
+              onSubmitEditing={handleRegister}
+              leftIcon={
+                <Ionicons
+                  name="lock-closed-outline"
+                  size={20}
+                  color={colors.secondaryText}
+                />
+              }
+              rightIcon={
+                <Button
+                  variant="ghost"
+                  onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                  style={{
+                    minHeight: 0,
+                    paddingHorizontal: 0,
+                    paddingVertical: 0,
+                  }}
+                >
+                  <Ionicons
+                    name={showConfirmPassword ? "eye-off" : "eye"}
+                    size={24}
+                    color={colors.secondaryText}
+                  />
+                </Button>
+              }
+            />
+
             <Button
-              variant="ghost"
-              onPress={() => router.push("/login")}
+              title="Register"
+              onPress={handleRegister}
+              loading={isLoading}
               disabled={isLoading}
-              style={{ minHeight: 0, paddingHorizontal: 0, paddingVertical: 0 }}
+              size="lg"
+              style={{ marginTop: spacing.sm }}
+            />
+
+            <View
+              style={[styles.dividerContainer, { marginVertical: spacing.md }]}
             >
-              <Text color="link" weight="bold">
-                Login
+              <View
+                style={[styles.divider, { backgroundColor: colors.separator }]}
+              />
+              <Text
+                variant="caption"
+                color="secondaryText"
+                style={{
+                  backgroundColor: colors.background,
+                  paddingHorizontal: spacing.sm,
+                }}
+              >
+                OR
               </Text>
-            </Button>
+            </View>
+
+            <GoogleSignInButton disabled={isLoading} />
+
+            <View style={[styles.footer, { marginTop: spacing.lg }]}>
+              <Text color="secondaryText">Already have an account? </Text>
+              <Button
+                variant="ghost"
+                onPress={() => router.push("/login")}
+                disabled={isLoading}
+                style={{
+                  minHeight: 0,
+                  paddingHorizontal: 0,
+                  paddingVertical: 0,
+                }}
+              >
+                <Text color="link" weight="bold">
+                  Login
+                </Text>
+              </Button>
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </TouchableWithoutFeedback>
     </KeyboardAvoidingView>
   );
 }
