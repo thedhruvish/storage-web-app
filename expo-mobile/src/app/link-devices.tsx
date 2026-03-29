@@ -13,8 +13,8 @@ export default function LinkDevicesScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuthAndHandleToken = async () => {
-      const authToken = await handleToken.getToken(AUTH_TOKEN_NAME);
+    const checkAuthAndHandleToken = () => {
+      const authToken = handleToken.getToken(AUTH_TOKEN_NAME);
 
       if (!authToken) {
         showGlobalDialog({

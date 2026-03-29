@@ -39,7 +39,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         category: ["BROWSABLE", "DEFAULT"],
       },
     ],
-    googleServicesFile: "./google-services.json",
+    googleServicesFile: process.env.PROD_GOOGLE_SERVICES_JSON,
   },
   ios: {
     bundleIdentifier: "com.dhruvish.storeone",
