@@ -61,150 +61,154 @@ const getFileIcon = (
   }
 };
 
-export const FileItemView = ({
-  file,
-  documentType,
-  viewMode,
-  isSelected,
-  onPress,
-  onLongPress,
-  onMenuPress,
-}: FileItemViewProps) => {
-  const { colors } = useTheme();
+export const FileItemView = React.memo(
+  ({
+    file,
+    documentType,
+    viewMode,
+    isSelected,
+    onPress,
+    onLongPress,
+    onMenuPress,
+  }: FileItemViewProps) => {
+    const { colors } = useTheme();
 
-  if (viewMode === "grid") {
+    if (viewMode === "grid") {
+      return (
+        <TouchableOpacity
+          style={[
+            styles.gridContainer,
+            {
+              borderColor: colors.separator,
+              backgroundColor: colors.background,
+            },
+            isSelected && {
+              backgroundColor: colors.tint + "15",
+              borderColor: colors.tint,
+            },
+          ]}
+          onPress={onPress}
+          onLongPress={onLongPress}
+          activeOpacity={0.7}
+        >
+          <View style={styles.gridIconWrapper}>
+            {file.previewUrl ? (
+              <Image
+                source={{ uri: file.previewUrl }}
+                style={styles.previewImage}
+                resizeMode="cover"
+              />
+            ) : (
+              getFileIcon(documentType, file, 48, colors.tint)
+            )}
+
+            {file.isStarred && (
+              <View style={styles.starBadgeGrid}>
+                <MaterialIcons name="star" size={12} color="#eab308" />
+              </View>
+            )}
+          </View>
+
+          <View style={styles.gridTextWrapper}>
+            <View style={styles.gridNameRow}>
+              <Text
+                variant="body"
+                style={[styles.gridNameText, { color: colors.text }]}
+                numberOfLines={1}
+                ellipsizeMode="middle"
+              >
+                {file.name}
+              </Text>
+              <TouchableOpacity
+                onPress={onMenuPress}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                style={styles.gridMenuButton}
+              >
+                <MaterialIcons
+                  name="more-vert"
+                  size={18}
+                  color={colors.secondaryText}
+                />
+              </TouchableOpacity>
+            </View>
+          </View>
+        </TouchableOpacity>
+      );
+    }
+
+    // LIST VIEW
     return (
       <TouchableOpacity
         style={[
-          styles.gridContainer,
-          {
-            borderColor: colors.separator,
-            backgroundColor: colors.background,
-          },
+          styles.listContainer,
+          { borderBottomColor: colors.separator },
           isSelected && {
-            backgroundColor: colors.tint + "15",
-            borderColor: colors.tint,
+            backgroundColor: colors.tint + "20",
           },
         ]}
         onPress={onPress}
         onLongPress={onLongPress}
         activeOpacity={0.7}
       >
-        <View style={styles.gridIconWrapper}>
-          {file.previewUrl ? (
-            <Image
-              source={{ uri: file.previewUrl }}
-              style={styles.previewImage}
-              resizeMode="cover"
-            />
-          ) : (
-            getFileIcon(documentType, file, 48, colors.tint)
-          )}
-
+        <View style={styles.listIconWrapper}>
+          {getFileIcon(documentType, file, 24, colors.tint)}
           {file.isStarred && (
-            <View style={styles.starBadgeGrid}>
-              <MaterialIcons name="star" size={12} color="#eab308" />
+            <View
+              style={[
+                styles.starBadgeList,
+                { backgroundColor: colors.background },
+              ]}
+            >
+              <MaterialIcons name="star" size={10} color="#eab308" />
             </View>
           )}
         </View>
 
-        <View style={styles.gridTextWrapper}>
-          <View style={styles.gridNameRow}>
-            <Text
-              variant="body"
-              style={[styles.gridNameText, { color: colors.text }]}
-              numberOfLines={1}
-              ellipsizeMode="middle"
-            >
-              {file.name}
-            </Text>
-            <TouchableOpacity
-              onPress={onMenuPress}
-              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-              style={styles.gridMenuButton}
-            >
-              <MaterialIcons
-                name="more-vert"
-                size={18}
-                color={colors.secondaryText}
-              />
-            </TouchableOpacity>
-          </View>
+        <View style={styles.listMainContent}>
+          <Text
+            variant="body"
+            style={{ color: colors.text }}
+            numberOfLines={1}
+            ellipsizeMode="tail"
+          >
+            {file.name}
+          </Text>
+          <Text
+            variant="caption"
+            style={[styles.listSubText, { color: colors.secondaryText }]}
+          >
+            {file.metaData?.size !== undefined
+              ? formatFileSize(file.metaData.size)
+              : documentType === "folder"
+                ? "Folder"
+                : "-"}
+            {" • "}
+            {file.createdAt
+              ? formatDistanceToNow(new Date(file.createdAt), {
+                  addSuffix: true,
+                })
+              : ""}
+          </Text>
         </View>
+
+        {/* Three-dot menu for list view */}
+        <TouchableOpacity
+          style={styles.listMenuButton}
+          onPress={onMenuPress}
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
+          <MaterialIcons
+            name="more-vert"
+            size={20}
+            color={colors.secondaryText}
+          />
+        </TouchableOpacity>
       </TouchableOpacity>
     );
-  }
+  },
+);
 
-  // LIST VIEW
-  return (
-    <TouchableOpacity
-      style={[
-        styles.listContainer,
-        { borderBottomColor: colors.separator },
-        isSelected && {
-          backgroundColor: colors.tint + "20",
-        },
-      ]}
-      onPress={onPress}
-      onLongPress={onLongPress}
-      activeOpacity={0.7}
-    >
-      <View style={styles.listIconWrapper}>
-        {getFileIcon(documentType, file, 24, colors.tint)}
-        {file.isStarred && (
-          <View
-            style={[
-              styles.starBadgeList,
-              { backgroundColor: colors.background },
-            ]}
-          >
-            <MaterialIcons name="star" size={10} color="#eab308" />
-          </View>
-        )}
-      </View>
-
-      <View style={styles.listMainContent}>
-        <Text
-          variant="body"
-          style={{ color: colors.text }}
-          numberOfLines={1}
-          ellipsizeMode="tail"
-        >
-          {file.name}
-        </Text>
-        <Text
-          variant="caption"
-          style={[styles.listSubText, { color: colors.secondaryText }]}
-        >
-          {file.metaData?.size !== undefined
-            ? formatFileSize(file.metaData.size)
-            : documentType === "folder"
-              ? "Folder"
-              : "-"}
-          {" • "}
-          {file.createdAt
-            ? formatDistanceToNow(new Date(file.createdAt), {
-                addSuffix: true,
-              })
-            : ""}
-        </Text>
-      </View>
-
-      {/* Three-dot menu for list view */}
-      <TouchableOpacity
-        style={styles.listMenuButton}
-        onPress={onMenuPress}
-        hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-      >
-        <MaterialIcons
-          name="more-vert"
-          size={20}
-          color={colors.secondaryText}
-        />
-      </TouchableOpacity>
-    </TouchableOpacity>
-  );
-};
+FileItemView.displayName = "FileItemView";
 
 const styles = StyleSheet.create({
   // Grid Styles

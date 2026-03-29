@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
   RefreshControl,
   StyleSheet,
@@ -33,36 +33,45 @@ export const FileGrid = ({
     return Math.max(2, Math.floor(width / 150));
   }, [viewMode, width]);
 
-  const handlePress = (file: FileItem) => {
-    if (isSelectionActive) {
+  const handlePress = useCallback(
+    (file: FileItem) => {
+      if (isSelectionActive) {
+        toggleSelection(file._id);
+      } else {
+        onFileDoubleClick(file);
+      }
+    },
+    [isSelectionActive, toggleSelection, onFileDoubleClick],
+  );
+
+  const handleLongPress = useCallback(
+    (file: FileItem) => {
+      // Long press always toggles selection (enters/expands selection mode)
       toggleSelection(file._id);
-    } else {
-      onFileDoubleClick(file);
-    }
-  };
+    },
+    [toggleSelection],
+  );
 
-  const handleLongPress = (file: FileItem) => {
-    // Long press always toggles selection (enters/expands selection mode)
-    toggleSelection(file._id);
-  };
+  const renderItem = useCallback(
+    ({ item }: { item: FileItem }) => {
+      const isSelected = selectedFiles.has(item._id);
 
-  const renderItem = ({ item }: { item: FileItem }) => {
-    const isSelected = selectedFiles.has(item._id);
+      return (
+        <FileItemView
+          file={item}
+          documentType={item.extension ? "file" : "folder"}
+          viewMode={viewMode}
+          isSelected={isSelected}
+          onPress={() => handlePress(item)}
+          onLongPress={() => handleLongPress(item)}
+          onMenuPress={() => onMenuPress?.(item)}
+        />
+      );
+    },
+    [selectedFiles, viewMode, handlePress, handleLongPress, onMenuPress],
+  );
 
-    return (
-      <FileItemView
-        file={item}
-        documentType={item.extension ? "file" : "folder"}
-        viewMode={viewMode}
-        isSelected={isSelected}
-        onPress={() => handlePress(item)}
-        onLongPress={() => handleLongPress(item)}
-        onMenuPress={() => onMenuPress?.(item)}
-      />
-    );
-  };
-
-  const ListHeader = () => {
+  const ListHeader = useCallback(() => {
     if (!showHeader || viewMode === "grid") return null;
 
     return (
@@ -75,7 +84,7 @@ export const FileGrid = ({
         </Text>
       </View>
     );
-  };
+  }, [showHeader, viewMode]);
 
   if (!files || files.length === 0) return null;
 
@@ -88,6 +97,8 @@ export const FileGrid = ({
         renderItem={renderItem}
         numColumns={numColumns}
         ListHeaderComponent={ListHeader}
+        // estimatedItemSize={viewMode === "grid" ? 180 : 70}
+
         showsVerticalScrollIndicator={false}
         contentInsetAdjustmentBehavior="automatic"
         refreshControl={
