@@ -32,6 +32,7 @@ export const CreateFolderDialog = ({
       setName("New Folder");
       const timer = setTimeout(() => {
         if (inputRef.current) {
+          inputRef.current.focus();
           inputRef.current.setSelection(0, 10);
         }
       }, 150);
@@ -52,13 +53,14 @@ export const CreateFolderDialog = ({
       visible={visible}
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.keyboardView}
-          >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
             <View
               style={[
                 styles.container,
@@ -98,6 +100,8 @@ export const CreateFolderDialog = ({
                 value={name}
                 onChangeText={setName}
                 autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleConfirm}
               />
 
               <View style={[styles.buttonContainer, { gap: spacing.md }]}>
@@ -116,9 +120,9 @@ export const CreateFolderDialog = ({
                 />
               </View>
             </View>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -129,11 +133,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  keyboardView: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 24,
   },
   container: {

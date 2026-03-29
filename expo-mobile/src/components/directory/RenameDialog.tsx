@@ -37,6 +37,7 @@ export const RenameDialog = ({
       // Small timeout to ensure autoFocus has finished and ref is ready
       const timer = setTimeout(() => {
         if (inputRef.current) {
+          inputRef.current.focus();
           const lastDotIndex = initialValue.lastIndexOf(".");
           // If there's a dot and it's not the first character, select up to the dot
           // Otherwise select everything (for folders or files without extensions)
@@ -62,13 +63,14 @@ export const RenameDialog = ({
       visible={visible}
       animationType="fade"
       onRequestClose={onClose}
+      statusBarTranslucent
     >
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-        <View style={styles.overlay}>
-          <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={styles.keyboardView}
-          >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.overlay}>
             <View
               style={[
                 styles.container,
@@ -108,6 +110,8 @@ export const RenameDialog = ({
                 value={name}
                 onChangeText={setName}
                 autoFocus
+                returnKeyType="done"
+                onSubmitEditing={handleConfirm}
               />
 
               <View style={[styles.buttonContainer, { gap: spacing.md }]}>
@@ -126,9 +130,9 @@ export const RenameDialog = ({
                 />
               </View>
             </View>
-          </KeyboardAvoidingView>
-        </View>
-      </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </Modal>
   );
 };
@@ -139,11 +143,6 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.6)",
     justifyContent: "center",
     alignItems: "center",
-  },
-  keyboardView: {
-    width: "100%",
-    alignItems: "center",
-    justifyContent: "center",
     padding: 24,
   },
   container: {
