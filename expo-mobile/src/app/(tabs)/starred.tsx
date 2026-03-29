@@ -15,6 +15,7 @@ import { Text } from "@/components/ui";
 import { SelectionBar } from "@/components/directory/SelectionBar";
 import { RenameDialog } from "@/components/directory/RenameDialog";
 import { useFileActions } from "@/hooks/use-file-actions";
+import { useNavigationDebounce } from "@/hooks/use-navigation-debounce";
 
 export default function StarredScreen() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function StarredScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
+  const debounceNavigation = useNavigationDebounce();
 
   const { data, isLoading, isError, refetch } = useGetAllDirectoryList("", {
     isStarred: true,
@@ -65,10 +67,12 @@ export default function StarredScreen() {
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (!file.extension) {
-        router.push(`/directory/${file._id}`);
+        debounceNavigation(() => {
+          router.push(`/directory/${file._id}`);
+        });
       }
     },
-    [router],
+    [router, debounceNavigation],
   );
 
   const selectionCount = selectedFiles.size;

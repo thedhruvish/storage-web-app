@@ -17,6 +17,7 @@ import { RenameDialog } from "@/components/directory/RenameDialog";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { UploadProgress } from "@/components/UploadProgress";
 import { PlusMenuFAB } from "@/components/directory/PlusMenuFAB";
+import { useNavigationDebounce } from "@/hooks/use-navigation-debounce";
 
 export default function Index() {
   const router = useRouter();
@@ -25,6 +26,7 @@ export default function Index() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
+  const debounceNavigation = useNavigationDebounce();
 
   const { data, isLoading, isError, refetch } = useGetAllDirectoryList("", {
     isStarred: undefined,
@@ -46,10 +48,10 @@ export default function Index() {
   } = useFileActions();
 
   const [refreshing, setRefreshing] = useState(false);
-  const onRefresh = useCallback(async () => {
+
+  const onRefresh = useCallback(() => {
     setRefreshing(true);
-    await refetch();
-    setRefreshing(false);
+    refetch().finally(() => setRefreshing(false));
   }, [refetch]);
 
   const files = useMemo(() => {
@@ -60,18 +62,23 @@ export default function Index() {
   }, [data]);
 
   const allFiles = useMemo(
-    () => [...files.directories, ...files.documents],
-    [files],
+    () => [...(files.directories ?? []), ...(files.documents ?? [])],
+    [files.directories, files.documents],
   );
 
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (!file.extension) {
-        router.push(`/directory/${file._id}`);
+        debounceNavigation(() => {
+          router.push(`/directory/${file._id}`);
+        });
       }
     },
-    [router],
+    [router, debounceNavigation],
   );
+  const handleMenuPress = useCallback((file: FileItem) => {
+    setMenuFile(file);
+  }, []);
 
   const selectionCount = selectedFiles.size;
   const isSelectionMode = selectionCount > 0;
@@ -153,7 +160,7 @@ export default function Index() {
         isLoading={isLoading}
         isError={isError}
         onFileDoubleClick={handleFilePress}
-        onMenuPress={(file) => setMenuFile(file)}
+        onMenuPress={handleMenuPress}
         onRefresh={onRefresh}
         refreshing={refreshing}
       />

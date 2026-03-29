@@ -16,6 +16,7 @@ import { RenameDialog } from "@/components/directory/RenameDialog";
 import { useFileActions } from "@/hooks/use-file-actions";
 import { UploadProgress } from "@/components/UploadProgress";
 import { PlusMenuFAB } from "@/components/directory/PlusMenuFAB";
+import { useNavigationDebounce } from "@/hooks/use-navigation-debounce";
 
 export default function DirectoryScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -25,6 +26,7 @@ export default function DirectoryScreen() {
   const insets = useSafeAreaInsets();
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
+  const debounceNavigation = useNavigationDebounce();
 
   const { data, isLoading, isError, refetch } = useGetAllDirectoryList(
     id || "",
@@ -71,10 +73,12 @@ export default function DirectoryScreen() {
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (!file.extension) {
-        router.push(`/directory/${file._id}`);
+        debounceNavigation(() => {
+          router.push(`/directory/${file._id}`);
+        });
       }
     },
-    [router],
+    [router, debounceNavigation],
   );
 
   const selectionCount = selectedFiles.size;

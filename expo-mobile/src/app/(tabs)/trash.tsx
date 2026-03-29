@@ -18,6 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
 import { useDialog } from "@/components/dialog";
+import { useNavigationDebounce } from "@/hooks/use-navigation-debounce";
 
 export default function TrashScreen() {
   const router = useRouter();
@@ -27,6 +28,7 @@ export default function TrashScreen() {
   const { colors } = useTheme();
   const [menuFile, setMenuFile] = useState<FileItem | null>(null);
   const { showDialog } = useDialog();
+  const debounceNavigation = useNavigationDebounce();
 
   const { data, isLoading, isError, refetch } = useGetAllTrash();
 
@@ -52,10 +54,12 @@ export default function TrashScreen() {
   const handleFilePress = useCallback(
     (file: FileItem) => {
       if (!file.extension) {
-        router.push(`/directory/${file._id}`);
+        debounceNavigation(() => {
+          router.push(`/directory/${file._id}`);
+        });
       }
     },
-    [router],
+    [router, debounceNavigation],
   );
 
   const handleRestoreItem = (file: FileItem) => {
