@@ -20,10 +20,10 @@ export const registerWithEmailService = async ({
   email,
   password,
   turnstileToken,
-}) => {
+},isMobile) => {
   const normalizedEmail = email.toLowerCase().trim();
   const userId = new mongoose.Types.ObjectId();
-  if (!req.isMobile) {
+  if (!isMobile) {
     await validTurnstileToken(turnstileToken);
   }
   await exstingAuthIdentity({
