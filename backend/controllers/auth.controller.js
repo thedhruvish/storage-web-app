@@ -39,7 +39,7 @@ import mongoose from "mongoose";
 
 // register user
 export const registerWithEmail = async (req, res) => {
-  const userId = await registerWithEmailService(req.body);
+  const userId = await registerWithEmailService(req.body,req.isMobile);
 
   res.status(201).json(
     new ApiResponse(201, "User registered successfully", {
