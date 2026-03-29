@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useCallback } from "react";
 import * as Notifications from "expo-notifications";
 import * as Device from "expo-device";
 import Constants from "expo-constants";
@@ -6,15 +6,39 @@ import { Platform } from "react-native";
 import { usePushToken } from "@/api/user-api";
 import { handleToken, PUSH_TOKEN } from "@/utils/handle-token";
 import { useUserStore } from "@/store/user-store";
+import * as Linking from "expo-linking";
 
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true,
-  }),
+  handleNotification: async (notification) => {
+    const isSilent = notification.request.content.data?.silent;
+    return {
+      shouldPlaySound: !isSilent,
+      shouldSetBadge: true,
+      shouldShowBanner: true,
+      shouldShowList: true,
+    };
+  },
 });
+
+export function useNotificationScheduler() {
+  const scheduleDownloadNotification = useCallback(
+    async (fileName: string, uri: string) => {
+      await Notifications.scheduleNotificationAsync({
+        content: {
+          title: "Download Complete",
+          body: `${fileName} has been downloaded.`,
+          data: { url: uri, silent: true },
+          categoryIdentifier: "download",
+          ...(Platform.OS === "android" ? { channelId: "downloads" } : {}),
+        },
+        trigger: null,
+      });
+    },
+    [],
+  );
+
+  return { scheduleDownloadNotification };
+}
 
 export function useNotifications() {
   const { mutate: updatePushToken } = usePushToken();
@@ -24,7 +48,18 @@ export function useNotifications() {
   );
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
 
+  const { scheduleDownloadNotification } = useNotificationScheduler();
+
   useEffect(() => {
+    if (Platform.OS === "android") {
+      Notifications.setNotificationChannelAsync("downloads", {
+        name: "Downloads",
+        importance: Notifications.AndroidImportance.LOW,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: "#FF231F7C",
+      });
+    }
+
     if (!user) return;
 
     async function registerForPushNotificationsAsync() {
@@ -92,6 +127,12 @@ export function useNotifications() {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification Response:", response);
+        const url = response.notification.request.content.data?.url as string;
+        if (url) {
+          Linking.openURL(url).catch((err) => {
+            console.error("Failed to open URL from notification:", err);
+          });
+        }
       });
 
     return () => {
@@ -103,4 +144,6 @@ export function useNotifications() {
       }
     };
   }, [user, updatePushToken]);
+
+  return { scheduleDownloadNotification };
 }

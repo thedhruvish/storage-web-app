@@ -9,12 +9,14 @@ import { useDialog } from "@/components/dialog";
 import * as Linking from "expo-linking";
 import { getMimeType } from "@/utils/mime-helper";
 import { useFileOperation } from "./use-file-operation";
+import { useNotificationScheduler } from "./use-notifications";
 
 const DOWNLOAD_DIR_KEY = "download_directory_uri";
 
 export const useDownload = () => {
   const { showDialog } = useDialog();
   const { getFileUrl } = useFileOperation();
+  const { scheduleDownloadNotification } = useNotificationScheduler();
 
   const getStoredDirectory = async () => {
     if (Platform.OS !== "android") return null;
@@ -164,6 +166,8 @@ export const useDownload = () => {
               // 4. Cleanup
               await FileSystem.deleteAsync(tempLocalUri, { idempotent: true });
 
+              scheduleDownloadNotification(file.name, finalFile.uri);
+
               showDialog({
                 title: "Download Complete",
                 message: `File saved to storeone/${file.name}`,
@@ -211,8 +215,10 @@ export const useDownload = () => {
       if (Platform.OS === "ios") {
         if (await Sharing.isAvailableAsync()) {
           await Sharing.shareAsync(downloadResult.uri);
+          scheduleDownloadNotification(file.name, downloadResult.uri);
         } else {
           await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
+          scheduleDownloadNotification(file.name, downloadResult.uri);
           showDialog({
             title: "Success",
             message: "File saved to media library.",
@@ -221,6 +227,7 @@ export const useDownload = () => {
         }
       } else {
         await MediaLibrary.saveToLibraryAsync(downloadResult.uri);
+        scheduleDownloadNotification(file.name, downloadResult.uri);
         showDialog({
           title: "Success",
           message: "File saved to media library.",
