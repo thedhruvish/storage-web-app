@@ -7,6 +7,8 @@ import { usePushToken } from "@/api/user-api";
 import { handleToken, PUSH_TOKEN } from "@/utils/handle-token";
 import { useUserStore } from "@/store/user-store";
 import * as Linking from "expo-linking";
+import { cancelUpload } from "@/store/upload-store";
+import { router } from "expo-router";
 
 Notifications.setNotificationHandler({
   handleNotification: async (notification) => {
@@ -19,6 +21,20 @@ Notifications.setNotificationHandler({
     };
   },
 });
+
+// Define notification categories
+const UPLOAD_CATEGORY = "upload-progress";
+const ACTION_CANCEL = "cancel-upload";
+
+Notifications.setNotificationCategoryAsync(UPLOAD_CATEGORY, [
+  {
+    identifier: ACTION_CANCEL,
+    buttonTitle: "Cancel Upload",
+    options: {
+      opensAppToForeground: false,
+    },
+  },
+]);
 
 export function useNotificationScheduler() {
   const scheduleDownloadNotification = useCallback(
@@ -37,7 +53,68 @@ export function useNotificationScheduler() {
     [],
   );
 
-  return { scheduleDownloadNotification };
+  const scheduleUploadNotification = useCallback(
+    async (id: string, fileName: string) => {
+      await Notifications.scheduleNotificationAsync({
+        identifier: id,
+        content: {
+          title: "Uploading File",
+          body: `Preparing to upload ${fileName}...`,
+          data: { uploadId: id, silent: true },
+          categoryIdentifier: UPLOAD_CATEGORY,
+          ...(Platform.OS === "android"
+            ? { channelId: "uploads-progress" }
+            : {}),
+        },
+        trigger: null,
+      });
+    },
+    [],
+  );
+
+  const updateUploadNotification = useCallback(
+    async (
+      id: string,
+      fileName: string,
+      progress: number,
+      totalSize?: string,
+      directoryId?: string,
+    ) => {
+      const isDone = progress === 100;
+      await Notifications.scheduleNotificationAsync({
+        identifier: id,
+        content: {
+          title: isDone ? "Upload Complete" : `Uploading ${fileName}`,
+          body: isDone
+            ? `${fileName} uploaded successfully.`
+            : `${progress}% of ${totalSize || "..."} uploaded`,
+          data: {
+            uploadId: id,
+            directoryId,
+            silent: true,
+            isDone,
+          },
+          categoryIdentifier: isDone ? undefined : UPLOAD_CATEGORY,
+          ...(Platform.OS === "android"
+            ? { channelId: isDone ? "default" : "uploads-progress" }
+            : {}),
+        },
+        trigger: null,
+      });
+    },
+    [],
+  );
+
+  const dismissNotification = useCallback(async (id: string) => {
+    await Notifications.dismissNotificationAsync(id);
+  }, []);
+
+  return {
+    scheduleDownloadNotification,
+    scheduleUploadNotification,
+    updateUploadNotification,
+    dismissNotification,
+  };
 }
 
 export function useNotifications() {
@@ -47,8 +124,7 @@ export function useNotifications() {
     null,
   );
   const responseListener = useRef<Notifications.EventSubscription | null>(null);
-
-  const { scheduleDownloadNotification } = useNotificationScheduler();
+  useNotificationScheduler();
 
   useEffect(() => {
     if (Platform.OS === "android") {
@@ -57,6 +133,14 @@ export function useNotifications() {
         importance: Notifications.AndroidImportance.LOW,
         vibrationPattern: [0, 250, 250, 250],
         lightColor: "#FF231F7C",
+      });
+
+      Notifications.setNotificationChannelAsync("uploads-progress", {
+        name: "Upload Progress",
+        importance: Notifications.AndroidImportance.LOW,
+        vibrationPattern: [0],
+        lightColor: "#FF231F7C",
+        showBadge: false,
       });
     }
 
@@ -127,11 +211,29 @@ export function useNotifications() {
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
         console.log("Notification Response:", response);
-        const url = response.notification.request.content.data?.url as string;
-        if (url) {
-          Linking.openURL(url).catch((err) => {
+        const data = response.notification.request.content.data;
+
+        // Handle Cancel Action
+        if (response.actionIdentifier === ACTION_CANCEL) {
+          if (data?.uploadId) {
+            cancelUpload(data.uploadId as string);
+          }
+          return;
+        }
+
+        // Handle Download URL
+        if (data?.url) {
+          Linking.openURL(data.url as string).catch((err) => {
             console.error("Failed to open URL from notification:", err);
           });
+        }
+
+        // Handle Upload Complete click - Open Directory
+        if (data?.isDone && data?.directoryId) {
+          router.push(`/directory/${data.directoryId}`);
+        } else if (data?.isDone && !data?.directoryId) {
+          // If no directoryId, it was root
+          router.push("/(tabs)");
         }
       });
 
@@ -145,5 +247,5 @@ export function useNotifications() {
     };
   }, [user, updatePushToken]);
 
-  return { scheduleDownloadNotification };
+  return useNotificationScheduler();
 }

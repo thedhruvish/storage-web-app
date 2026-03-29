@@ -8,6 +8,7 @@ import { AppState, Platform } from "react-native";
 import { useEffect } from "react";
 import { useBackExit } from "@/hooks/use-back-exit";
 import { useNotifications } from "@/hooks/use-notifications";
+import { UploadNotificationManager } from "@/components/UploadNotificationManager";
 
 function RootContent() {
   const { isDark, colors } = useTheme();
@@ -26,6 +27,7 @@ function RootContent() {
 
   return (
     <DialogProvider>
+      <UploadNotificationManager />
       <StatusBar style={isDark ? "light" : "dark"} />
       <Stack
         screenOptions={{

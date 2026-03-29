@@ -1,4 +1,4 @@
-import { isAxiosError } from "axios";
+import axios, { isAxiosError, AxiosProgressEvent } from "axios";
 import { create } from "zustand";
 import axiosClient from "@/api/axios-client";
 import { useUserStore } from "./user-store";
@@ -104,13 +104,32 @@ const processFile = async (fileItem: UploadableFile, dirId: string) => {
     store.setGlobalUploading(true);
     store.setSheetVisible(true);
 
-    const response = await fetch(data.data.presignedUrl, {
-      method: "PUT",
-      body: { uri: fileItem.uri } as any,
-      headers: {
-        "Content-Type": fileItem.mimeType,
+    const response = await axios.put(
+      data.data.presignedUrl,
+      {
+        uri: fileItem.uri,
+        name: fileItem.name,
+        type: fileItem.mimeType,
+      } as any,
+      {
+        headers: {
+          "Content-Type": fileItem.mimeType,
+        },
+        signal: fileItem.source.signal,
+        onUploadProgress: (progressEvent: AxiosProgressEvent) => {
+          const progress = Math.min(
+            100,
+            Math.round(
+              (progressEvent.loaded * 100) /
+                (progressEvent.total || fileItem.size),
+            ),
+          );
+          store.updateFileEntry(fileItem.id, { progress });
+        },
+
+        transformRequest: (data) => data, // Ensure axios doesn't stringify the file object
       },
-    });
+    );
 
     if (response.status < 200 || response.status >= 300) {
       throw new Error(`Upload failed with status ${response.status}`);
