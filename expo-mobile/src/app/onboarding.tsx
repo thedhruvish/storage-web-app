@@ -110,17 +110,17 @@ export default function Onboarding() {
         {ONBOARDING_DATA[currentIndex].isPermission ? (
           <View style={styles.buttonContainer}>
             <Button
-              title="Allow Notifications"
-              onPress={requestPermission}
-              size="lg"
-              style={styles.nextButton}
-            />
-            <Button
               title="Maybe Later"
               onPress={handleComplete}
               variant="ghost"
               size="md"
               style={styles.maybeLaterButton}
+            />
+            <Button
+              title="Allow Notifications"
+              onPress={requestPermission}
+              size="lg"
+              style={styles.nextButton}
             />
           </View>
         ) : (
