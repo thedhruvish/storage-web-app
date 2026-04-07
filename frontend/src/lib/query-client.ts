@@ -2,7 +2,6 @@ import { AxiosError } from "axios";
 import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { useUserStore } from "@/store/user-store";
 import { toast } from "sonner";
-import { handleServerError } from "@/utils/handle-server-error";
 
 const navigateTo = (path: string) => {
   window.location.href = path;
@@ -37,8 +36,6 @@ export const queryClient = new QueryClient({
     },
     mutations: {
       onError: (error) => {
-        handleServerError(error);
-
         if (error instanceof AxiosError) {
           if (error.code === "ERR_NETWORK") {
             toast.error("Cannot connect to server. Please try again later.");

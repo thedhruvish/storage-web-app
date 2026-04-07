@@ -39,7 +39,7 @@ import mongoose from "mongoose";
 
 // register user
 export const registerWithEmail = async (req, res) => {
-  const userId = await registerWithEmailService(req.body,req.isMobile);
+  const userId = await registerWithEmailService(req.body, req.isMobile);
 
   res.status(201).json(
     new ApiResponse(201, "User registered successfully", {
@@ -485,6 +485,7 @@ export const disConnectAccount = async (req, res) => {
 
 export const deleteSession = async (req, res) => {
   const sessionId = req.params?.id;
+  console.log(sessionId);
   const userId = req.user._id.toString();
   if (sessionId) {
     await deleteSingleUserSession({
@@ -498,6 +499,7 @@ export const deleteSession = async (req, res) => {
     } else {
       sessionId = req.signedCookies?.sessionId;
     }
+    console.log({ userId, sessionId });
 
     await deleteAllUserSessions(userId, sessionId);
   }
