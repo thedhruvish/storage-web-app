@@ -100,6 +100,14 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
         cameraPermission: "Allow $(PRODUCT_NAME) to access your camera",
       },
     ],
+    [
+      "@sentry/react-native/expo",
+      {
+        url: "https://sentry.io/",
+        project: "storeone-mobile",
+        organization: "thedhruvish",
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,

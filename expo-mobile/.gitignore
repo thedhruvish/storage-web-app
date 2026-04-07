@@ -46,3 +46,4 @@ app-example
 google-services*
 storeone-7ff25-firebase-adminsdk-fbsvc-*
 .gemini
+.env.local
