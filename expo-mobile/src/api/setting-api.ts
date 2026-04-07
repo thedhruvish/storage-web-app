@@ -15,7 +15,7 @@ export const useRevokeSession = () => {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (sessionId: string) => {
-      await axiosClient.delete(`/auth/session/${sessionId}`);
+      await axiosClient.delete(`/sso/session/${sessionId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["settings", "info"] });
