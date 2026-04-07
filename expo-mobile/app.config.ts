@@ -104,10 +104,12 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
       "@sentry/react-native/expo",
       {
         url: "https://sentry.io/",
+        note: "Use SENTRY_AUTH_TOKEN env to authenticate with Sentry.",
         project: "storeone-mobile",
         organization: "thedhruvish",
       },
     ],
+    "expo-image",
   ],
   experiments: {
     typedRoutes: true,
