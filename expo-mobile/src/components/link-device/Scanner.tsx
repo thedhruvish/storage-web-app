@@ -4,16 +4,16 @@ import {
   StyleSheet,
   TouchableOpacity,
   Modal,
-  Linking,
-  Platform,
+  ActivityIndicator,
 } from "react-native";
-import { CameraView, useCameraPermissions } from "expo-camera";
+import { CameraView } from "expo-camera";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/use-theme";
 import { Text } from "@/components/ui";
 import { showGlobalDialog } from "@/components/dialog";
-import Animated, { FadeOut, ZoomIn } from "react-native-reanimated";
+import Animated, { FadeOut, ZoomIn, FadeIn } from "react-native-reanimated";
 import { useTokenVerifyForLink } from "@/api/auth-api";
+import { useCameraPermission } from "@/hooks/use-camera-permission";
 
 interface ScannerProps {
   isVisible: boolean;
@@ -22,9 +22,9 @@ interface ScannerProps {
 
 export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
   const { colors } = useTheme();
-  const [permission, requestPermission] = useCameraPermissions();
+  const { permission, requestPermission, isGranted } = useCameraPermission();
   const [scanned, setScanned] = useState(false);
-  const { mutate: mutateVerify } = useTokenVerifyForLink();
+  const { mutate: mutateVerify, isPending } = useTokenVerifyForLink();
 
   React.useEffect(() => {
     if (isVisible && (!permission || permission.status === "undetermined")) {
@@ -33,74 +33,66 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isVisible, permission]);
 
-  const handleScan = async () => {
-    const { status } = await requestPermission();
-    if (status !== "granted") {
-      showGlobalDialog({
-        title: "Camera Permission",
-        message:
-          "We need your permission to use the camera to scan the QR code. Please enable it in your device settings.",
-        type: "info",
-        confirmText: "Open Settings",
-        onConfirm: () => {
-          if (Platform.OS === "ios") {
-            Linking.openURL("app-settings:");
-          } else {
-            Linking.openSettings();
-          }
-        },
-      });
-      return;
-    }
-  };
-
   const handleBarcodeScanned = ({ data }: { type: string; data: string }) => {
-    if (scanned) return;
+    if (scanned || isPending) return;
     setScanned(true);
 
     // Extract token from URL like https://links.example.com/link-devices?token=thisistoken
-    const token = new URL(data).searchParams.get("token");
+    try {
+      const urlObj = new URL(data);
+      const token = urlObj.searchParams.get("token");
 
-    if (!token) {
+      if (!token) {
+        showGlobalDialog({
+          title: "Invalid QR Code",
+          message: "The scanned QR code is not valid for device linking.",
+          type: "error",
+        });
+        setTimeout(() => setScanned(false), 2000);
+        return;
+      }
+
+      mutateVerify(token, {
+        onSuccess: () => {
+          showGlobalDialog({
+            title: "Device Linked",
+            message:
+              "Successfully linked your device. You can now access your account from the new device.",
+            type: "success",
+            onConfirm: () => {
+              setScanned(false);
+              onClose();
+            },
+          });
+        },
+        onError: (error: any) => {
+          if (error.response?.status === 404) {
+            showGlobalDialog({
+              title: "Link Expired",
+              message:
+                "The QR code has expired or is invalid. Please refresh your website to get a new QR code and try again.",
+              type: "error",
+            });
+          } else {
+            showGlobalDialog({
+              title: "Error",
+              message:
+                error.response?.data?.message ||
+                "Failed to link device. Please try again.",
+              type: "error",
+            });
+          }
+          setTimeout(() => setScanned(false), 2000);
+        },
+      });
+    } catch {
       showGlobalDialog({
         title: "Invalid QR Code",
-        message: "The scanned QR code is not valid for device linking.",
+        message: "The scanned QR code is not valid.",
         type: "error",
       });
       setTimeout(() => setScanned(false), 2000);
-      return;
     }
-
-    mutateVerify(token, {
-      onSuccess: () => {
-        showGlobalDialog({
-          title: "Device Linked",
-          message:
-            "Successfully linked your device. You can now access your account from the new device.",
-          type: "success",
-          onConfirm: onClose,
-        });
-      },
-      onError: (error: any) => {
-        if (error.response?.status === 404) {
-          showGlobalDialog({
-            title: "Link Expired",
-            message:
-              "The QR code has expired or is invalid. Please refresh your website to get a new QR code and try again.",
-            type: "error",
-          });
-        } else {
-          showGlobalDialog({
-            title: "Error",
-            message:
-              error.response?.data?.message ||
-              "Failed to link device. Please try again.",
-            type: "error",
-          });
-        }
-        setTimeout(() => setScanned(false), 2000);
-      },
-    });
   };
 
   if (!isVisible) return null;
@@ -122,51 +114,73 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
             <Text weight="bold" variant="h3">
               Scan QR Code
             </Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={onClose}
+              disabled={isPending}
+              style={[styles.closeButton, isPending && { opacity: 0.5 }]}
+            >
               <Ionicons name="close" size={24} color={colors.text} />
             </TouchableOpacity>
           </View>
 
           <View style={styles.cameraContainer}>
-            {permission?.granted ? (
-              <CameraView
-                style={StyleSheet.absoluteFill}
-                barcodeScannerSettings={{
-                  barcodeTypes: ["qr"],
-                }}
-                onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
-              >
-                <View style={styles.scannerOverlay}>
-                  <View
-                    style={[
-                      styles.corner,
-                      styles.topLeft,
-                      { borderColor: colors.primary },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.corner,
-                      styles.topRight,
-                      { borderColor: colors.primary },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.corner,
-                      styles.bottomLeft,
-                      { borderColor: colors.primary },
-                    ]}
-                  />
-                  <View
-                    style={[
-                      styles.corner,
-                      styles.bottomRight,
-                      { borderColor: colors.primary },
-                    ]}
-                  />
-                </View>
-              </CameraView>
+            {isGranted ? (
+              <View style={StyleSheet.absoluteFill}>
+                <CameraView
+                  style={StyleSheet.absoluteFill}
+                  barcodeScannerSettings={{
+                    barcodeTypes: ["qr"],
+                  }}
+                  onBarcodeScanned={scanned ? undefined : handleBarcodeScanned}
+                >
+                  <View style={styles.scannerOverlay}>
+                    <View
+                      style={[
+                        styles.corner,
+                        styles.topLeft,
+                        { borderColor: colors.primary },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        styles.corner,
+                        styles.topRight,
+                        { borderColor: colors.primary },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        styles.corner,
+                        styles.bottomLeft,
+                        { borderColor: colors.primary },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        styles.corner,
+                        styles.bottomRight,
+                        { borderColor: colors.primary },
+                      ]}
+                    />
+                  </View>
+                </CameraView>
+
+                {isPending && (
+                  <Animated.View
+                    entering={FadeIn}
+                    exiting={FadeOut}
+                    style={styles.loadingOverlay}
+                  >
+                    <ActivityIndicator size="large" color={colors.primary} />
+                    <Text
+                      weight="bold"
+                      style={{ marginTop: 16, color: "white" }}
+                    >
+                      Linking Device...
+                    </Text>
+                  </Animated.View>
+                )}
+              </View>
             ) : (
               <View
                 style={[
@@ -187,7 +201,7 @@ export const Scanner = ({ isVisible, onClose }: ScannerProps) => {
                 </Text>
                 <TouchableOpacity
                   style={[styles.button, { backgroundColor: colors.primary }]}
-                  onPress={handleScan}
+                  onPress={requestPermission}
                 >
                   <Text weight="bold" style={{ color: "white" }}>
                     Grant Permission
@@ -247,6 +261,12 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "transparent",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
   },
   corner: {
     position: "absolute",

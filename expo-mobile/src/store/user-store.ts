@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { AUTH_TOKEN_NAME, handleToken, PUSH_TOKEN } from "@/utils/handle-token";
 import { createJSONStorage, persist } from "zustand/middleware";
 import AsyncStorage from "expo-sqlite/kv-store";
-import axiosClient from "@/api/axios-client";
 
 export type User = {
   _id: string;
@@ -30,7 +29,6 @@ export const useUserStore = create<UserStore>()(
         handleToken.deleteToken(AUTH_TOKEN_NAME);
         handleToken.deleteToken(PUSH_TOKEN);
         set({ user: null });
-        delete axiosClient.defaults.headers.common["Token"];
       },
     }),
     {
