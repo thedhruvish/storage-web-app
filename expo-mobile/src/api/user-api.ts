@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import axiosClient from "./axios-client";
 import { useUserStore } from "@/store/user-store";
-import { AUTH_TOKEN_NAME, handleToken, PUSH_TOKEN } from "@/utils/handle-token";
-import { useRouter } from "expo-router";
+import { handleToken, PUSH_TOKEN } from "@/utils/handle-token";
+import { performLogout } from "@/lib/logout-handler";
 
 const STORAGE_SIZE_API_KEY = "storage-used";
 
@@ -23,10 +23,6 @@ export const usePushToken = () => {
 };
 
 export const usePushLogout = () => {
-  const router = useRouter();
-  const { logout: clearStore } = useUserStore();
-  const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async () => {
       await Promise.all([
@@ -35,19 +31,10 @@ export const usePushLogout = () => {
       ]);
     },
     onSuccess: async () => {
-      handleToken.deleteToken(AUTH_TOKEN_NAME);
-      handleToken.deleteToken(PUSH_TOKEN);
-      clearStore();
-      queryClient.clear();
-      router.replace("/(auth)/login");
+      performLogout();
     },
-    onError: async (error: any) => {
-      console.error("Logout failed:", error);
-      handleToken.deleteToken(AUTH_TOKEN_NAME);
-      handleToken.deleteToken(PUSH_TOKEN);
-      clearStore();
-      queryClient.clear();
-      router.replace("/(auth)/login");
+    onError: async () => {
+      performLogout();
     },
   });
 };

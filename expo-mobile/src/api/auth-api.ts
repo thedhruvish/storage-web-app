@@ -5,6 +5,7 @@ import axiosClient from "./axios-client";
 import { AUTH_TOKEN_NAME, handleToken } from "@/utils/handle-token";
 import { useUserStore } from "@/store/user-store";
 import { getCurrentUser } from "./user-api";
+import { performLogout } from "@/lib/logout-handler";
 
 export const authApi = {
   login: async (data: any) => {
@@ -93,8 +94,13 @@ export function useRegister() {
 
   return useMutation({
     mutationFn: authApi.register,
-    onSuccess: () => {
-      router.push("/otp");
+    onSuccess: (data) => {
+      router.push({
+        pathname: "/(auth)/otp",
+        params: {
+          userId: data.data?.userId,
+        },
+      });
     },
     onError: (error: any) => {
       const message = error.response?.data?.message || "Failed to register";
@@ -193,24 +199,14 @@ export function useGoogleLogin() {
     },
   });
 }
-
 export function useLogout() {
-  const router = useRouter();
-  const { logout: clearStore } = useUserStore();
-
   return useMutation({
     mutationFn: authApi.logout,
     onSuccess: async () => {
-      await handleToken.deleteToken(AUTH_TOKEN_NAME);
-      clearStore();
-      router.replace("/(auth)/login");
+      performLogout();
     },
-    onError: async (error: any) => {
-      console.error("Logout failed:", error);
-      // Even if API fails, clear local state and redirect
-      await handleToken.deleteToken(AUTH_TOKEN_NAME);
-      clearStore();
-      router.replace("/(auth)/login");
+    onError: async () => {
+      performLogout();
     },
   });
 }

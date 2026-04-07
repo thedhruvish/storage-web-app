@@ -325,7 +325,7 @@ export default function SettingScreen() {
               {storagePercentage.toFixed(1)}% used
             </Text>
             <Text variant="caption" color="secondaryText">
-              {formatFileSize(usedStorage)} / {formatFileSize(maxStorage)}
+              {formatFileSize(usedStorage)} / {formatFileSize(maxStorage, 0)}
             </Text>
           </View>
         </View>
