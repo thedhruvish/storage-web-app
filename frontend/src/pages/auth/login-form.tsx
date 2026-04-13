@@ -106,6 +106,10 @@ export function LoginForm({
             navigate({ to: "/auth/2fa/setup" });
           } else if (responseData.is_verfiy_otp) {
             localStorage.setItem("userId", responseData.userId);
+            sessionStorage.setItem(
+              "otpExpiryTime",
+              (Date.now() + 3 * 60 * 1000).toString()
+            );
             navigate({ to: "/auth/otp-verify" });
           } else {
             navigate({ to: "/app/directory" });

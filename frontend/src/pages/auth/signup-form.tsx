@@ -61,6 +61,10 @@ export function SigupForm({
           const responseData = res.data.data;
           if (responseData.step) {
             localStorage.setItem("userId", responseData.userId);
+            sessionStorage.setItem(
+              "otpExpiryTime",
+              (Date.now() + 3 * 60 * 1000).toString()
+            );
             navagate({ to: "/auth/otp-verify" });
           } else {
             navagate({ to: "/auth/login" });

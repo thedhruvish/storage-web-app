@@ -10,7 +10,16 @@ import { Button } from "@/components/ui/button";
 export function QrLogin({ isActive }: { isActive: boolean }) {
   const [token, setToken] = useState<string | null>(null);
   const [isExpired, setIsExpired] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutes in seconds
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const storedExpiry = sessionStorage.getItem("qrExpiryTime");
+    if (storedExpiry) {
+      return Math.max(
+        0,
+        Math.floor((Number(storedExpiry) - Date.now()) / 1000)
+      );
+    }
+    return 120;
+  }); // 2 minutes in seconds
   const createTokenMutation = useCreateLinkToken();
   const checkTokenMutation = useCheckLinkToken();
   const navigate = useNavigate();
@@ -21,6 +30,8 @@ export function QrLogin({ isActive }: { isActive: boolean }) {
     createTokenMutation.mutate(undefined, {
       onSuccess: (res) => {
         setToken(res.data.token);
+        const expiryTime = Date.now() + 120 * 1000;
+        sessionStorage.setItem("qrExpiryTime", expiryTime.toString());
       },
       onError: () => {
         toast.error("Failed to generate QR code");
@@ -40,13 +51,20 @@ export function QrLogin({ isActive }: { isActive: boolean }) {
     if (!token || isExpired) return;
 
     const timerInterval = setInterval(() => {
-      setTimeLeft((prev) => {
-        if (prev <= 1) {
-          setIsExpired(true);
-          return 0;
-        }
-        return prev - 1;
-      });
+      const storedExpiry = sessionStorage.getItem("qrExpiryTime");
+      if (!storedExpiry) return;
+
+      const remaining = Math.max(
+        0,
+        Math.floor((Number(storedExpiry) - Date.now()) / 1000)
+      );
+
+      setTimeLeft(remaining);
+
+      if (remaining <= 0) {
+        setIsExpired(true);
+        clearInterval(timerInterval);
+      }
     }, 1000);
 
     return () => clearInterval(timerInterval);
@@ -61,6 +79,7 @@ export function QrLogin({ isActive }: { isActive: boolean }) {
         onSuccess: (res) => {
           if (res.data.status === "verified") {
             clearInterval(pollInterval);
+            sessionStorage.removeItem("qrExpiryTime");
             toast.success("Login successful");
             navigate({ to: "/app/directory" });
           }
@@ -123,8 +142,7 @@ export function QrLogin({ isActive }: { isActive: boolean }) {
                 <span className='animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75'></span>
                 <span className='relative inline-flex rounded-full h-2 w-2 bg-primary'></span>
               </span>
-              Expires in {Math.floor(timeLeft / 60)}:
-              {(timeLeft % 60).toString().padStart(2, "0")}
+              Expires in {timeLeft}s
             </div>
           )}
         </div>

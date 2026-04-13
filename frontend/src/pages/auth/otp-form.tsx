@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { z } from "zod";
 import { AxiosError } from "axios";
-import { formatDuration, intervalToDuration } from "date-fns";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -43,7 +42,17 @@ export function OtpVerfiyForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const [countdown, setCountdown] = useState(COUNTDOWN_SECONDS);
+  const [countdown, setCountdown] = useState(() => {
+    const expiryTime = sessionStorage.getItem("otpExpiryTime");
+    if (expiryTime) {
+      const remaining = Math.max(
+        0,
+        Math.floor((Number(expiryTime) - Date.now()) / 1000)
+      );
+      return remaining;
+    }
+    return COUNTDOWN_SECONDS;
+  });
 
   const verfiyOpt = useVerifyOtp();
   const reSendOTP = useResendOtp();
@@ -59,10 +68,32 @@ export function OtpVerfiyForm({
   }
 
   useEffect(() => {
-    if (countdown <= 0) return;
-    const timer = setInterval(() => setCountdown((c) => c - 1), 1000);
+    const expiryTime = sessionStorage.getItem("otpExpiryTime");
+
+    if (!expiryTime) {
+      const newExpiryTime = Date.now() + COUNTDOWN_SECONDS * 1000;
+      sessionStorage.setItem("otpExpiryTime", newExpiryTime.toString());
+    }
+
+    const timer = setInterval(() => {
+      const storedExpiry = sessionStorage.getItem("otpExpiryTime");
+      if (!storedExpiry) return;
+
+      const currentTime = Date.now();
+      const remaining = Math.max(
+        0,
+        Math.floor((Number(storedExpiry) - currentTime) / 1000)
+      );
+
+      setCountdown(remaining);
+
+      if (remaining <= 0) {
+        clearInterval(timer);
+      }
+    }, 1000);
+
     return () => clearInterval(timer);
-  }, [countdown]);
+  }, []);
 
   // submit otp
   const onSubmit = (data: z.infer<typeof FormSchema>) => {
@@ -74,6 +105,7 @@ export function OtpVerfiyForm({
         {
           onSuccess(res) {
             const responseData = res.data.data;
+            sessionStorage.removeItem("otpExpiryTime");
             if (responseData?.showSetUp2Fa) {
               localStorage.setItem("userId", responseData.userId);
               navagate({ to: "/auth/2fa/setup" });
@@ -103,19 +135,15 @@ export function OtpVerfiyForm({
     if (!userId) return;
     try {
       await reSendOTP.mutateAsync({ userId });
+      const newExpiryTime = Date.now() + COUNTDOWN_SECONDS * 1000;
+      sessionStorage.setItem("otpExpiryTime", newExpiryTime.toString());
+      setCountdown(COUNTDOWN_SECONDS);
       toast.success("OTP resend successfully");
     } catch {
       toast.error("OTP resend failed. try after some time");
     }
-
-    setCountdown(COUNTDOWN_SECONDS);
   };
-  const formatTime = (secs: number) =>
-    formatDuration(intervalToDuration({ start: 0, end: secs * 1000 }), {
-      format: ["minutes", "seconds"],
-      zero: true,
-      delimiter: ":",
-    });
+  const formatTime = (secs: number) => `${secs}s`;
 
   return (
     <div
