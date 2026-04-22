@@ -47,36 +47,37 @@ function RouteComponent() {
   useEffect(() => {
     if (localStorage.getItem("payment_status") === "INIT") {
       fireConfetti();
-
       localStorage.setItem("payment_status", "SUCCESS");
-
       localStorage.removeItem("payment_status");
     }
   }, []);
 
   return (
-    <div className='min-h-screen w-full flex items-center justify-center bg-muted'>
-      <Card className='w-[420px] text-center shadow-xl'>
-        <CardHeader>
-          <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-green-100'>
-            <CheckCircle className='h-12 w-12 text-green-600' />
+    <div className='min-h-[80vh] w-full flex items-center justify-center p-6'>
+      <Card className='max-w-md w-full border border-border bg-card shadow-2xl shadow-primary/5 p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700'>
+        <CardHeader className='pt-10 pb-6 flex flex-col items-center gap-4 text-center'>
+          <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/5 text-primary'>
+            <CheckCircle className='h-8 w-8' />
           </div>
-          <CardTitle className='pt-4 text-3xl font-bold'>
-            Payment Successful!
-          </CardTitle>
-          <CardDescription className='text-base'>
-            Your payment has been processed successfully.
-          </CardDescription>
+          <div className='space-y-2'>
+            <CardTitle className='text-3xl font-bold tracking-tight text-foreground'>
+              Payment successful
+            </CardTitle>
+            <CardDescription className='text-muted-foreground text-sm'>
+              Your transaction has been processed securely.
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className='flex flex-col gap-4'>
-          <p className='text-sm text-muted-foreground'>
-            You now have access to premium features.
+        <CardContent className='flex flex-col gap-8 px-10 pb-10'>
+          <p className='text-sm text-center text-muted-foreground/80 leading-relaxed'>
+            Thank you for your purchase. You now have full access to all premium
+            features and expanded storage capacity.
           </p>
           <a
-            href='/'
-            className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2'
+            href='/app'
+            className='inline-flex h-11 items-center justify-center rounded-xl bg-primary px-8 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:translate-y-[-1px] active:translate-y-0'
           >
-            Go to Dashboard
+            Go to dashboard
           </a>
         </CardContent>
       </Card>

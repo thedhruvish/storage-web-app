@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Features } from "@/pages/web/home/features";
 import { Hero } from "@/pages/web/home/here";
+import { MobileAppSection } from "@/pages/web/home/mobile-app";
 import { SelfHostSection } from "@/pages/web/home/self-host";
 import { StartFreeTrial } from "@/pages/web/home/start-free-trial";
 import { Uploading } from "@/pages/web/home/uploading";
@@ -20,6 +21,7 @@ function LandingPage() {
     <main>
       <Hero />
       <Features />
+      <MobileAppSection />
       <Uploading />
       {/* <Integrations /> */}
       <SelfHostSection />

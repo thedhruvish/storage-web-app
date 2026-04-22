@@ -8,12 +8,12 @@ export const Route = createFileRoute("/_web")({
 
 function RouteComponent() {
   return (
-    <>
-      <div className='min-h-screen bg-background text-foreground font-sans selection:bg-primary/20 antialiased'>
-        <Navbar />
+    <div className='min-h-screen bg-background text-foreground flex flex-col'>
+      <Navbar />
+      <main className='flex-1 animate-scale-in'>
         <Outlet />
-        <Footer />
-      </div>
-    </>
+      </main>
+      <Footer />
+    </div>
   );
 }

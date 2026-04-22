@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { KeyRound, Smartphone, ChevronRight, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -44,47 +43,50 @@ export function TwoFactorSelection() {
   }
 
   return (
-    <Card className='relative w-full overflow-hidden border-none shadow-none md:border md:shadow-sm'>
-      <CardHeader className='flex flex-col items-center gap-2 text-center pb-6'>
-        <div className='bg-primary/10 text-primary mb-2 flex size-12 items-center justify-center rounded-full'>
-          <ShieldCheck className='size-6' />
-        </div>
-        <CardTitle className='text-xl'>Verify it's you</CardTitle>
-        <CardDescription className='max-w-xs'>
-          Select a verification method to complete your login securely.
-        </CardDescription>
-      </CardHeader>
+    <div className='animate-in fade-in slide-in-from-bottom-2 duration-500'>
+      <Card className='relative w-full overflow-hidden border border-border bg-card/50 backdrop-blur-xl shadow-xl p-0 max-w-md w-full mx-auto'>
+        <CardHeader className='flex flex-col items-center gap-2 text-center pt-8 pb-6 px-8'>
+          <div className='bg-primary/10 text-primary mb-4 flex size-14 items-center justify-center rounded-2xl shadow-sm'>
+            <ShieldCheck className='size-7' />
+          </div>
+          <CardTitle className='text-3xl font-bold tracking-tight text-foreground'>
+            Verify identity
+          </CardTitle>
+          <CardDescription className='max-w-[280px] text-sm text-muted-foreground'>
+            Choose a secure method to confirm it's really you.
+          </CardDescription>
+        </CardHeader>
 
-      <CardContent className='grid gap-4 px-4 pb-8 md:px-6'>
-        {authData?.isTotp && (
-          <MethodButton
-            icon={<Smartphone className='h-5 w-5' />}
-            title='Authenticator App'
-            description='Enter a code from Google or Authy'
-            colorClass='bg-blue-100 text-blue-600 dark:bg-blue-900/40 dark:text-blue-400'
-            onClick={() =>
-              navigate({
-                to: `/auth/2fa/totp`,
-              })
-            }
-          />
-        )}
+        <CardContent className='grid gap-3 px-8 pb-10'>
+          {authData?.isTotp && (
+            <MethodButton
+              icon={<Smartphone className='h-5 w-5' />}
+              title='Authenticator App'
+              description='Google Authenticator, Authy, or others'
+              onClick={() => navigate({ to: `/auth/2fa/totp` })}
+            />
+          )}
 
-        {authData?.isPasskey && (
-          <MethodButton
-            icon={<KeyRound className='h-5 w-5' />}
-            title='Passkey'
-            description='Use FaceID, TouchID or PIN'
-            colorClass='bg-purple-100 text-purple-600 dark:bg-purple-900/40 dark:text-purple-400'
-            onClick={() =>
-              navigate({
-                to: `/auth/2fa/passkey`,
-              })
-            }
-          />
-        )}
-      </CardContent>
-    </Card>
+          {authData?.isPasskey && (
+            <MethodButton
+              icon={<KeyRound className='h-5 w-5' />}
+              title='Passkey'
+              description='FaceID, TouchID, or Security Key'
+              onClick={() => navigate({ to: `/auth/2fa/passkey` })}
+            />
+          )}
+        </CardContent>
+      </Card>
+
+      <div className='mt-8 text-center'>
+        <button
+          onClick={() => navigate({ to: "/auth/login" })}
+          className='text-xs font-semibold text-muted-foreground hover:text-foreground transition-colors'
+        >
+          Cancel and go back
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -93,53 +95,52 @@ function MethodButton({
   icon,
   title,
   description,
-  colorClass,
   onClick,
 }: {
   icon: React.ReactNode;
   title: string;
   description: string;
-  colorClass: string;
   onClick: () => void;
 }) {
   return (
-    <Button
-      variant='outline'
-      className='h-auto w-full p-4 flex items-center justify-between transition-all hover:border-primary/50 hover:bg-muted/50'
+    <button
+      className='group flex w-full items-center justify-between rounded-xl border border-border bg-muted/20 p-4 transition-all hover:border-primary/40 hover:bg-muted/40 active:translate-y-[1px]'
       onClick={onClick}
     >
-      <div className='flex items-center gap-4'>
-        <div
-          className={`h-10 w-10 rounded-full flex items-center justify-center ${colorClass}`}
-        >
+      <div className='flex items-center gap-4 text-left'>
+        <div className='flex h-11 w-11 items-center justify-center rounded-lg bg-background shadow-sm transition-colors group-hover:text-primary'>
           {icon}
         </div>
-        <div className='flex flex-col items-start'>
-          <span className='font-semibold text-foreground'>{title}</span>
-          <span className='text-xs text-muted-foreground font-normal'>
+        <div className='flex flex-col'>
+          <span className='text-sm font-semibold text-foreground group-hover:text-primary transition-colors'>
+            {title}
+          </span>
+          <span className='text-[11px] text-muted-foreground font-medium'>
             {description}
           </span>
         </div>
       </div>
-      <ChevronRight className='h-4 w-4 text-muted-foreground/50' />
-    </Button>
+      <ChevronRight className='h-4 w-4 text-muted-foreground/30 transition-transform group-hover:translate-x-0.5 group-hover:text-primary' />
+    </button>
   );
 }
 
 function SelectionSkeleton() {
   return (
-    <Card className='w-full border-none shadow-none md:border'>
-      <CardHeader className='flex flex-col items-center gap-4'>
-        <Skeleton className='h-12 w-12 rounded-full' />
-        <div className='space-y-2 text-center'>
-          <Skeleton className='h-6 w-32 mx-auto' />
-          <Skeleton className='h-4 w-48 mx-auto' />
-        </div>
-      </CardHeader>
-      <CardContent className='gap-4 grid'>
-        <Skeleton className='h-20 w-full rounded-xl' />
-        <Skeleton className='h-20 w-full rounded-xl' />
-      </CardContent>
-    </Card>
+    <div className='max-w-md w-full mx-auto'>
+      <Card className='border border-border bg-card/50'>
+        <CardHeader className='flex flex-col items-center gap-4 pt-8'>
+          <Skeleton className='h-14 w-14 rounded-2xl' />
+          <div className='space-y-2 text-center'>
+            <Skeleton className='h-7 w-40 mx-auto' />
+            <Skeleton className='h-4 w-56 mx-auto' />
+          </div>
+        </CardHeader>
+        <CardContent className='gap-3 grid pb-10 px-8'>
+          <Skeleton className='h-16 w-full rounded-xl' />
+          <Skeleton className='h-16 w-full rounded-xl' />
+        </CardContent>
+      </Card>
+    </div>
   );
 }

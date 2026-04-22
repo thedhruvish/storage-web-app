@@ -8,20 +8,13 @@ import { toast } from "sonner";
 import { useResendOtp, useVerifyOtp } from "@/api/auth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import {
   Form,
   FormControl,
   FormDescription,
   FormField,
   FormItem,
-  FormLabel,
   FormMessage,
 } from "@/components/ui/form";
 import {
@@ -146,105 +139,102 @@ export function OtpVerfiyForm({
   const formatTime = (secs: number) => `${secs}s`;
 
   return (
-    <div
-      className={cn("animate-fade-in-up flex flex-col gap-6", className)}
-      {...props}
-    >
-      <Card className='rounded-2xl shadow-xl'>
-        <CardHeader className='pb-2 text-center'>
-          <CardTitle className='text-2xl font-bold tracking-tight'>
-            Welcome back
-          </CardTitle>
-          <CardDescription>
-            Enter the 6-digit code we sent to your phone.
-          </CardDescription>
-        </CardHeader>
+    <div className={cn("flex flex-col gap-6", className)} {...props}>
+      <Card className='border border-border bg-card/50 backdrop-blur-xl shadow-xl p-0 max-w-md w-full mx-auto overflow-hidden'>
+        <div className='p-8'>
+          <div className='space-y-2 text-center mb-8'>
+            <CardTitle className='text-3xl font-bold tracking-tight text-foreground'>
+              Verify identity
+            </CardTitle>
+            <CardDescription className='text-muted-foreground text-sm'>
+              Enter the 6-digit code sent to your registered device.
+            </CardDescription>
+          </div>
 
-        <CardContent className='pt-4'>
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(onSubmit)}
-              className='flex w-full flex-col items-center gap-6'
+              className='flex w-full flex-col items-center gap-8'
             >
               <FormField
                 control={form.control}
                 name='pin'
                 render={({ field }) => (
                   <FormItem className='w-full'>
-                    <FormLabel className='text-sm font-semibold'>
-                      One-Time Password
-                    </FormLabel>
+                    <div className='flex items-center justify-center mb-4'>
+                      <FormControl>
+                        <InputOTP maxLength={6} {...field}>
+                          <InputOTPGroup className='gap-2.5'>
+                            {Array.from({ length: 6 }).map((_, idx) => (
+                              <InputOTPSlot
+                                key={idx}
+                                index={idx}
+                                className='h-12 w-11 rounded-lg border border-border bg-muted/20 text-xl font-semibold focus:ring-1 focus:ring-primary/30 transition-all'
+                              />
+                            ))}
+                          </InputOTPGroup>
+                        </InputOTP>
+                      </FormControl>
+                    </div>
 
-                    <FormControl>
-                      <InputOTP maxLength={6} {...field}>
-                        <InputOTPGroup className='w-full justify-between gap-2'>
-                          {Array.from({ length: 6 }).map((_, idx) => (
-                            <InputOTPSlot
-                              key={idx}
-                              index={idx}
-                              className={cn(
-                                "h-14 w-12 rounded-lg border-2 border-slate-300 text-2xl font-bold transition-all",
-                                ""
-                              )}
-                            />
-                          ))}
-                        </InputOTPGroup>
-                      </InputOTP>
-                    </FormControl>
+                    <div className='text-center'>
+                      <FormDescription className='text-[11px] text-muted-foreground font-medium'>
+                        Didn’t receive a code?{" "}
+                        <button
+                          type='button'
+                          disabled={countdown > 0}
+                          onClick={handleResend}
+                          className={cn(
+                            "font-bold text-primary transition-colors hover:text-primary/80",
+                            countdown > 0 && "cursor-not-allowed opacity-50"
+                          )}
+                        >
+                          {countdown > 0
+                            ? `Resend in ${formatTime(countdown)}`
+                            : "Resend now"}
+                        </button>
+                      </FormDescription>
+                    </div>
 
-                    <FormDescription className='mt-1 text-xs text-slate-500'>
-                      Didn’t receive a code?{" "}
-                      <button
-                        type='button'
-                        disabled={countdown > 0}
-                        onClick={handleResend}
-                        className={cn(
-                          "font-semibold text-indigo-600",
-                          countdown > 0 && "cursor-not-allowed opacity-60"
-                        )}
-                      >
-                        {countdown > 0
-                          ? `Resend in ${formatTime(countdown)}`
-                          : "Resend"}
-                      </button>
-                    </FormDescription>
-
-                    <FormMessage className='text-center text-sm' />
+                    <FormMessage className='text-center text-[11px] mt-2' />
                   </FormItem>
                 )}
               />
 
               <Button
                 type='submit'
-                className='w-full rounded-lg bg-indigo-600 font-semibold text-white shadow-sm transition-transform hover:bg-indigo-700 active:scale-[.98]'
-                disabled={!form.formState.isValid}
+                className='w-full h-11 text-sm font-semibold transition-all hover:-translate-y-px active:translate-y-0 shadow-md shadow-primary/10 rounded-lg'
+                disabled={!form.formState.isValid || verfiyOpt.isPending}
               >
-                Verify & continue
+                {verfiyOpt.isPending
+                  ? "Verifying code..."
+                  : "Verify & access account"}
               </Button>
             </form>
           </Form>
-        </CardContent>
+        </div>
       </Card>
 
-      <p className='text-center text-xs leading-relaxed text-slate-500'>
-        By continuing, you agree to our{" "}
+      <div className='text-muted-foreground/60 text-center text-[11px] px-8 flex justify-center gap-6'>
         <Link
           to='/terms-and-conditions'
-          className='font-semibold text-slate-700 underline'
+          className='hover:text-foreground transition-colors'
         >
           Terms
-        </Link>{" "}
-        and{" "}
+        </Link>
         <Link
           to='/privacy-policy'
-          className='font-semibold text-slate-700 underline'
+          className='hover:text-foreground transition-colors'
         >
-          Privacy Policy
+          Privacy
         </Link>
-        .
-      </p>
-
-      {/* Minimal fade-in keyframes (global) */}
+        <button
+          onClick={() => navagate({ to: "/auth/login" })}
+          className='hover:text-foreground transition-colors font-semibold text-foreground/70'
+        >
+          Back to Login
+        </button>
+      </div>
     </div>
   );
 }

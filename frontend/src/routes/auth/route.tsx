@@ -33,23 +33,27 @@ function RouteComponent() {
     location.pathname.includes("/auth/signup");
 
   return (
-    <div className='bg-muted flex min-h-svh flex-col items-center justify-center gap-6 p-6 md:p-10'>
+    <div className='bg-background flex min-h-svh flex-col items-center justify-center p-6 md:p-10'>
       <div
         className={cn(
-          "flex w-full flex-col gap-6",
-          isWidePage ? "max-w-4xl" : "max-w-sm"
+          "flex w-full flex-col gap-8",
+          isWidePage ? "max-w-4xl" : "max-w-[400px]"
         )}
       >
         <Link
           to='/'
-          className='flex items-center gap-2 self-center font-medium'
+          className='flex flex-col items-center gap-3 self-center transition-opacity hover:opacity-80'
         >
-          <div className='bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md'>
-            <GalleryVerticalEnd className='size-4' />
+          <div className='bg-primary text-primary-foreground flex size-11 items-center justify-center rounded-xl shadow-sm'>
+            <GalleryVerticalEnd className='size-6' />
           </div>
-          {APP_NAME}
+          <span className='text-2xl font-bold tracking-tight text-foreground'>
+            {APP_NAME}
+          </span>
         </Link>
-        <Outlet />
+        <div className='animate-scale-in'>
+          <Outlet />
+        </div>
       </div>
     </div>
   );

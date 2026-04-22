@@ -14,36 +14,38 @@ export const Route = createFileRoute("/_web/payment-fail")({
 
 function RouteComponent() {
   return (
-    <div className='min-h-screen w-full flex items-center justify-center bg-muted'>
-      <Card className='w-[420px] text-center shadow-xl'>
-        <CardHeader>
-          <div className='mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-red-100'>
-            <XCircle className='h-12 w-12 text-red-600' />
+    <div className='min-h-[80vh] w-full flex items-center justify-center p-6'>
+      <Card className='max-w-md w-full border border-border bg-card shadow-2xl shadow-destructive/5 p-0 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700'>
+        <CardHeader className='pt-10 pb-6 flex flex-col items-center gap-4 text-center'>
+          <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/5 text-destructive'>
+            <XCircle className='h-8 w-8' />
           </div>
-          <CardTitle className='pt-4 text-3xl font-bold'>
-            Payment Failed
-          </CardTitle>
-          <CardDescription className='text-base'>
-            We couldn't process your payment. Please try again.
-          </CardDescription>
+          <div className='space-y-2'>
+            <CardTitle className='text-3xl font-bold tracking-tight text-foreground'>
+              Payment failed
+            </CardTitle>
+            <CardDescription className='text-muted-foreground text-sm'>
+              We couldn't process your transaction.
+            </CardDescription>
+          </div>
         </CardHeader>
-        <CardContent className='flex flex-col gap-4'>
-          <p className='text-sm text-muted-foreground'>
-            If money was deducted, it will be refunded automatically within 5-7
-            business days.
+        <CardContent className='flex flex-col gap-8 px-10 pb-10'>
+          <p className='text-sm text-center text-muted-foreground/80 leading-relaxed'>
+            There was an issue with your payment method or authorization. Any
+            pending charges will be automatically refunded by your bank.
           </p>
-          <div className='flex gap-4 justify-center'>
+          <div className='flex flex-col sm:flex-row gap-3'>
             <Link
               to='/pricing'
-              className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-10 px-4 py-2'
+              className='flex-1 inline-flex h-11 items-center justify-center rounded-xl border border-border bg-background px-6 text-sm font-semibold text-foreground transition-all hover:bg-muted/50 active:translate-y-[1px]'
             >
-              Try Again
+              Try another method
             </Link>
             <Link
               to='/'
-              className='inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2'
+              className='flex-1 inline-flex h-11 items-center justify-center rounded-xl bg-primary px-6 text-sm font-semibold text-primary-foreground shadow-md shadow-primary/20 transition-all hover:translate-y-[-1px] active:translate-y-0'
             >
-              Go to Dashboard
+              Back to home
             </Link>
           </div>
         </CardContent>

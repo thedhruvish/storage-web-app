@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { createFileRoute } from "@tanstack/react-router";
-import { Loader2 } from "lucide-react";
+import { Loader2, XCircle } from "lucide-react";
 import axiosClient from "@/api/axios-client";
 import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const paymentProcessSchema = z.object({
   razorpay_payment_id: z.string().catch(""),
@@ -86,44 +93,61 @@ function RouteComponent() {
 
   if (verifying) {
     return (
-      <div className='flex h-screen w-full flex-col items-center justify-center gap-4'>
-        <Loader2 className='h-12 w-12 animate-spin text-primary' />
-        <h2 className='text-xl font-semibold text-foreground'>
-          Verifying your payment...
-        </h2>
-        <p className='text-muted-foreground'>
-          Please do not close this window or press back.
-        </p>
+      <div className='flex min-h-[80vh] w-full flex-col items-center justify-center gap-6 px-6 animate-in fade-in duration-500'>
+        <div className='relative flex items-center justify-center'>
+          <div className='absolute h-16 w-16 animate-ping rounded-full bg-primary/10 duration-1000' />
+          <Loader2 className='h-10 w-10 animate-spin text-primary' />
+        </div>
+        <div className='space-y-2 text-center'>
+          <h2 className='text-2xl font-bold tracking-tight text-foreground'>
+            Verifying your payment
+          </h2>
+          <p className='text-muted-foreground text-sm max-w-[280px] mx-auto'>
+            This will only take a moment. Please do not refresh or close this
+            page.
+          </p>
+        </div>
       </div>
     );
   }
 
   if (errorMessage) {
     return (
-      <div className='flex h-screen w-full flex-col items-center justify-center gap-4'>
-        <h2 className='text-xl font-semibold text-destructive'>
-          Payment Failed
-        </h2>
-        <p className='text-muted-foreground'>
-          {errorMessage == "cancelled"
-            ? "Your are the cancel Payment"
-            : errorMessage}
-        </p>
-        <div className='flex gap-6'>
-          <Button
-            variant={"outline"}
-            onClick={() => navigate({ to: "/" })}
-            className='mt-4 rounded-md  px-4 py-2 '
-          >
-            Go to Home
-          </Button>
-          <Button
-            onClick={() => navigate({ to: "/pricing" })}
-            className='mt-4 rounded-md  px-4 py-2 '
-          >
-            Price
-          </Button>
-        </div>
+      <div className='flex min-h-[80vh] w-full flex-col items-center justify-center p-6 animate-in fade-in duration-500'>
+        <Card className='max-w-md w-full border border-border bg-card shadow-2xl shadow-destructive/5 p-0 overflow-hidden'>
+          <CardHeader className='pt-10 pb-6 flex flex-col items-center gap-4 text-center'>
+            <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-destructive/5 text-destructive'>
+              <XCircle className='h-8 w-8' />
+            </div>
+            <div className='space-y-2'>
+              <CardTitle className='text-3xl font-bold tracking-tight text-foreground'>
+                Verification failed
+              </CardTitle>
+              <CardDescription className='text-muted-foreground text-sm'>
+                {errorMessage === "cancelled"
+                  ? "The payment process was cancelled."
+                  : errorMessage}
+              </CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent className='flex flex-col gap-6 px-10 pb-10'>
+            <div className='flex flex-col sm:flex-row gap-3'>
+              <Button
+                variant='outline'
+                onClick={() => navigate({ to: "/" })}
+                className='flex-1 h-11 rounded-xl font-semibold border-border transition-all hover:bg-muted/50'
+              >
+                Back to home
+              </Button>
+              <Button
+                onClick={() => navigate({ to: "/pricing" })}
+                className='flex-1 h-11 rounded-xl font-semibold bg-primary shadow-md shadow-primary/20 transition-all hover:translate-y-[-1px]'
+              >
+                View plans
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
       </div>
     );
   }
