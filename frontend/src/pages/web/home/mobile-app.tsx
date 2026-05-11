@@ -7,10 +7,15 @@ export function MobileAppSection() {
         <div className='flex flex-col lg:flex-row items-center gap-16'>
           {/* Text Content */}
           <div className='flex-1 space-y-8 text-center lg:text-left'>
-            <div className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-4 duration-500'>
+            <a
+              href='https://app.storeone.cloud?utm_source=website&utm_medium=link&utm_campaign=mobile_app_section'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/5 border border-primary/10 text-primary text-xs font-bold uppercase tracking-wider animate-in fade-in slide-in-from-left-4 duration-500 hover:bg-primary/10 transition-colors'
+            >
               <Smartphone className='size-3.5' />
-              <span>Coming Soon</span>
-            </div>
+              <span>Download App</span>
+            </a>
 
             <div className='space-y-4'>
               <h2 className='text-4xl md:text-5xl font-bold tracking-tight text-foreground leading-[1.1]'>
@@ -18,9 +23,9 @@ export function MobileAppSection() {
                 <span className='text-primary'>Always in your pocket.</span>
               </h2>
               <p className='text-muted-foreground text-lg max-w-xl mx-auto lg:mx-0 leading-relaxed'>
-                Sync web and app automatically. We are building a powerful
-                mobile experience that brings all your secure storage features
-                to your fingertips.
+                Sync web and app automatically. Experience a powerful mobile
+                experience that brings all your secure storage features to your
+                fingertips.
               </p>
             </div>
 
@@ -41,18 +46,23 @@ export function MobileAppSection() {
               </div>
             </div>
 
-            <div className='flex flex-wrap justify-center lg:justify-start gap-4 pt-4 opacity-50 grayscale select-none'>
-              <div className='h-10 w-32 bg-foreground rounded-lg flex items-center justify-center text-background gap-2 border border-foreground'>
+            <div className='flex flex-wrap justify-center lg:justify-start gap-4 pt-4'>
+              <a
+                href='https://app.storeone.cloud'
+                target='_blank'
+                rel='noopener noreferrer'
+                className='h-10 w-32 bg-foreground rounded-lg flex items-center justify-center text-background gap-2 border border-foreground hover:opacity-90 transition-opacity'
+              >
                 <div className='size-5 bg-white rounded-full flex items-center justify-center'>
                   <div className='size-3 bg-black rounded-full' />
                 </div>
                 <div className='flex flex-col leading-none'>
                   <span className='text-[8px] uppercase font-bold'>
-                    Soon on
+                    Get it on
                   </span>
                   <span className='text-xs font-bold'>Google Play</span>
                 </div>
-              </div>
+              </a>
             </div>
           </div>
 

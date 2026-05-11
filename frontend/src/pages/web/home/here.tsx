@@ -24,11 +24,18 @@ export const Hero = () => {
             variants={fadeInUp}
             className='items-center gap-2 mb-8 px-4 py-1.5 rounded-full text-primary text-sm font-semibold '
           >
-            <PillAlert
-              shortText='Free Try'
-              badgeText='500 MB STORAGE'
-              longText='Your Own Storage, Smarter and Faster.'
-            />
+            <a
+              href='https://app.storeone.cloud?utm_source=website&utm_medium=pill&utm_campaign=hero_section'
+              target='_blank'
+              rel='noopener noreferrer'
+              className='inline-block hover:opacity-80 transition-opacity'
+            >
+              <PillAlert
+                shortText='New'
+                badgeText='MOBILE APP'
+                longText='StoreOne Mobile is now live! Access your storage anywhere.'
+              />
+            </a>
           </motion.div>
 
           <motion.h1
