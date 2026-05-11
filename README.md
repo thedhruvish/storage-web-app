@@ -35,6 +35,14 @@ An open-source, bring-your-own-storage platform that connects Google Drive and S
 - **File Sharing**: Securely share files with other users
 - **AWS S3 Integration**: Store files in AWS S3 for scalable and secure storage
 - **Enhanced File Preview**: Support for more file types and formats
+- **Mobile Application**: Fully functional mobile app for managing files on the go ([app.storeone.cloud](https://app.storeone.cloud))
+
+## Mobile Application
+
+StoreOne is now available on mobile! Access your personal cloud storage anywhere, sync files in real-time, and manage your documents directly from your pocket.
+
+- **Web App**: [app.storeone.cloud](https://app.storeone.cloud)
+- **Get it on Google Play**: [Available via Web App](https://app.storeone.cloud)
 
 ## Tech Stack
 
